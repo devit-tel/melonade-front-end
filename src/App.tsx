@@ -1,12 +1,13 @@
 import React from "react";
 import { Route } from "react-router";
+import { BrowserRouter } from "react-router-dom";
 import TransactionTable from "./containers/TransactionTable";
 
 const App: React.FC = () => {
   return (
-    <React.Fragment>
+    <BrowserRouter>
       <Route path="/" component={TransactionTable} exact />
-    </React.Fragment>
+    </BrowserRouter>
   );
 };
 
