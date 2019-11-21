@@ -42,14 +42,9 @@ class TransactionTable extends React.Component<IProps, IState> {
 
   columns = [
     {
-      title: "TransactionId",
-      dataIndex: "transactionId",
-      key: "transactionId",
-      render: (text: string, _event: Event.AllEvent, index: number) => (
-        <a onClick={() => this.setState({ selectedEventIndex: index })}>
-          {text}
-        </a>
-      )
+      title: "Event Type",
+      dataIndex: "type",
+      key: "type"
     },
     {
       title: "Status",
