@@ -2,6 +2,7 @@ import { State } from "@melonade/melonade-declaration";
 import { Select } from "antd";
 import { param } from "change-case";
 import React from "react";
+import styled from "styled-components";
 
 declare module "antd/lib/select" {
   export interface OptionProps {
@@ -10,6 +11,10 @@ declare module "antd/lib/select" {
 }
 
 const { Option } = Select;
+
+const StyledSelect = (styled(Select)`
+  min-width: 180px;
+` as unknown) as typeof Select;
 
 const AllTransactionStates = [
   State.TransactionStates.Cancelled,
@@ -31,19 +36,19 @@ interface IProps {
 }
 
 export default (props: IProps) => (
-  <Select
+  <StyledSelect
     mode="multiple"
     placeholder=""
-    onChange={props.handleChange}
+    onChange={props.handleChange || (() => undefined)}
     optionLabelProp="label"
     size={props.size}
     value={props.value}
-    onBlur={props.onBlur}
+    onBlur={props.onBlur || (() => undefined)}
   >
     {AllTransactionStates.map((state: State.TransactionStates) => (
       <Option key={state} value={state} label={param(state)}>
         {param(state)}
       </Option>
     ))}
-  </Select>
+  </StyledSelect>
 );
