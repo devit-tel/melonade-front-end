@@ -51,11 +51,6 @@ interface IState {
   isLoading: boolean;
 }
 
-const DateFormat = moment()
-  .locale(navigator.languages ? navigator.languages[0] : navigator.language)
-  .localeData()
-  .longDateFormat("LLL");
-
 const AllTransactionStates = [
   State.TransactionStates.Cancelled,
   State.TransactionStates.Compensated,
@@ -93,7 +88,9 @@ const columns = [
     dataIndex: "timestamp",
     key: "timestamp",
     render: (timestamp: number) => (
-      <Typography.Text>{moment(timestamp).format(DateFormat)}</Typography.Text>
+      <Typography.Text>
+        {moment(timestamp).format("YYYY/MM/DD HH:mm:ss.SSS")}
+      </Typography.Text>
     )
   }
 ];

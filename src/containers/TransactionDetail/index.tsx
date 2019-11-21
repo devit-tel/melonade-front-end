@@ -1,20 +1,13 @@
-import { Event, State } from "@melonade/melonade-declaration";
+import { Event, State, Task } from "@melonade/melonade-declaration";
 import { Icon, Table, Typography } from "antd";
 import moment from "moment";
 import * as R from "ramda";
 import React from "react";
 import { Chart } from "react-google-charts";
 import { RouteComponentProps } from "react-router";
-import styled from "styled-components";
 import JsonViewModal from "../../components/JsonViewModal";
 import StatusText from "../../components/StatusText";
 import { getTransactionData } from "../../services/eventLogger/http";
-
-const StyledTable = styled(Table)`
-  .ant-table-row {
-    cursor: pointer;
-  }
-`;
 
 interface ITransactionParams {
   transactionId: string;
@@ -81,7 +74,8 @@ const getTimelineDataFromEvents = (
   return startNodeOfEachType.map((event: Event.AllEvent) => {
     if (event.type === "TASK") {
       const lastTaskEvent = R.findLast(
-        (taskEvent: Event.ITaskEvent) =>
+        (taskEvent: Event.AllEvent) =>
+          taskEvent.type === "TASK" &&
           event.details.taskId === taskEvent.details.taskId &&
           taskEvent.details.status !== State.TaskStates.Scheduled,
         validEvents as Event.ITaskEvent[]
@@ -93,9 +87,21 @@ const getTimelineDataFromEvents = (
 
       if (endTimestamp < event.timestamp) endTimestamp = event.timestamp + 1;
 
+      if (
+        [Task.TaskTypes.Task, Task.TaskTypes.Compensate].includes(
+          R.pathOr(Task.TaskTypes.Task, ["details", "type"], event)
+        )
+      ) {
+        return [
+          "Task",
+          R.pathOr("-", ["details", "taskName"], event),
+          new Date(event.timestamp),
+          new Date(endTimestamp)
+        ];
+      }
       return [
         "Task",
-        R.pathOr("-", ["details", "taskName"], event),
+        R.pathOr("-", ["details", "type"], event),
         new Date(event.timestamp),
         new Date(endTimestamp)
       ];
@@ -103,7 +109,8 @@ const getTimelineDataFromEvents = (
 
     if (event.type === "WORKFLOW") {
       const lastWorkflowEvent = R.findLast(
-        (workflowEvent: Event.IWorkflowEvent) =>
+        (workflowEvent: Event.AllEvent) =>
+          workflowEvent.type === "WORKFLOW" &&
           event.details.workflowId === workflowEvent.details.workflowId &&
           workflowEvent.details.status !== State.WorkflowStates.Running,
         validEvents as Event.IWorkflowEvent[]
@@ -129,7 +136,8 @@ const getTimelineDataFromEvents = (
 
     if (event.type === "TRANSACTION") {
       const lastTransactionEvent = R.findLast(
-        (transactionEvent: Event.ITransactionEvent) =>
+        (transactionEvent: Event.AllEvent) =>
+          transactionEvent.type === "TRANSACTION" &&
           event.details.transactionId ===
             transactionEvent.details.transactionId &&
           transactionEvent.details.status !== State.TransactionStates.Running,
@@ -153,11 +161,6 @@ const getTimelineDataFromEvents = (
     return [event.type, "Error", new Date(event.timestamp), new Date()];
   });
 };
-
-const DateFormat = moment()
-  .locale(navigator.languages ? navigator.languages[0] : navigator.language)
-  .localeData()
-  .longDateFormat("LLL");
 
 class TransactionTable extends React.Component<IProps, IState> {
   constructor(props: IProps) {
@@ -220,7 +223,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       key: "timestamp",
       render: (timestamp: number) => (
         <Typography.Text>
-          {moment(timestamp).format(DateFormat)}
+          {moment(timestamp).format("YYYY/MM/DD HH:mm:ss.SSS")}
         </Typography.Text>
       )
     }
