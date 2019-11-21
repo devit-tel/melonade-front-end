@@ -1,5 +1,13 @@
 import { Event, State } from "@melonade/melonade-declaration";
-import { Button, DatePicker, Icon, Input, Table, Typography } from "antd";
+import {
+  Button,
+  DatePicker,
+  Icon,
+  Input,
+  Pagination,
+  Table,
+  Typography
+} from "antd";
 import moment from "moment";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -10,6 +18,8 @@ import {
   ITransactionEventPaginate,
   listTransaction
 } from "../../services/eventLogger/http";
+
+const TRANSACTION_PER_PAGE = 50;
 
 const ToolBarContainer = styled.div`
   display: flex;
@@ -42,6 +52,7 @@ const DateRange = styled(DatePicker.RangePicker)`
 interface IProps {}
 
 interface IState {
+  currentPage: number;
   transactionEvents: ITransactionEventPaginate;
   search: {
     transactionId: string;
@@ -100,6 +111,7 @@ class TransactionTable extends React.Component<IProps, IState> {
     super(props);
 
     this.state = {
+      currentPage: 1,
       transactionEvents: {
         total: 0,
         events: []
@@ -113,21 +125,35 @@ class TransactionTable extends React.Component<IProps, IState> {
     };
   }
 
-  search = async () => {
+  search = async (page?: number) => {
     this.setState({ isLoading: true });
-    const { transactionId, dateRange, statuses } = this.state.search;
+    const {
+      currentPage,
+      search: { transactionId, dateRange, statuses }
+    } = this.state;
+    const searchPage = page || currentPage;
     try {
       const transactionEvents = await listTransaction(
         statuses,
         +dateRange[0],
         +dateRange[1],
         transactionId,
-        0,
-        50
+        (searchPage - 1) * TRANSACTION_PER_PAGE,
+        TRANSACTION_PER_PAGE
       );
-      this.setState({ transactionEvents, isLoading: false });
+      this.setState({
+        transactionEvents,
+        isLoading: false,
+        currentPage: searchPage
+      });
     } catch (error) {
-      this.setState({ isLoading: false });
+      this.setState({
+        isLoading: false,
+        transactionEvents: {
+          events: [],
+          total: this.state.transactionEvents.total
+        }
+      });
     }
   };
 
@@ -167,6 +193,7 @@ class TransactionTable extends React.Component<IProps, IState> {
 
   render() {
     const {
+      currentPage,
       transactionEvents,
       search: { transactionId, dateRange, statuses },
       isLoading
@@ -179,13 +206,13 @@ class TransactionTable extends React.Component<IProps, IState> {
             prefix={<Icon type="number" />}
             value={transactionId}
             onChange={this.handleTransactionIdChange}
-            onPressEnter={this.search}
+            onPressEnter={() => this.search()}
           />
           <StatusSelects
             handleChange={this.handleStatusChange}
             size="default"
             value={statuses}
-            onBlur={this.search}
+            onBlur={() => this.search()}
           />
           <DateRange
             size="default"
@@ -195,7 +222,7 @@ class TransactionTable extends React.Component<IProps, IState> {
           <Button
             type="primary"
             icon="search"
-            onClick={this.search}
+            onClick={() => this.search()}
             disabled={isLoading}
           >
             Search
@@ -206,6 +233,14 @@ class TransactionTable extends React.Component<IProps, IState> {
           dataSource={transactionEvents.events}
           pagination={false}
           loading={isLoading}
+        />
+        <Pagination
+          onChange={(page: number) => {
+            this.search(page);
+          }}
+          current={currentPage}
+          pageSize={TRANSACTION_PER_PAGE}
+          total={transactionEvents.total}
         />
       </div>
     );
