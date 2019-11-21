@@ -40,3 +40,14 @@ export const listTransaction = async (
     resp
   );
 };
+
+export const getTransactionData = async (
+  transactionId: string
+): Promise<Event.AllEvent[]> => {
+  const resp = await client({
+    url: `/${transactionId}`,
+    method: "GET"
+  });
+
+  return R.path(["data", "data"], resp) as Event.AllEvent[];
+};

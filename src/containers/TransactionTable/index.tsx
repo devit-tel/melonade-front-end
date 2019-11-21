@@ -2,6 +2,7 @@ import { Event, State } from "@melonade/melonade-declaration";
 import { Button, DatePicker, Icon, Input, Table, Typography } from "antd";
 import moment from "moment";
 import React from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import StatusSelects from "../../components/StatusSelects";
 import StatusText from "../../components/StatusText";
@@ -69,7 +70,7 @@ const columns = [
     title: "TransactionId",
     dataIndex: "transactionId",
     key: "transactionId",
-    render: (text: string) => <a>{text}</a>
+    render: (text: string) => <Link to={text}>{text}</Link>
   },
   {
     title: "Status",
