@@ -1,5 +1,6 @@
 import { Event, State, Task } from "@melonade/melonade-declaration";
 import { Icon, Table, Typography } from "antd";
+import { headerCase } from "change-case";
 import moment from "moment";
 import * as R from "ramda";
 import React from "react";
@@ -178,7 +179,18 @@ class TransactionTable extends React.Component<IProps, IState> {
     {
       title: "Event Type",
       dataIndex: "type",
-      key: "type"
+      key: "type",
+      render: (type: string, _event: Event.AllEvent, index: number) => (
+        <a
+          onClick={() =>
+            this.setState({
+              selectedEventIndex: index
+            })
+          }
+        >
+          {headerCase(type)}
+        </a>
+      )
     },
     {
       title: "Is Valid",
@@ -200,6 +212,7 @@ class TransactionTable extends React.Component<IProps, IState> {
     },
     {
       title: "Workflow / Task",
+      key: "details",
       render: (_text: string, event: Event.AllEvent) => getName(event)
     },
     {
@@ -254,7 +267,6 @@ class TransactionTable extends React.Component<IProps, IState> {
           width={"100%"}
           height={"300px"}
           chartType="Timeline"
-          loader={<div>Loading Chart</div>}
           data={[
             [
               { type: "string", id: "Type" },
@@ -276,9 +288,9 @@ class TransactionTable extends React.Component<IProps, IState> {
           dataSource={events}
           pagination={false}
           loading={isLoading}
-          onRowClick={(_event: Event.AllEvent, index: number) =>
-            this.setState({ selectedEventIndex: index })
-          }
+          // onRowClick={(_event: Event.AllEvent, index: number) =>
+          //   this.setState({ selectedEventIndex: index })
+          // }
         />
       </div>
     );
