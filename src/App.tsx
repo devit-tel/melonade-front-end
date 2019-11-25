@@ -3,6 +3,7 @@ import { Route } from "react-router";
 import { BrowserRouter } from "react-router-dom";
 import TransactionDetail from "./containers/TransactionDetail";
 import TransactionTable from "./containers/TransactionTable";
+import WorkflowDefinitionDetail from "./containers/WorkflowDefinitionDetail";
 import WorkflowDefinitionList from "./containers/WorkflowDefinitionList";
 
 const App: React.FC = () => {
@@ -13,6 +14,11 @@ const App: React.FC = () => {
       <Route
         path="/definition/workflow"
         component={WorkflowDefinitionList}
+        exact
+      />
+      <Route
+        path="/definition/workflow/:name/:rev"
+        component={WorkflowDefinitionDetail}
         exact
       />
     </BrowserRouter>
