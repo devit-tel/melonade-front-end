@@ -19,7 +19,7 @@ export const listTransaction = async (
   size?: number
 ): Promise<ITransactionEventPaginate> => {
   const resp = await client({
-    url: "/",
+    url: "/v1/store",
     method: "GET",
     params: {
       statuses: JSON.stringify(statuses),
@@ -45,7 +45,7 @@ export const getTransactionData = async (
   transactionId: string
 ): Promise<Event.AllEvent[]> => {
   const resp = await client({
-    url: `/${transactionId}`,
+    url: `/v1/store/${transactionId}`,
     method: "GET"
   });
 
