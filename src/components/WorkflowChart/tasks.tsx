@@ -3,6 +3,7 @@ import { Button, Icon, Typography } from "antd";
 import * as R from "ramda";
 import React from "react";
 import styled from "styled-components";
+import { CreateTaskModal } from "./modal";
 
 const ChartContainer = styled.div`
   display: flex;
@@ -149,11 +150,7 @@ export enum taskMode {
 interface IAddButtonProps {
   path: (string | number)[];
   editing?: boolean;
-  onInsertTask?: (
-    task: WorkflowDefinition.AllTaskType,
-    path: (string | number)[],
-    mode: taskMode
-  ) => void;
+  onTaskUpdate?: (path: (string | number)[], mode: taskMode) => void;
 }
 
 const AddButton = (props: IAddButtonProps) => {
@@ -164,17 +161,7 @@ const AddButton = (props: IAddButtonProps) => {
       size="small"
       icon="plus"
       onClick={() =>
-        props.onInsertTask &&
-        props.onInsertTask(
-          {
-            name: "hello",
-            taskReferenceName: "hello",
-            type: Task.TaskTypes.Task,
-            inputParameters: {}
-          },
-          props.path,
-          taskMode.insert
-        )
+        props.onTaskUpdate && props.onTaskUpdate(props.path, taskMode.insert)
       }
     />
   ) : (
@@ -206,7 +193,7 @@ const ParallelModel = (props: IParallelProps) => (
 
     <AddButton
       editing={props.editing}
-      onInsertTask={props.onInsertTask}
+      onTaskUpdate={props.onTaskUpdate}
       path={[
         ...props.path,
         "parallelTasks",
@@ -223,14 +210,14 @@ const ParallelModel = (props: IParallelProps) => (
             <ParallelModelChildContainer key={path.join(".")}>
               <AddButton
                 editing={props.editing}
-                onInsertTask={props.onInsertTask}
+                onTaskUpdate={props.onTaskUpdate}
                 path={[...path, -1]}
               />
               <RenderChildTasks
                 tasks={tasks}
                 path={path}
                 editing={props.editing}
-                onInsertTask={props.onInsertTask}
+                onTaskUpdate={props.onTaskUpdate}
               />
             </ParallelModelChildContainer>
           );
@@ -253,14 +240,14 @@ const DecisionCase = (props: IDecisionCaseProps) => (
 
     <AddButton
       editing={props.editing}
-      onInsertTask={props.onInsertTask}
+      onTaskUpdate={props.onTaskUpdate}
       path={[...props.path, -1]}
     />
     <RenderChildTasks
       tasks={props.tasks}
       path={props.path}
       editing={props.editing}
-      onInsertTask={props.onInsertTask}
+      onTaskUpdate={props.onTaskUpdate}
     />
   </DecisionCaseContainer>
 );
@@ -279,7 +266,7 @@ const DecisionModel = (props: IDecisionProps) => (
     {/* TODO Add decision */}
     <AddButton
       editing={props.editing}
-      onInsertTask={props.onInsertTask}
+      onTaskUpdate={props.onTaskUpdate}
       path={[...props.path, "decisions", Date.now().toString(), -1]}
     />
 
@@ -294,7 +281,7 @@ const DecisionModel = (props: IDecisionProps) => (
               caseKey={caseKey}
               path={path}
               editing={props.editing}
-              onInsertTask={props.onInsertTask}
+              onTaskUpdate={props.onTaskUpdate}
             />
           );
         }
@@ -304,7 +291,7 @@ const DecisionModel = (props: IDecisionProps) => (
         caseKey="default"
         path={[...props.path, "defaultDecision"]}
         editing={props.editing}
-        onInsertTask={props.onInsertTask}
+        onTaskUpdate={props.onTaskUpdate}
       />
     </DecisionModelChildContainer>
   </DecisionModelContainer>
@@ -323,7 +310,7 @@ const AllTaskModel = (props: IAllTaskProps) => {
           task={task}
           path={props.path}
           editing={props.editing}
-          onInsertTask={props.onInsertTask}
+          onTaskUpdate={props.onTaskUpdate}
         />
       );
     case Task.TaskTypes.Parallel:
@@ -332,7 +319,7 @@ const AllTaskModel = (props: IAllTaskProps) => {
           task={task}
           path={props.path}
           editing={props.editing}
-          onInsertTask={props.onInsertTask}
+          onTaskUpdate={props.onTaskUpdate}
         />
       );
     case Task.TaskTypes.Decision:
@@ -341,7 +328,7 @@ const AllTaskModel = (props: IAllTaskProps) => {
           task={task}
           path={props.path}
           editing={props.editing}
-          onInsertTask={props.onInsertTask}
+          onTaskUpdate={props.onTaskUpdate}
         />
       );
     default:
@@ -363,12 +350,12 @@ const RenderChildTasks = (props: IChildTasksProps) => (
             task={task}
             path={path}
             editing={props.editing}
-            onInsertTask={props.onInsertTask}
+            onTaskUpdate={props.onTaskUpdate}
           />
 
           <AddButton
             editing={props.editing}
-            onInsertTask={props.onInsertTask}
+            onTaskUpdate={props.onTaskUpdate}
             path={path}
           />
         </React.Fragment>
@@ -380,23 +367,74 @@ const RenderChildTasks = (props: IChildTasksProps) => (
 interface IProps {
   tasks: WorkflowDefinition.AllTaskType[];
   editing?: IAddButtonProps["editing"];
-  onInsertTask?: IAddButtonProps["onInsertTask"];
+  onTaskUpdated?: (tasks: WorkflowDefinition.AllTaskType[]) => void;
 }
 
-export default (props: IProps) => (
-  <ChartContainer>
-    <StartModel />
-    <AddButton
-      editing={props.editing}
-      onInsertTask={props.onInsertTask}
-      path={[-1]}
-    />
-    <RenderChildTasks
-      tasks={props.tasks}
-      path={[]}
-      editing={props.editing}
-      onInsertTask={props.onInsertTask}
-    />
-    <EndModel />
-  </ChartContainer>
-);
+interface IState {
+  selectingPath?: (string | number)[];
+  mode?: taskMode;
+}
+
+export default class WorkflowChart extends React.Component<IProps, IState> {
+  constructor(props: IProps) {
+    super(props);
+
+    this.state = {
+      selectingPath: undefined,
+      mode: undefined
+    };
+  }
+
+  handleTaskUpdate = (path: (string | number)[], mode: taskMode) => {
+    if (this.props.onTaskUpdated) {
+      switch (mode) {
+        case taskMode.insert:
+          this.setState({
+            selectingPath: path,
+            mode
+          });
+        // const childPath = R.init(path);
+        // const childTasks = R.pathOr(
+        //   [],
+        //   childPath,
+        //   this.props.tasks
+        // );
+
+        // return this.props.onTaskUpdated(
+        //   R.set(
+        //     R.lensPath(childPath),
+        //     R.insert((R.last(path) as number) + 1, task, childTasks),
+        //     this.props.tasks as any
+        //   )
+        // );
+
+        default:
+          break;
+      }
+    }
+  };
+
+  render() {
+    return (
+      <ChartContainer>
+        <CreateTaskModal
+          onSubmit={(task: WorkflowDefinition.AllTaskType) => {}}
+          visible={!!this.state.selectingPath}
+        />
+        <StartModel />
+        <AddButton
+          editing={this.props.editing}
+          onTaskUpdate={this.handleTaskUpdate}
+          path={[-1]}
+        />
+        <RenderChildTasks
+          tasks={this.props.tasks}
+          path={[]}
+          editing={this.props.editing}
+          onTaskUpdate={this.handleTaskUpdate}
+        />
+        <EndModel />
+      </ChartContainer>
+    );
+  }
+}
