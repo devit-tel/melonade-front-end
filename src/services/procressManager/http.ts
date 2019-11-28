@@ -1,4 +1,7 @@
-import { WorkflowDefinition } from "@melonade/melonade-declaration";
+import {
+  TaskDefinition,
+  WorkflowDefinition
+} from "@melonade/melonade-declaration";
 import axios from "axios";
 import * as R from "ramda";
 import { processManager } from "../../config";
@@ -27,4 +30,13 @@ export const getWorkflowDefinitionData = async (
     ["data", "data"],
     resp
   ) as WorkflowDefinition.IWorkflowDefinition;
+};
+
+export const listTaskDefinitions = async (): Promise<TaskDefinition.ITaskDefinition[]> => {
+  const resp = await client({
+    url: "/v1/definition/task",
+    method: "GET"
+  });
+
+  return R.pathOr([], ["data", "data"], resp);
 };

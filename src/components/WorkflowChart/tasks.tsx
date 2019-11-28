@@ -1,4 +1,8 @@
-import { Task, WorkflowDefinition } from "@melonade/melonade-declaration";
+import {
+  Task,
+  TaskDefinition,
+  WorkflowDefinition
+} from "@melonade/melonade-declaration";
 import { Button, Icon, Typography } from "antd";
 import * as R from "ramda";
 import React from "react";
@@ -364,7 +368,42 @@ const RenderChildTasks = (props: IChildTasksProps) => (
   </TasksContainer>
 );
 
+const pickTaskProperties = (
+  task: WorkflowDefinition.AllTaskType
+): WorkflowDefinition.AllTaskType => {
+  switch (task.type) {
+    case Task.TaskTypes.Task:
+      return {
+        name: task.name,
+        taskReferenceName: task.taskReferenceName,
+        ackTimeout: task.ackTimeout,
+        inputParameters: task.inputParameters,
+        retry: task.retry,
+        timeout: task.timeout,
+        type: task.type
+      } as WorkflowDefinition.ITaskTask;
+    case Task.TaskTypes.Decision:
+      return {
+        taskReferenceName: task.taskReferenceName,
+        inputParameters: task.inputParameters,
+        decisions: {},
+        defaultDecision: [],
+        type: task.type
+      } as WorkflowDefinition.IDecisionTask;
+    case Task.TaskTypes.Parallel:
+      return {
+        taskReferenceName: task.taskReferenceName,
+        parallelTasks: [],
+        inputParameters: {},
+        type: task.type
+      } as WorkflowDefinition.IParallelTask;
+    default:
+      return task;
+  }
+};
+
 interface IProps {
+  taskDefinitions: TaskDefinition.ITaskDefinition[];
   tasks: WorkflowDefinition.AllTaskType[];
   editing?: IAddButtonProps["editing"];
   onTaskUpdated?: (tasks: WorkflowDefinition.AllTaskType[]) => void;
@@ -389,24 +428,23 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
     if (this.props.onTaskUpdated) {
       switch (mode) {
         case taskMode.insert:
+        case taskMode.modify:
           this.setState({
             selectingPath: path,
             mode
           });
-        // const childPath = R.init(path);
-        // const childTasks = R.pathOr(
-        //   [],
-        //   childPath,
-        //   this.props.tasks
-        // );
-
-        // return this.props.onTaskUpdated(
-        //   R.set(
-        //     R.lensPath(childPath),
-        //     R.insert((R.last(path) as number) + 1, task, childTasks),
-        //     this.props.tasks as any
-        //   )
-        // );
+          break;
+        case taskMode.delete:
+          const childPath = R.init(path);
+          const childTasks = R.pathOr([], childPath, this.props.tasks);
+          this.props.onTaskUpdated(
+            R.set(
+              R.lensPath(childPath),
+              R.remove((R.last(path) as number) + 1, 1, childTasks),
+              this.props.tasks as any
+            )
+          );
+          break;
 
         default:
           break;
@@ -418,7 +456,55 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
     return (
       <ChartContainer>
         <CreateTaskModal
-          onSubmit={(task: WorkflowDefinition.AllTaskType) => {}}
+          taskDefinitions={this.props.taskDefinitions}
+          onCancel={() => {
+            this.setState({
+              selectingPath: undefined,
+              mode: undefined
+            });
+          }}
+          onSubmit={(task: WorkflowDefinition.AllTaskType) => {
+            if (this.props.onTaskUpdated) {
+              switch (this.state.mode) {
+                case taskMode.insert:
+                  const childPath = R.init(
+                    this.state.selectingPath as (string | number)[]
+                  );
+                  const childTasks = R.pathOr([], childPath, this.props.tasks);
+
+                  this.props.onTaskUpdated(
+                    R.set(
+                      R.lensPath(childPath),
+                      R.insert(
+                        (R.last(
+                          this.state.selectingPath as (string | number)[]
+                        ) as number) + 1,
+                        pickTaskProperties(task),
+                        childTasks
+                      ),
+                      this.props.tasks as any
+                    )
+                  );
+                  break;
+                case taskMode.modify:
+                  this.props.onTaskUpdated(
+                    R.set(
+                      R.lensPath(
+                        this.state.selectingPath as (string | number)[]
+                      ),
+                      pickTaskProperties(task),
+                      this.props.tasks
+                    )
+                  );
+                  break;
+              }
+            }
+
+            this.setState({
+              selectingPath: undefined,
+              mode: undefined
+            });
+          }}
           visible={!!this.state.selectingPath}
         />
         <StartModel />

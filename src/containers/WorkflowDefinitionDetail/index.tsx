@@ -1,10 +1,16 @@
-import { WorkflowDefinition } from "@melonade/melonade-declaration";
+import {
+  TaskDefinition,
+  WorkflowDefinition
+} from "@melonade/melonade-declaration";
 import React from "react";
 import JsonView from "react-json-view";
 import { RouteComponentProps } from "react-router-dom";
 import styled from "styled-components";
 import WorkflowChart from "../../components/WorkflowChart";
-import { getWorkflowDefinitionData } from "../../services/procressManager/http";
+import {
+  getWorkflowDefinitionData,
+  listTaskDefinitions
+} from "../../services/procressManager/http";
 
 const WorkflowDefinitionDetailContainer = styled.div`
   display: flex;
@@ -19,6 +25,7 @@ interface IProps extends RouteComponentProps<IWorkflowDefinitionParams> {}
 
 interface IState {
   workflowDefinition?: WorkflowDefinition.IWorkflowDefinition;
+  taskDefinitions?: TaskDefinition.ITaskDefinition[];
   isLoading: boolean;
 }
 
@@ -32,33 +39,37 @@ class TransactionTable extends React.Component<IProps, IState> {
     };
   }
 
-  getWorkflowDefinitionData = async () => {
+  getWorkflowAndTasksDefinitionData = async () => {
     this.setState({ isLoading: true });
     try {
       const { name, rev } = this.props.match.params;
       const workflowDefinition = await getWorkflowDefinitionData(name, rev);
+      const taskDefinitions = await listTaskDefinitions();
       this.setState({
         workflowDefinition,
+        taskDefinitions,
         isLoading: false
       });
     } catch (error) {
       this.setState({
         isLoading: false,
-        workflowDefinition: undefined
+        workflowDefinition: undefined,
+        taskDefinitions: undefined
       });
     }
   };
 
   componentDidMount = async () => {
-    this.getWorkflowDefinitionData();
+    this.getWorkflowAndTasksDefinitionData();
   };
 
   render() {
-    const { workflowDefinition } = this.state;
+    const { workflowDefinition, taskDefinitions } = this.state;
     return (
       <WorkflowDefinitionDetailContainer>
         <WorkflowChart
           workflowDefinition={workflowDefinition}
+          taskDefinitions={taskDefinitions}
           editing
           workflowDefinitionChanged={workflowDefinition => {
             this.setState({

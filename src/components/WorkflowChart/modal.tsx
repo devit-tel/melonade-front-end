@@ -1,4 +1,8 @@
-import { Task, WorkflowDefinition } from "@melonade/melonade-declaration";
+import {
+  Task,
+  TaskDefinition,
+  WorkflowDefinition
+} from "@melonade/melonade-declaration";
 import { Form, Input, InputNumber, Modal, Select } from "antd";
 import * as R from "ramda";
 import React from "react";
@@ -13,10 +17,13 @@ const StyledNumberInput = styled(InputNumber)`
 interface IProps {
   visible?: boolean;
   onSubmit: (task: WorkflowDefinition.AllTaskType) => void;
+  onCancel: () => void;
+  task?: WorkflowDefinition.ITaskTask;
+  taskDefinitions: TaskDefinition.ITaskDefinition[];
 }
 
 interface IState {
-  task: WorkflowDefinition.ITaskTask;
+  task?: WorkflowDefinition.ITaskTask;
 }
 
 export class CreateTaskModal extends React.Component<IProps, IState> {
@@ -30,6 +37,14 @@ export class CreateTaskModal extends React.Component<IProps, IState> {
     };
   }
 
+  componentWillReceiveProps(nextProps: IProps) {
+    if (!this.props.visible && nextProps.visible) {
+      this.setState({
+        task: nextProps.task
+      });
+    }
+  }
+
   onInputChanged = (path: (string | number)[], value: any) => {
     this.setState({
       task: R.set(R.lensPath(path), value, this.state.task)
@@ -38,7 +53,14 @@ export class CreateTaskModal extends React.Component<IProps, IState> {
 
   render() {
     return (
-      <Modal title="Insert task" visible={this.props.visible}>
+      <Modal
+        title="Insert task"
+        visible={this.props.visible}
+        onOk={() =>
+          this.props.onSubmit(this.state.task as WorkflowDefinition.ITaskTask)
+        }
+        onCancel={this.props.onCancel}
+      >
         <Form>
           <Form.Item label="Type">
             <Select
@@ -71,9 +93,18 @@ export class CreateTaskModal extends React.Component<IProps, IState> {
                     this.onInputChanged(["name"], value)
                   }
                 >
-                  <Option value={Task.TaskTypes.Task}>Task</Option>
-                  <Option value={Task.TaskTypes.Parallel}>Parallel</Option>
-                  <Option value={Task.TaskTypes.Decision}>Decision</Option>
+                  {this.props.taskDefinitions.map(
+                    (taskDefinition: TaskDefinition.ITaskDefinition) => {
+                      return (
+                        <Option
+                          key={taskDefinition.name}
+                          value={taskDefinition.name}
+                        >
+                          {taskDefinition.name}
+                        </Option>
+                      );
+                    }
+                  )}
                 </Select>
               </Form.Item>
               <Form.Item label="Retry Limit">
