@@ -1,5 +1,5 @@
 import { Event, State, Task } from "@melonade/melonade-declaration";
-import { Icon, Table, Typography } from "antd";
+import { Button, Icon, Table, Typography } from "antd";
 import { headerCase } from "change-case";
 import moment from "moment";
 import * as R from "ramda";
@@ -183,7 +183,9 @@ class TransactionTable extends React.Component<IProps, IState> {
       dataIndex: "type",
       key: "type",
       render: (type: string, _event: Event.AllEvent, index: number) => (
-        <a
+        <Button
+          type="link"
+          block
           onClick={() =>
             this.setState({
               selectedEventIndex: index
@@ -191,7 +193,7 @@ class TransactionTable extends React.Component<IProps, IState> {
           }
         >
           {headerCase(type)}
-        </a>
+        </Button>
       )
     },
     {
