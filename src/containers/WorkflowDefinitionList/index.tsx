@@ -63,7 +63,6 @@ class TransactionTable extends React.Component<IProps, IState> {
     this.setState({ isLoading: true });
     try {
       const workflowDefinitions = await listWorkflowDefinitions();
-      console.log(workflowDefinitions);
       this.setState({
         workflowDefinitions,
         isLoading: false

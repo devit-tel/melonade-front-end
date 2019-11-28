@@ -28,7 +28,6 @@ export default (props: IProps) => (
       tasks={R.pathOr([], ["workflowDefinition", "tasks"], props)}
       editing={props.editing}
       onTaskUpdated={tasks => {
-        console.log(tasks);
         props.workflowDefinitionChanged &&
           props.workflowDefinitionChanged({
             ...props.workflowDefinition,
