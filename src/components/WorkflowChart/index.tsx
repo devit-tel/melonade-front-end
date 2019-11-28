@@ -32,7 +32,6 @@ export default (props: IProps) => (
                 childPath,
                 props.workflowDefinition
               );
-              console.log(path, childPath, childTasks);
               return props.workflowDefinitionChanged(
                 R.set(
                   R.lensPath(childPath),

@@ -280,7 +280,7 @@ const DecisionModel = (props: IDecisionProps) => (
     <AddButton
       editing={props.editing}
       onInsertTask={props.onInsertTask}
-      path={props.path}
+      path={[...props.path, "decisions", Date.now().toString(), -1]}
     />
 
     <DecisionModelChildContainer>
