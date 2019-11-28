@@ -3,7 +3,7 @@ import {
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
 import React from "react";
-import JsonView from "react-json-view";
+import JsonView, { InteractionProps } from "react-json-view";
 import { RouteComponentProps } from "react-router-dom";
 import styled from "styled-components";
 import WorkflowChart from "../../components/WorkflowChart";
@@ -77,7 +77,14 @@ class TransactionTable extends React.Component<IProps, IState> {
             });
           }}
         />
-        <JsonView src={workflowDefinition || {}} />
+        <JsonView
+          src={workflowDefinition || {}}
+          onEdit={(edit: InteractionProps) => {
+            this.setState({
+              workflowDefinition: edit.updated_src as any
+            });
+          }}
+        />
       </WorkflowDefinitionDetailContainer>
     );
   }

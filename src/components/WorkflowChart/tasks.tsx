@@ -439,7 +439,7 @@ const pickTaskProperties = (
         name: task.name,
         taskReferenceName: task.taskReferenceName,
         ackTimeout: task.ackTimeout,
-        inputParameters: task.inputParameters,
+        inputParameters: task.inputParameters || {},
         retry: task.retry,
         timeout: task.timeout,
         type: task.type
@@ -447,7 +447,7 @@ const pickTaskProperties = (
     case Task.TaskTypes.Decision:
       return {
         taskReferenceName: task.taskReferenceName,
-        inputParameters: task.inputParameters,
+        inputParameters: task.inputParameters || {},
         decisions: {},
         defaultDecision: [],
         type: task.type
