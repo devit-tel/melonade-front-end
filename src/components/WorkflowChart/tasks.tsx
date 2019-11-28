@@ -136,6 +136,7 @@ const DecisionCaseModelContainer = styled.div`
 
 interface ITaskProps {
   task: WorkflowDefinition.ITaskTask;
+  path: (string | number)[];
 }
 
 const TaskModel = (props: ITaskProps) => (
@@ -147,6 +148,7 @@ const TaskModel = (props: ITaskProps) => (
 
 interface IParallelProps {
   task: WorkflowDefinition.IParallelTask;
+  path: (string | number)[];
 }
 
 const ParallelModel = (props: IParallelProps) => (
@@ -160,8 +162,11 @@ const ParallelModel = (props: IParallelProps) => (
 
     <ParallelModelChildContainer>
       {props.task.parallelTasks.map(
-        (tasks: WorkflowDefinition.AllTaskType[]) => (
-          <RenderChildTasks tasks={tasks} />
+        (tasks: WorkflowDefinition.AllTaskType[], index: number) => (
+          <RenderChildTasks
+            tasks={tasks}
+            path={[...props.path, "parallelTasks", index]}
+          />
         )
       )}
     </ParallelModelChildContainer>
@@ -171,6 +176,7 @@ const ParallelModel = (props: IParallelProps) => (
 interface IDecisionCaseProps {
   tasks: WorkflowDefinition.AllTaskType[];
   caseKey: string;
+  path: (string | number)[];
 }
 
 const DecisionCase = (props: IDecisionCaseProps) => (
@@ -179,12 +185,13 @@ const DecisionCase = (props: IDecisionCaseProps) => (
       <Typography.Text>{props.caseKey}</Typography.Text>
     </DecisionCaseModelContainer>
     <Icon type="caret-down" />
-    <RenderChildTasks tasks={props.tasks} />
+    <RenderChildTasks tasks={props.tasks} path={props.path} />
   </DecisionCaseContainer>
 );
 
 interface IDecisionProps {
   task: WorkflowDefinition.IDecisionTask;
+  path: (string | number)[];
 }
 
 const DecisionModel = (props: IDecisionProps) => (
@@ -199,56 +206,66 @@ const DecisionModel = (props: IDecisionProps) => (
     <DecisionModelChildContainer>
       {R.toPairs(props.task.decisions).map(
         ([caseKey, tasks]: [string, WorkflowDefinition.AllTaskType[]]) => (
-          <DecisionCase tasks={tasks} caseKey={caseKey} />
+          <DecisionCase
+            tasks={tasks}
+            caseKey={caseKey}
+            path={[...props.path, "decisions", caseKey]}
+          />
         )
       )}
-      <DecisionCase tasks={props.task.defaultDecision} caseKey="default" />
+      <DecisionCase
+        tasks={props.task.defaultDecision}
+        caseKey="default"
+        path={[...props.path, "defaultDecision"]}
+      />
     </DecisionModelChildContainer>
   </DecisionModelContainer>
 );
 
 interface IAllTaskProps {
   task: WorkflowDefinition.AllTaskType;
+  path: (string | number)[];
 }
 
 const AllTaskModel = (props: IAllTaskProps) => {
   const { task } = props;
   switch (task.type) {
     case Task.TaskTypes.Task:
-      return <TaskModel task={task} />;
+      return <TaskModel task={task} path={props.path} />;
     case Task.TaskTypes.Parallel:
-      return <ParallelModel task={task} />;
+      return <ParallelModel task={task} path={props.path} />;
     case Task.TaskTypes.Decision:
-      return <DecisionModel task={task} />;
+      return <DecisionModel task={task} path={props.path} />;
     default:
       return <Icon type="warning" />;
   }
 };
 
-interface IProps {
+interface IChildTasksProps {
   tasks: WorkflowDefinition.AllTaskType[];
+  path: (string | number)[];
 }
 
-const RenderChildTasks = (props: IProps) => (
+const RenderChildTasks = (props: IChildTasksProps) => (
   <TasksContainer>
     {props.tasks.map((task: WorkflowDefinition.AllTaskType, index: number) => (
       <React.Fragment>
-        <AllTaskModel task={task} />
-        {index === props.tasks.length - 1 ? (
-          undefined
-        ) : (
-          <Icon type="caret-down" />
-        )}
+        {index === 0 ? undefined : <Icon type="caret-down" />}
+        <AllTaskModel task={task} path={[...props.path, index]} />
       </React.Fragment>
     ))}
   </TasksContainer>
 );
 
+interface IProps {
+  tasks: WorkflowDefinition.AllTaskType[];
+}
+
 export default (props: IProps) => (
   <ChartContainer>
     <StartModel />
     <Icon type="caret-down" />
-    <RenderChildTasks tasks={props.tasks} />
+    <RenderChildTasks tasks={props.tasks} path={[]} />
     <Icon type="caret-down" />
     <EndModel />
   </ChartContainer>

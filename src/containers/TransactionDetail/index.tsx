@@ -70,6 +70,8 @@ const getTimelineDataFromEvents = (
       if (event.details.status === State.TransactionStates.Running) return true;
       return false;
     }
+
+    return false;
   });
 
   return startNodeOfEachType.map((event: Event.AllEvent) => {
