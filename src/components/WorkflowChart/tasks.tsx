@@ -72,7 +72,7 @@ const ParallelModelContainer = styled.div`
   }
 `;
 
-const ParallelModelChildContainer = styled.div`
+const ParallelModelChildsContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   margin: 6px;
@@ -80,6 +80,12 @@ const ParallelModelChildContainer = styled.div`
 
   border-top: 8px solid black;
   border-bottom: 8px solid black;
+`;
+
+const ParallelModelChildContainer = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
 `;
 
 const DecisionModelContainer = styled.div`
@@ -160,16 +166,19 @@ const ParallelModel = (props: IParallelProps) => (
 
     <Icon type="caret-down" />
 
-    <ParallelModelChildContainer>
+    <ParallelModelChildsContainer>
       {props.task.parallelTasks.map(
         (tasks: WorkflowDefinition.AllTaskType[], index: number) => (
-          <RenderChildTasks
-            tasks={tasks}
-            path={[...props.path, "parallelTasks", index]}
-          />
+          <ParallelModelChildContainer>
+            <Icon type="caret-down" />
+            <RenderChildTasks
+              tasks={tasks}
+              path={[...props.path, "parallelTasks", index]}
+            />
+          </ParallelModelChildContainer>
         )
       )}
-    </ParallelModelChildContainer>
+    </ParallelModelChildsContainer>
   </ParallelModelContainer>
 );
 
@@ -250,8 +259,8 @@ const RenderChildTasks = (props: IChildTasksProps) => (
   <TasksContainer>
     {props.tasks.map((task: WorkflowDefinition.AllTaskType, index: number) => (
       <React.Fragment>
-        {index === 0 ? undefined : <Icon type="caret-down" />}
         <AllTaskModel task={task} path={[...props.path, index]} />
+        <Icon type="caret-down" />
       </React.Fragment>
     ))}
   </TasksContainer>
@@ -259,6 +268,7 @@ const RenderChildTasks = (props: IChildTasksProps) => (
 
 interface IProps {
   tasks: WorkflowDefinition.AllTaskType[];
+  editable?: boolean;
 }
 
 export default (props: IProps) => (
