@@ -9,6 +9,29 @@ import React from "react";
 import styled from "styled-components";
 import { CreateTaskModal } from "./modal";
 
+const YellowButton = styled(Button)`
+  background-color: #ffd800;
+  border-color: #ffd800;
+
+  :hover {
+    background-color: #e3b04b;
+    border-color: #e3b04b;
+  }
+`;
+
+const TaskWithActionContainer = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+`;
+
+const ActionContainer = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  & > button {
+    margin-top: 6px;
+  }
+`;
+
 const ChartContainer = styled.div`
   display: flex;
   flex-flow: column nowrap;
@@ -151,13 +174,38 @@ export enum taskMode {
   delete = "DELETE"
 }
 
-interface IAddButtonProps {
+interface IActionButtonProps {
   path: (string | number)[];
   editing?: boolean;
   onTaskUpdate?: (path: (string | number)[], mode: taskMode) => void;
 }
 
-const AddButton = (props: IAddButtonProps) => {
+const EditButton = (props: IActionButtonProps) => {
+  return props.editing ? (
+    <YellowButton
+      size="small"
+      icon="edit"
+      onClick={() =>
+        props.onTaskUpdate && props.onTaskUpdate(props.path, taskMode.modify)
+      }
+    />
+  ) : null;
+};
+
+const DeleteButton = (props: IActionButtonProps) => {
+  return props.editing ? (
+    <Button
+      type="danger"
+      size="small"
+      icon="delete"
+      onClick={() =>
+        props.onTaskUpdate && props.onTaskUpdate(props.path, taskMode.delete)
+      }
+    />
+  ) : null;
+};
+
+const AddButton = (props: IActionButtonProps) => {
   return props.editing ? (
     <Button
       type="primary"
@@ -173,7 +221,7 @@ const AddButton = (props: IAddButtonProps) => {
   );
 };
 
-interface ITaskProps extends IAddButtonProps {
+interface ITaskProps extends IActionButtonProps {
   task: WorkflowDefinition.ITaskTask;
 }
 
@@ -184,7 +232,7 @@ const TaskModel = (props: ITaskProps) => (
   </TaskModelContainer>
 );
 
-interface IParallelProps extends IAddButtonProps {
+interface IParallelProps extends IActionButtonProps {
   task: WorkflowDefinition.IParallelTask;
 }
 
@@ -231,7 +279,7 @@ const ParallelModel = (props: IParallelProps) => (
   </ParallelModelContainer>
 );
 
-interface IDecisionCaseProps extends IAddButtonProps {
+interface IDecisionCaseProps extends IActionButtonProps {
   tasks: WorkflowDefinition.AllTaskType[];
   caseKey: string;
 }
@@ -256,7 +304,7 @@ const DecisionCase = (props: IDecisionCaseProps) => (
   </DecisionCaseContainer>
 );
 
-interface IDecisionProps extends IAddButtonProps {
+interface IDecisionProps extends IActionButtonProps {
   task: WorkflowDefinition.IDecisionTask;
 }
 
@@ -301,7 +349,7 @@ const DecisionModel = (props: IDecisionProps) => (
   </DecisionModelContainer>
 );
 
-interface IAllTaskProps extends IAddButtonProps {
+interface IAllTaskProps extends IActionButtonProps {
   task: WorkflowDefinition.AllTaskType;
 }
 
@@ -340,7 +388,7 @@ const AllTaskModel = (props: IAllTaskProps) => {
   }
 };
 
-interface IChildTasksProps extends IAddButtonProps {
+interface IChildTasksProps extends IActionButtonProps {
   tasks: WorkflowDefinition.AllTaskType[];
 }
 
@@ -350,12 +398,26 @@ const RenderChildTasks = (props: IChildTasksProps) => (
       const path = [...props.path, index];
       return (
         <React.Fragment key={path.join(".")}>
-          <AllTaskModel
-            task={task}
-            path={path}
-            editing={props.editing}
-            onTaskUpdate={props.onTaskUpdate}
-          />
+          <TaskWithActionContainer>
+            <AllTaskModel
+              task={task}
+              path={path}
+              editing={props.editing}
+              onTaskUpdate={props.onTaskUpdate}
+            />
+            <ActionContainer>
+              <EditButton
+                editing={props.editing}
+                onTaskUpdate={props.onTaskUpdate}
+                path={path}
+              />
+              <DeleteButton
+                editing={props.editing}
+                onTaskUpdate={props.onTaskUpdate}
+                path={path}
+              />
+            </ActionContainer>
+          </TaskWithActionContainer>
 
           <AddButton
             editing={props.editing}
@@ -405,7 +467,7 @@ const pickTaskProperties = (
 interface IProps {
   taskDefinitions: TaskDefinition.ITaskDefinition[];
   tasks: WorkflowDefinition.AllTaskType[];
-  editing?: IAddButtonProps["editing"];
+  editing?: IActionButtonProps["editing"];
   onTaskUpdated?: (tasks: WorkflowDefinition.AllTaskType[]) => void;
 }
 
@@ -440,7 +502,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
           this.props.onTaskUpdated(
             R.set(
               R.lensPath(childPath),
-              R.remove((R.last(path) as number) + 1, 1, childTasks),
+              R.remove(R.last(path) as number, 1, childTasks),
               this.props.tasks as any
             )
           );
@@ -506,6 +568,11 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
             });
           }}
           visible={!!this.state.selectingPath}
+          task={
+            this.state.selectingPath
+              ? R.path(this.state.selectingPath, this.props.tasks)
+              : ({} as any)
+          }
         />
         <StartModel />
         <AddButton
