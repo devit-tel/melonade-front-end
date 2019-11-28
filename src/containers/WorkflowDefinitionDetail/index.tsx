@@ -57,7 +57,15 @@ class TransactionTable extends React.Component<IProps, IState> {
     const { workflowDefinition } = this.state;
     return (
       <WorkflowDefinitionDetailContainer>
-        <WorkflowChart workflowDefinition={workflowDefinition} />
+        <WorkflowChart
+          workflowDefinition={workflowDefinition}
+          editing
+          workflowDefinitionChanged={workflowDefinition => {
+            this.setState({
+              workflowDefinition
+            });
+          }}
+        />
         <JsonView src={workflowDefinition || {}} />
       </WorkflowDefinitionDetailContainer>
     );

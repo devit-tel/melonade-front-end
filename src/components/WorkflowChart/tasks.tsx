@@ -1,5 +1,5 @@
 import { Task, WorkflowDefinition } from "@melonade/melonade-declaration";
-import { Icon, Typography } from "antd";
+import { Button, Icon, Typography } from "antd";
 import * as R from "ramda";
 import React from "react";
 import styled from "styled-components";
@@ -38,6 +38,7 @@ const EndModel = styled(StartModel)`
 const TasksContainer = styled.div`
   display: flex;
   flex-flow: column nowrap;
+  align-items: center;
 
   :hover {
     background-color: rgba(0, 0, 255, 0.2);
@@ -85,7 +86,7 @@ const ParallelModelChildsContainer = styled.div`
 const ParallelModelChildContainer = styled.div`
   display: flex;
   flex-flow: column nowrap;
-  align-items: stretch;
+  align-items: center;
 `;
 
 const DecisionModelContainer = styled.div`
@@ -115,8 +116,7 @@ const DecisionCaseContainer = styled.div`
   flex-flow: column nowrap;
   margin: 6px;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
+  justify-content: flex-start;
 
   :hover {
     background-color: rgba(0, 0, 255, 0.2);
@@ -140,9 +140,50 @@ const DecisionCaseModelContainer = styled.div`
   margin: 6px;
 `;
 
-interface ITaskProps {
-  task: WorkflowDefinition.ITaskTask;
+export enum taskMode {
+  modify = "MODIFY",
+  insert = "INSERT",
+  delete = "DELETE"
+}
+
+interface IAddButtonProps {
   path: (string | number)[];
+  editing?: boolean;
+  onInsertTask?: (
+    task: WorkflowDefinition.AllTaskType,
+    path: (string | number)[],
+    mode: taskMode
+  ) => void;
+}
+
+const AddButton = (props: IAddButtonProps) => {
+  return props.editing ? (
+    <Button
+      type="primary"
+      shape="circle"
+      size="small"
+      icon="plus"
+      onClick={() =>
+        props.onInsertTask &&
+        props.onInsertTask(
+          {
+            name: "hello",
+            taskReferenceName: "hello",
+            type: Task.TaskTypes.Task,
+            inputParameters: {}
+          },
+          props.path,
+          taskMode.insert
+        )
+      }
+    />
+  ) : (
+    <Icon type="caret-down" />
+  );
+};
+
+interface ITaskProps extends IAddButtonProps {
+  task: WorkflowDefinition.ITaskTask;
 }
 
 const TaskModel = (props: ITaskProps) => (
@@ -152,9 +193,8 @@ const TaskModel = (props: ITaskProps) => (
   </TaskModelContainer>
 );
 
-interface IParallelProps {
+interface IParallelProps extends IAddButtonProps {
   task: WorkflowDefinition.IParallelTask;
-  path: (string | number)[];
 }
 
 const ParallelModel = (props: IParallelProps) => (
@@ -164,28 +204,45 @@ const ParallelModel = (props: IParallelProps) => (
       <Typography.Text code>PARALLEL</Typography.Text>
     </SystemTaskModelContainer>
 
-    <Icon type="caret-down" />
+    <AddButton
+      editing={props.editing}
+      onInsertTask={props.onInsertTask}
+      path={[
+        ...props.path,
+        "parallelTasks",
+        props.task.parallelTasks.length,
+        -1
+      ]}
+    />
 
     <ParallelModelChildsContainer>
       {props.task.parallelTasks.map(
-        (tasks: WorkflowDefinition.AllTaskType[], index: number) => (
-          <ParallelModelChildContainer>
-            <Icon type="caret-down" />
-            <RenderChildTasks
-              tasks={tasks}
-              path={[...props.path, "parallelTasks", index]}
-            />
-          </ParallelModelChildContainer>
-        )
+        (tasks: WorkflowDefinition.AllTaskType[], index: number) => {
+          const path = [...props.path, "parallelTasks", index];
+          return (
+            <ParallelModelChildContainer key={path.join(".")}>
+              <AddButton
+                editing={props.editing}
+                onInsertTask={props.onInsertTask}
+                path={[...path, -1]}
+              />
+              <RenderChildTasks
+                tasks={tasks}
+                path={path}
+                editing={props.editing}
+                onInsertTask={props.onInsertTask}
+              />
+            </ParallelModelChildContainer>
+          );
+        }
       )}
     </ParallelModelChildsContainer>
   </ParallelModelContainer>
 );
 
-interface IDecisionCaseProps {
+interface IDecisionCaseProps extends IAddButtonProps {
   tasks: WorkflowDefinition.AllTaskType[];
   caseKey: string;
-  path: (string | number)[];
 }
 
 const DecisionCase = (props: IDecisionCaseProps) => (
@@ -193,14 +250,23 @@ const DecisionCase = (props: IDecisionCaseProps) => (
     <DecisionCaseModelContainer>
       <Typography.Text>{props.caseKey}</Typography.Text>
     </DecisionCaseModelContainer>
-    <Icon type="caret-down" />
-    <RenderChildTasks tasks={props.tasks} path={props.path} />
+
+    <AddButton
+      editing={props.editing}
+      onInsertTask={props.onInsertTask}
+      path={[...props.path, -1]}
+    />
+    <RenderChildTasks
+      tasks={props.tasks}
+      path={props.path}
+      editing={props.editing}
+      onInsertTask={props.onInsertTask}
+    />
   </DecisionCaseContainer>
 );
 
-interface IDecisionProps {
+interface IDecisionProps extends IAddButtonProps {
   task: WorkflowDefinition.IDecisionTask;
-  path: (string | number)[];
 }
 
 const DecisionModel = (props: IDecisionProps) => (
@@ -210,73 +276,127 @@ const DecisionModel = (props: IDecisionProps) => (
       <Typography.Text code>DECISION</Typography.Text>
     </SystemTaskModelContainer>
 
-    <Icon type="caret-down" />
+    {/* TODO Add decision */}
+    <AddButton
+      editing={props.editing}
+      onInsertTask={props.onInsertTask}
+      path={props.path}
+    />
 
     <DecisionModelChildContainer>
       {R.toPairs(props.task.decisions).map(
-        ([caseKey, tasks]: [string, WorkflowDefinition.AllTaskType[]]) => (
-          <DecisionCase
-            tasks={tasks}
-            caseKey={caseKey}
-            path={[...props.path, "decisions", caseKey]}
-          />
-        )
+        ([caseKey, tasks]: [string, WorkflowDefinition.AllTaskType[]]) => {
+          const path = [...props.path, "decisions", caseKey];
+          return (
+            <DecisionCase
+              key={path.join(".")}
+              tasks={tasks}
+              caseKey={caseKey}
+              path={path}
+              editing={props.editing}
+              onInsertTask={props.onInsertTask}
+            />
+          );
+        }
       )}
       <DecisionCase
         tasks={props.task.defaultDecision}
         caseKey="default"
         path={[...props.path, "defaultDecision"]}
+        editing={props.editing}
+        onInsertTask={props.onInsertTask}
       />
     </DecisionModelChildContainer>
   </DecisionModelContainer>
 );
 
-interface IAllTaskProps {
+interface IAllTaskProps extends IAddButtonProps {
   task: WorkflowDefinition.AllTaskType;
-  path: (string | number)[];
 }
 
 const AllTaskModel = (props: IAllTaskProps) => {
   const { task } = props;
   switch (task.type) {
     case Task.TaskTypes.Task:
-      return <TaskModel task={task} path={props.path} />;
+      return (
+        <TaskModel
+          task={task}
+          path={props.path}
+          editing={props.editing}
+          onInsertTask={props.onInsertTask}
+        />
+      );
     case Task.TaskTypes.Parallel:
-      return <ParallelModel task={task} path={props.path} />;
+      return (
+        <ParallelModel
+          task={task}
+          path={props.path}
+          editing={props.editing}
+          onInsertTask={props.onInsertTask}
+        />
+      );
     case Task.TaskTypes.Decision:
-      return <DecisionModel task={task} path={props.path} />;
+      return (
+        <DecisionModel
+          task={task}
+          path={props.path}
+          editing={props.editing}
+          onInsertTask={props.onInsertTask}
+        />
+      );
     default:
       return <Icon type="warning" />;
   }
 };
 
-interface IChildTasksProps {
+interface IChildTasksProps extends IAddButtonProps {
   tasks: WorkflowDefinition.AllTaskType[];
-  path: (string | number)[];
 }
 
 const RenderChildTasks = (props: IChildTasksProps) => (
   <TasksContainer>
-    {props.tasks.map((task: WorkflowDefinition.AllTaskType, index: number) => (
-      <React.Fragment>
-        <AllTaskModel task={task} path={[...props.path, index]} />
-        <Icon type="caret-down" />
-      </React.Fragment>
-    ))}
+    {props.tasks.map((task: WorkflowDefinition.AllTaskType, index: number) => {
+      const path = [...props.path, index];
+      return (
+        <React.Fragment key={path.join(".")}>
+          <AllTaskModel
+            task={task}
+            path={path}
+            editing={props.editing}
+            onInsertTask={props.onInsertTask}
+          />
+
+          <AddButton
+            editing={props.editing}
+            onInsertTask={props.onInsertTask}
+            path={path}
+          />
+        </React.Fragment>
+      );
+    })}
   </TasksContainer>
 );
 
 interface IProps {
   tasks: WorkflowDefinition.AllTaskType[];
-  editable?: boolean;
+  editing?: IAddButtonProps["editing"];
+  onInsertTask?: IAddButtonProps["onInsertTask"];
 }
 
 export default (props: IProps) => (
   <ChartContainer>
     <StartModel />
-    <Icon type="caret-down" />
-    <RenderChildTasks tasks={props.tasks} path={[]} />
-    <Icon type="caret-down" />
+    <AddButton
+      editing={props.editing}
+      onInsertTask={props.onInsertTask}
+      path={[-1]}
+    />
+    <RenderChildTasks
+      tasks={props.tasks}
+      path={[]}
+      editing={props.editing}
+      onInsertTask={props.onInsertTask}
+    />
     <EndModel />
   </ChartContainer>
 );
