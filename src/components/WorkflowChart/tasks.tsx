@@ -76,7 +76,7 @@ const ParallelModelChildContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   margin: 6px;
-  align-items: flex-start;
+  align-items: stretch;
 
   border-top: 8px solid black;
   border-bottom: 8px solid black;
@@ -98,7 +98,7 @@ const DecisionModelChildContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   margin: 6px;
-  align-items: flex-start;
+  align-items: stretch;
 
   border-top: 8px dashed black;
   border-bottom: 8px dashed black;
@@ -156,7 +156,7 @@ const ParallelModel = (props: IParallelProps) => (
       <Typography.Text code>PARALLEL</Typography.Text>
     </SystemTaskModelContainer>
 
-    <Icon type="arrow-down" />
+    <Icon type="caret-down" />
 
     <ParallelModelChildContainer>
       {props.task.parallelTasks.map(
@@ -178,7 +178,7 @@ const DecisionCase = (props: IDecisionCaseProps) => (
     <DecisionCaseModelContainer>
       <Typography.Text>{props.caseKey}</Typography.Text>
     </DecisionCaseModelContainer>
-    <Icon type="arrow-down" />
+    <Icon type="caret-down" />
     <RenderChildTasks tasks={props.tasks} />
   </DecisionCaseContainer>
 );
@@ -194,7 +194,7 @@ const DecisionModel = (props: IDecisionProps) => (
       <Typography.Text code>DECISION</Typography.Text>
     </SystemTaskModelContainer>
 
-    <Icon type="arrow-down" />
+    <Icon type="caret-down" />
 
     <DecisionModelChildContainer>
       {R.toPairs(props.task.decisions).map(
@@ -231,10 +231,14 @@ interface IProps {
 
 const RenderChildTasks = (props: IProps) => (
   <TasksContainer>
-    {props.tasks.map((task: WorkflowDefinition.AllTaskType) => (
+    {props.tasks.map((task: WorkflowDefinition.AllTaskType, index: number) => (
       <React.Fragment>
         <AllTaskModel task={task} />
-        <Icon type="arrow-down" />
+        {index === props.tasks.length - 1 ? (
+          undefined
+        ) : (
+          <Icon type="caret-down" />
+        )}
       </React.Fragment>
     ))}
   </TasksContainer>
@@ -243,8 +247,9 @@ const RenderChildTasks = (props: IProps) => (
 export default (props: IProps) => (
   <ChartContainer>
     <StartModel />
-    <Icon type="arrow-down" />
+    <Icon type="caret-down" />
     <RenderChildTasks tasks={props.tasks} />
+    <Icon type="caret-down" />
     <EndModel />
   </ChartContainer>
 );
