@@ -112,7 +112,7 @@ class TransactionTable extends React.Component<IProps, IState> {
           type="primary"
           onClick={() => this.props.history.push("/definition/workflow/create")}
         >
-          Create Task Definition
+          Create Workflow Definition
         </Button>
         <Table
           columns={columns}
