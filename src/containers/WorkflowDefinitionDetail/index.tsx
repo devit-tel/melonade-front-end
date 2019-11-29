@@ -84,6 +84,11 @@ class TransactionTable extends React.Component<IProps, IState> {
               workflowDefinition: edit.updated_src as any
             });
           }}
+          onAdd={(edit: InteractionProps) => {
+            this.setState({
+              workflowDefinition: edit.updated_src as any
+            });
+          }}
         />
       </WorkflowDefinitionDetailContainer>
     );
