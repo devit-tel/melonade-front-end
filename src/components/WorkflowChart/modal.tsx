@@ -14,7 +14,7 @@ const StyledNumberInput = styled(InputNumber)`
   width: 100%;
 `;
 
-interface IProps {
+interface ICreateTaskModalProps {
   visible?: boolean;
   onSubmit: (task: WorkflowDefinition.AllTaskType) => void;
   onCancel: () => void;
@@ -22,12 +22,15 @@ interface IProps {
   taskDefinitions: TaskDefinition.ITaskDefinition[];
 }
 
-interface IState {
+interface ICreateTaskModalState {
   task?: WorkflowDefinition.ITaskTask;
 }
 
-export class CreateTaskModal extends React.Component<IProps, IState> {
-  constructor(props: IProps) {
+export class CreateTaskModal extends React.Component<
+  ICreateTaskModalProps,
+  ICreateTaskModalState
+> {
+  constructor(props: ICreateTaskModalProps) {
     super(props);
 
     this.state = {
@@ -37,7 +40,7 @@ export class CreateTaskModal extends React.Component<IProps, IState> {
     };
   }
 
-  componentWillReceiveProps(nextProps: IProps) {
+  componentWillReceiveProps(nextProps: ICreateTaskModalProps) {
     if (!this.props.visible && nextProps.visible) {
       this.setState({
         task: nextProps.task
@@ -149,6 +152,67 @@ export class CreateTaskModal extends React.Component<IProps, IState> {
               </Form.Item>
             </React.Fragment>
           )}
+        </Form>
+      </Modal>
+    );
+  }
+}
+
+interface ICreateDecisionCaseModalProps {
+  visible?: boolean;
+  onSubmit: (caseName?: string) => void;
+  onCancel: () => void;
+  caseName?: string;
+  existingCase: string[];
+}
+
+interface ICreateDecisionCaseModalState {
+  caseName?: string;
+}
+
+export class CreateDecisionCaseModal extends React.Component<
+  ICreateDecisionCaseModalProps,
+  ICreateDecisionCaseModalState
+> {
+  constructor(props: ICreateDecisionCaseModalProps) {
+    super(props);
+
+    this.state = {
+      caseName: ""
+    };
+  }
+
+  componentWillReceiveProps(nextProps: ICreateDecisionCaseModalProps) {
+    if (!this.props.visible && nextProps.visible) {
+      this.setState({
+        caseName: nextProps.caseName
+      });
+    }
+  }
+
+  render() {
+    const { existingCase } = this.props;
+    const { caseName } = this.state;
+    return (
+      <Modal
+        title="Insert task"
+        visible={this.props.visible}
+        onOk={() => this.props.onSubmit(this.state.caseName)}
+        onCancel={this.props.onCancel}
+        okButtonProps={{ disabled: existingCase.includes(caseName || "") }}
+      >
+        <Form>
+          <Form.Item label="Decision case">
+            <Input
+              placeholder="Decision case"
+              value={caseName}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                this.setState({
+                  caseName: event.target.value
+                });
+              }}
+            />
+          </Form.Item>
         </Form>
       </Modal>
     );

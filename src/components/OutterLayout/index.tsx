@@ -17,7 +17,7 @@ const StyledContent = styled(Content)`
   margin: 16px;
   padding: 24px;
   background: #fff;
-  height: 100%;
+  height: 100vh;
   overflow: auto;
 `;
 

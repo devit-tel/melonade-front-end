@@ -158,7 +158,7 @@ class TransactionTable extends React.Component<IProps, IState> {
             </Form.Item>
             <Form.Item label="Retry Limit">
               <StyledNumberInput
-                placeholder="Time that workflow can retry if failed"
+                placeholder="Number that workflow can retry if failed"
                 value={R.path(["retry", "limit"], workflowDefinition) as any}
                 onChange={(value?: number) => {
                   this.onInputChanged(["retry", "limit"], value);

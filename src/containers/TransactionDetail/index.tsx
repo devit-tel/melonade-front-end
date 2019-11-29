@@ -14,14 +14,10 @@ import { getTransactionData } from "../../services/eventLogger/http";
 const { TabPane } = Tabs;
 
 const Container = styled.div`
-  height: 100vh;
   overflow: hidden;
 `;
 
-const StyledTabs = styled(Tabs)`
-  width: 100%;
-  height: 100%;
-`;
+const StyledTabs = styled(Tabs)``;
 
 interface ITransactionParams {
   transactionId: string;
