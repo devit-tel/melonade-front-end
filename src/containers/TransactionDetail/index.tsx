@@ -6,9 +6,20 @@ import * as R from "ramda";
 import React from "react";
 import { Chart } from "react-google-charts";
 import { RouteComponentProps } from "react-router";
+import styled from "styled-components";
 import JsonViewModal from "../../components/JsonViewModal";
 import StatusText from "../../components/StatusText";
 import { getTransactionData } from "../../services/eventLogger/http";
+
+const Container = styled.div`
+  height: 100vh;
+  overflow: hidden;
+`;
+
+const TableContainer = styled.div`
+  overflow: scroll;
+  height: 100%;
+`;
 
 interface ITransactionParams {
   transactionId: string;
@@ -266,7 +277,13 @@ class TransactionTable extends React.Component<IProps, IState> {
     const { events, isLoading, selectedEventIndex } = this.state;
     const isEventSelecting = isNumber(selectedEventIndex);
     return (
-      <div>
+      <Container>
+        <JsonViewModal
+          // @ts-ignore: Fuck the TS lint
+          data={isEventSelecting ? events[selectedEventIndex] : []}
+          visible={isEventSelecting}
+          onClose={() => this.setState({ selectedEventIndex: undefined })}
+        />
         <Chart
           width={"100%"}
           height={"300px"}
@@ -281,22 +298,18 @@ class TransactionTable extends React.Component<IProps, IState> {
             ...getTimelineDataFromEvents(events)
           ]}
         />
-        <JsonViewModal
-          // @ts-ignore: Fuck the TS lint
-          data={isEventSelecting ? events[selectedEventIndex] : []}
-          visible={isEventSelecting}
-          onClose={() => this.setState({ selectedEventIndex: undefined })}
-        />
-        <Table
-          columns={this.columns}
-          dataSource={events}
-          pagination={false}
-          loading={isLoading}
-          // onRowClick={(_event: Event.AllEvent, index: number) =>
-          //   this.setState({ selectedEventIndex: index })
-          // }
-        />
-      </div>
+        <TableContainer>
+          <Table
+            columns={this.columns}
+            dataSource={events}
+            pagination={false}
+            loading={isLoading}
+            // onRowClick={(_event: Event.AllEvent, index: number) =>
+            //   this.setState({ selectedEventIndex: index })
+            // }
+          />
+        </TableContainer>
+      </Container>
     );
   }
 }

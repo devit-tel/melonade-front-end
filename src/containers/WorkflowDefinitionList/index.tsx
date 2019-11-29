@@ -18,7 +18,7 @@ const columns = [
     dataIndex: "name",
     key: "name",
     render: (name: string, { rev }: WorkflowDefinition.IWorkflowDefinition) => (
-      <Link to={`${name}/${rev}`}>{name}</Link>
+      <Link to={`/definition/workflow/${name}/${rev}`}>{name}</Link>
     )
   },
   {
@@ -26,7 +26,7 @@ const columns = [
     dataIndex: "rev",
     key: "rev",
     render: (rev: string, { name }: WorkflowDefinition.IWorkflowDefinition) => (
-      <Link to={`${name}/${rev}`}>{rev}</Link>
+      <Link to={`/definition/workflow/${name}/${rev}`}>{rev}</Link>
     )
   },
   {

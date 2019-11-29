@@ -76,7 +76,7 @@ const columns = [
     title: "TransactionId",
     dataIndex: "transactionId",
     key: "transactionId",
-    render: (text: string) => <Link to={text}>{text}</Link>
+    render: (text: string) => <Link to={`transaction/${text}`}>{text}</Link>
   },
   {
     title: "Status",
