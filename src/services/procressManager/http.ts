@@ -64,3 +64,33 @@ export const createTaskDefinitions = async (
 
   return R.path(["data", "data"], resp) as TaskDefinition.ITaskDefinition;
 };
+
+export const updateWorkflowDefinitions = async (
+  taskDefinition: WorkflowDefinition.IWorkflowDefinition
+): Promise<WorkflowDefinition.IWorkflowDefinition> => {
+  const resp = await client({
+    url: "/v1/definition/workflow",
+    method: "PUT",
+    data: taskDefinition
+  });
+
+  return R.path(
+    ["data", "data"],
+    resp
+  ) as WorkflowDefinition.IWorkflowDefinition;
+};
+
+export const createWorkflowDefinitions = async (
+  taskDefinition: WorkflowDefinition.IWorkflowDefinition
+): Promise<WorkflowDefinition.IWorkflowDefinition> => {
+  const resp = await client({
+    url: "/v1/definition/workflow",
+    method: "POST",
+    data: taskDefinition
+  });
+
+  return R.path(
+    ["data", "data"],
+    resp
+  ) as WorkflowDefinition.IWorkflowDefinition;
+};

@@ -62,7 +62,7 @@ export default class TaskDefinitionModal extends React.Component<
         <Form>
           <Form.Item label="Name">
             <Input
-              disabled={!!taskDefinition}
+              disabled={!!this.props.taskDefinition}
               placeholder="The uniq name of task"
               value={R.path(["name"], taskDefinition) as any}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {

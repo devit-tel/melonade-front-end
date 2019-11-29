@@ -1,12 +1,19 @@
 import { WorkflowDefinition } from "@melonade/melonade-declaration";
-import { Table, Typography } from "antd";
+import { Button, Table, Typography } from "antd";
 import { ColumnProps } from "antd/lib/table";
 import * as R from "ramda";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
+import styled from "styled-components";
 import { listWorkflowDefinitions } from "../../services/procressManager/http";
 
-interface IProps {}
+const Container = styled.div`
+  & > button {
+    margin-bottom: 12px;
+  }
+`;
+
+interface IProps extends RouteComponentProps {}
 
 interface IState {
   workflowDefinitions: WorkflowDefinition.IWorkflowDefinition[];
@@ -38,6 +45,14 @@ const columns: ColumnProps<WorkflowDefinition.IWorkflowDefinition>[] = [
     ),
     sortDirections: ["ascend", "descend"],
     sorter: sortByPath(["rev"])
+  },
+  {
+    title: "Description",
+    dataIndex: "description",
+    key: "description",
+    render: (description: string) => (
+      <Typography.Text>{description}</Typography.Text>
+    )
   },
   {
     title: "Failure Strategy",
@@ -92,12 +107,20 @@ class TransactionTable extends React.Component<IProps, IState> {
   render() {
     const { workflowDefinitions, isLoading } = this.state;
     return (
-      <Table
-        columns={columns}
-        dataSource={workflowDefinitions}
-        pagination={false}
-        loading={isLoading}
-      />
+      <Container>
+        <Button
+          type="primary"
+          onClick={() => this.props.history.push("/definition/workflow/create")}
+        >
+          Create Task Definition
+        </Button>
+        <Table
+          columns={columns}
+          dataSource={workflowDefinitions}
+          pagination={false}
+          loading={isLoading}
+        />
+      </Container>
     );
   }
 }

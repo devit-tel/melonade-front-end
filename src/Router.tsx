@@ -29,6 +29,11 @@ export default (props: IProps) => {
         component={WorkflowDefinitionDetail}
         exact
       />
+      <Route
+        path="/definition/workflow/create"
+        component={WorkflowDefinitionDetail}
+        exact
+      />
     </Layout>
   );
 };
