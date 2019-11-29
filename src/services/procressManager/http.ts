@@ -40,3 +40,27 @@ export const listTaskDefinitions = async (): Promise<TaskDefinition.ITaskDefinit
 
   return R.pathOr([], ["data", "data"], resp);
 };
+
+export const updateTaskDefinitions = async (
+  taskDefinition: TaskDefinition.ITaskDefinition
+): Promise<TaskDefinition.ITaskDefinition> => {
+  const resp = await client({
+    url: "/v1/definition/task",
+    method: "PUT",
+    data: taskDefinition
+  });
+
+  return R.path(["data", "data"], resp) as TaskDefinition.ITaskDefinition;
+};
+
+export const createTaskDefinitions = async (
+  taskDefinition: TaskDefinition.ITaskDefinition
+): Promise<TaskDefinition.ITaskDefinition> => {
+  const resp = await client({
+    url: "/v1/definition/task",
+    method: "POST",
+    data: taskDefinition
+  });
+
+  return R.path(["data", "data"], resp) as TaskDefinition.ITaskDefinition;
+};

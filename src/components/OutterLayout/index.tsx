@@ -55,6 +55,12 @@ export default class OutterLayout extends React.Component<IProps, IState> {
     return (
       <StyledLayout>
         <Sider collapsible collapsed={this.state.collapsed} trigger={null}>
+          <ToggleContainer onClick={this.toggle}>
+            <Icon
+              className="trigger"
+              type={this.state.collapsed ? "menu-unfold" : "menu-fold"}
+            />
+          </ToggleContainer>
           <Menu
             theme="dark"
             mode="inline"
@@ -62,12 +68,6 @@ export default class OutterLayout extends React.Component<IProps, IState> {
             defaultOpenKeys={["/definition"]}
             selectedKeys={[this.props.location.pathname]}
           >
-            <ToggleContainer onClick={this.toggle}>
-              <Icon
-                className="trigger"
-                type={this.state.collapsed ? "menu-unfold" : "menu-fold"}
-              />
-            </ToggleContainer>
             <Menu.Item key="/transaction" onClick={this.changePath}>
               <Icon type="unordered-list" />
               <span>Transactions</span>
