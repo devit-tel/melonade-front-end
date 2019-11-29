@@ -1,5 +1,5 @@
 import { Event, State, Task } from "@melonade/melonade-declaration";
-import { Button, Icon, Table, Typography } from "antd";
+import { Button, Icon, Table, Tabs, Typography } from "antd";
 import { headerCase } from "change-case";
 import moment from "moment";
 import * as R from "ramda";
@@ -11,13 +11,15 @@ import JsonViewModal from "../../components/JsonViewModal";
 import StatusText from "../../components/StatusText";
 import { getTransactionData } from "../../services/eventLogger/http";
 
+const { TabPane } = Tabs;
+
 const Container = styled.div`
   height: 100vh;
   overflow: hidden;
 `;
 
-const TableContainer = styled.div`
-  overflow: scroll;
+const StyledTabs = styled(Tabs)`
+  width: 100%;
   height: 100%;
 `;
 
@@ -278,37 +280,41 @@ class TransactionTable extends React.Component<IProps, IState> {
     const isEventSelecting = isNumber(selectedEventIndex);
     return (
       <Container>
-        <JsonViewModal
-          // @ts-ignore: Fuck the TS lint
-          data={isEventSelecting ? events[selectedEventIndex] : []}
-          visible={isEventSelecting}
-          onClose={() => this.setState({ selectedEventIndex: undefined })}
-        />
-        <Chart
-          width={"100%"}
-          height={"300px"}
-          chartType="Timeline"
-          data={[
-            [
-              { type: "string", id: "Type" },
-              { type: "string", id: "Name" },
-              { type: "date", id: "Start" },
-              { type: "date", id: "End" }
-            ],
-            ...getTimelineDataFromEvents(events)
-          ]}
-        />
-        <TableContainer>
-          <Table
-            columns={this.columns}
-            dataSource={events}
-            pagination={false}
-            loading={isLoading}
-            // onRowClick={(_event: Event.AllEvent, index: number) =>
-            //   this.setState({ selectedEventIndex: index })
-            // }
-          />
-        </TableContainer>
+        <StyledTabs>
+          <TabPane tab="Timeline view" key="1">
+            <JsonViewModal
+              // @ts-ignore: Fuck the TS lint
+              data={isEventSelecting ? events[selectedEventIndex] : []}
+              visible={isEventSelecting}
+              onClose={() => this.setState({ selectedEventIndex: undefined })}
+            />
+            <Chart
+              width={"100%"}
+              height={"250px"}
+              chartType="Timeline"
+              data={[
+                [
+                  { type: "string", id: "Type" },
+                  { type: "string", id: "Name" },
+                  { type: "date", id: "Start" },
+                  { type: "date", id: "End" }
+                ],
+                ...getTimelineDataFromEvents(events)
+              ]}
+            />
+            <Table
+              columns={this.columns}
+              dataSource={events}
+              pagination={false}
+              loading={isLoading}
+              scroll={{
+                scrollToFirstRowOnChange: true,
+                y: window.innerWidth - 420
+              }}
+            />
+          </TabPane>
+          <TabPane tab="Workflows view" key="2"></TabPane>
+        </StyledTabs>
       </Container>
     );
   }
