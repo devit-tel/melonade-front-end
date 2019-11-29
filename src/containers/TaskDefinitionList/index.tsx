@@ -3,12 +3,19 @@ import { Button, Table, Typography } from "antd";
 import { ColumnProps } from "antd/lib/table";
 import * as R from "ramda";
 import React from "react";
+import styled from "styled-components";
 import TaskDefinitionModal from "../../components/TaskDefinitionModal";
 import {
   createTaskDefinitions,
   listTaskDefinitions,
   updateTaskDefinitions
 } from "../../services/procressManager/http";
+
+const Container = styled.div`
+  & > button {
+    margin-bottom: 12px;
+  }
+`;
 
 interface IProps {}
 
@@ -134,6 +141,8 @@ class TransactionTable extends React.Component<IProps, IState> {
         showModal: false,
         editingTask: undefined
       });
+
+      await this.listTaskDefinitions();
     } catch (error) {
       const errorResp = R.path(["response", "data", "error", "message"], error);
 
@@ -155,7 +164,19 @@ class TransactionTable extends React.Component<IProps, IState> {
       errorMessage
     } = this.state;
     return (
-      <div>
+      <Container>
+        <Button
+          type="primary"
+          onClick={() => this.setState({ showModal: true })}
+        >
+          Create Task Definition
+        </Button>
+        <Table
+          columns={this.columns}
+          dataSource={taskDefinitions}
+          pagination={false}
+          loading={isLoading}
+        />
         <TaskDefinitionModal
           title={
             R.isNil(editingTask)
@@ -163,18 +184,14 @@ class TransactionTable extends React.Component<IProps, IState> {
               : "Edit Task Definition"
           }
           visible={this.state.showModal}
-          onCancel={() => this.setState({ showModal: false })}
+          onCancel={() =>
+            this.setState({ showModal: false, editingTask: undefined })
+          }
           onSubmit={this.handleModalSubmit}
           taskDefinition={editingTask}
           errorMessage={errorMessage}
         />
-        <Table
-          columns={this.columns}
-          dataSource={taskDefinitions}
-          pagination={false}
-          loading={isLoading}
-        />
-      </div>
+      </Container>
     );
   }
 }
