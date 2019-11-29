@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, RouteComponentProps } from "react-router";
 import Layout from "./components/OutterLayout";
+import TaskDefinitionList from "./containers/TaskDefinitionList";
 import TransactionDetail from "./containers/TransactionDetail";
 import TransactionTable from "./containers/TransactionTable";
 import WorkflowDefinitionDetail from "./containers/WorkflowDefinitionDetail";
@@ -22,6 +23,7 @@ export default (props: IProps) => {
         component={WorkflowDefinitionList}
         exact
       />
+      <Route path="/definition/task" component={TaskDefinitionList} exact />
       <Route
         path="/definition/workflow/:name/:rev"
         component={WorkflowDefinitionDetail}

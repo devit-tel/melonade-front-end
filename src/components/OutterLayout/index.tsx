@@ -9,6 +9,16 @@ const { SubMenu } = Menu;
 
 const StyledLayout = styled(Layout)`
   height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+`;
+
+const StyledContent = styled(Content)`
+  margin: 16px;
+  padding: 24px;
+  background: #fff;
+  height: 100%;
+  overflow: auto;
 `;
 
 const ToggleContainer = styled.div`
@@ -44,7 +54,7 @@ export default class OutterLayout extends React.Component<IProps, IState> {
   render() {
     return (
       <StyledLayout>
-        <Sider trigger={null} collapsible collapsed={this.state.collapsed}>
+        <Sider collapsible collapsed={this.state.collapsed}>
           <Menu
             theme="dark"
             mode="inline"
@@ -78,13 +88,9 @@ export default class OutterLayout extends React.Component<IProps, IState> {
                 Workflow Definition
               </Menu.Item>
             </SubMenu>
-            <Menu.Item key="3">
-              <Icon type="upload" />
-              <span>nav 3</span>
-            </Menu.Item>
           </Menu>
         </Sider>
-        <Content>{this.props.children}</Content>
+        <StyledContent>{this.props.children}</StyledContent>
       </StyledLayout>
     );
   }

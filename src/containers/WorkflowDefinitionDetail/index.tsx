@@ -2,6 +2,7 @@ import {
   TaskDefinition,
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
+import { Tabs } from "antd";
 import React from "react";
 import JsonView, { InteractionProps } from "react-json-view";
 import { RouteComponentProps } from "react-router-dom";
@@ -11,6 +12,13 @@ import {
   getWorkflowDefinitionData,
   listTaskDefinitions
 } from "../../services/procressManager/http";
+
+const { TabPane } = Tabs;
+
+const StyledTabs = styled(Tabs)`
+  width: 100%;
+  height: 100%;
+`;
 
 const WorkflowDefinitionDetailContainer = styled.div`
   display: flex;
@@ -67,29 +75,35 @@ class TransactionTable extends React.Component<IProps, IState> {
     const { workflowDefinition, taskDefinitions } = this.state;
     return (
       <WorkflowDefinitionDetailContainer>
-        <WorkflowChart
-          workflowDefinition={workflowDefinition}
-          taskDefinitions={taskDefinitions}
-          editing
-          workflowDefinitionChanged={workflowDefinition => {
-            this.setState({
-              workflowDefinition
-            });
-          }}
-        />
-        <JsonView
-          src={workflowDefinition || {}}
-          onEdit={(edit: InteractionProps) => {
-            this.setState({
-              workflowDefinition: edit.updated_src as any
-            });
-          }}
-          onAdd={(edit: InteractionProps) => {
-            this.setState({
-              workflowDefinition: edit.updated_src as any
-            });
-          }}
-        />
+        <StyledTabs>
+          <TabPane tab="Workflow View" key="1">
+            <WorkflowChart
+              workflowDefinition={workflowDefinition}
+              taskDefinitions={taskDefinitions}
+              editing
+              workflowDefinitionChanged={workflowDefinition => {
+                this.setState({
+                  workflowDefinition
+                });
+              }}
+            />
+          </TabPane>
+          <TabPane tab="JSON View" key="2">
+            <JsonView
+              src={workflowDefinition || {}}
+              onEdit={(edit: InteractionProps) => {
+                this.setState({
+                  workflowDefinition: edit.updated_src as any
+                });
+              }}
+              onAdd={(edit: InteractionProps) => {
+                this.setState({
+                  workflowDefinition: edit.updated_src as any
+                });
+              }}
+            />
+          </TabPane>
+        </StyledTabs>
       </WorkflowDefinitionDetailContainer>
     );
   }

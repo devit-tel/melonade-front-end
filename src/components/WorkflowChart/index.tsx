@@ -19,6 +19,7 @@ interface IProps {
 const WorkflowChartDefinitionContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
+  justify-content: center;
 `;
 
 export default (props: IProps) => (

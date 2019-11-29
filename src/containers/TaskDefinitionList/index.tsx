@@ -1,15 +1,15 @@
-import { WorkflowDefinition } from "@melonade/melonade-declaration";
+import { TaskDefinition } from "@melonade/melonade-declaration";
 import { Table, Typography } from "antd";
 import { ColumnProps } from "antd/lib/table";
 import * as R from "ramda";
 import React from "react";
 import { Link } from "react-router-dom";
-import { listWorkflowDefinitions } from "../../services/procressManager/http";
+import { listTaskDefinitions } from "../../services/procressManager/http";
 
 interface IProps {}
 
 interface IState {
-  workflowDefinitions: WorkflowDefinition.IWorkflowDefinition[];
+  taskDefinitions: TaskDefinition.ITaskDefinition[];
   isLoading: boolean;
 }
 
@@ -18,36 +18,44 @@ const sortByPath = (path: (string | number)[]) => (a: any, b: any): number => {
   return -1;
 };
 
-const columns: ColumnProps<WorkflowDefinition.IWorkflowDefinition>[] = [
+const columns: ColumnProps<TaskDefinition.ITaskDefinition>[] = [
   {
     title: "Name",
     dataIndex: "name",
     key: "name",
-    render: (name: string, { rev }: WorkflowDefinition.IWorkflowDefinition) => (
-      <Link to={`/definition/workflow/${name}/${rev}`}>{name}</Link>
+    render: (name: string) => (
+      <Link to={`/definition/task/${name}`}>{name}</Link>
     ),
     sortDirections: ["ascend", "descend"],
     sorter: sortByPath(["name"])
   },
   {
-    title: "Revision",
-    dataIndex: "rev",
-    key: "rev",
-    render: (rev: string, { name }: WorkflowDefinition.IWorkflowDefinition) => (
-      <Link to={`/definition/workflow/${name}/${rev}`}>{rev}</Link>
+    title: "Description",
+    dataIndex: "description",
+    key: "description",
+    render: (description: string) => (
+      <Typography.Text>{description}</Typography.Text>
     ),
     sortDirections: ["ascend", "descend"],
-    sorter: sortByPath(["rev"])
+    sorter: sortByPath(["description"])
   },
   {
-    title: "Failure Strategy",
-    dataIndex: "failureStrategy",
-    key: "failureStrategy",
-    render: (failureStrategy: string) => (
-      <Typography.Text code>{failureStrategy}</Typography.Text>
+    title: "Ack Timeout (ms)",
+    dataIndex: "ackTimeout",
+    key: "ackTimeout",
+    render: (ackTimeout: number) => (
+      <Typography.Text>{ackTimeout}</Typography.Text>
     ),
     sortDirections: ["ascend", "descend"],
-    sorter: sortByPath(["failureStrategy"])
+    sorter: sortByPath(["ackTimeout"])
+  },
+  {
+    title: "Timeout (ms)",
+    dataIndex: "timeout",
+    key: "timeout",
+    render: (Timeout: number) => <Typography.Text>{Timeout}</Typography.Text>,
+    sortDirections: ["ascend", "descend"],
+    sorter: sortByPath(["timeout"])
   },
   {
     title: "Retry Limit",
@@ -56,6 +64,14 @@ const columns: ColumnProps<WorkflowDefinition.IWorkflowDefinition>[] = [
     render: (limit: number) => <Typography.Text>{limit}</Typography.Text>,
     sortDirections: ["ascend", "descend"],
     sorter: sortByPath(["retry", "limit"])
+  },
+  {
+    title: "Retry Delay",
+    dataIndex: "retry.delay",
+    key: "retry.delay",
+    render: (delay: number) => <Typography.Text>{delay}</Typography.Text>,
+    sortDirections: ["ascend", "descend"],
+    sorter: sortByPath(["retry", "delay"])
   }
 ];
 
@@ -64,33 +80,33 @@ class TransactionTable extends React.Component<IProps, IState> {
     super(props);
 
     this.state = {
-      workflowDefinitions: [],
+      taskDefinitions: [],
       isLoading: false
     };
   }
 
-  listWorkflowDefinitions = async () => {
+  listTaskDefinitions = async () => {
     this.setState({ isLoading: true });
     try {
-      const workflowDefinitions = await listWorkflowDefinitions();
+      const taskDefinitions = await listTaskDefinitions();
       this.setState({
-        workflowDefinitions,
+        taskDefinitions: taskDefinitions,
         isLoading: false
       });
     } catch (error) {
       this.setState({
         isLoading: false,
-        workflowDefinitions: []
+        taskDefinitions: []
       });
     }
   };
 
   componentDidMount = async () => {
-    this.listWorkflowDefinitions();
+    this.listTaskDefinitions();
   };
 
   render() {
-    const { workflowDefinitions, isLoading } = this.state;
+    const { taskDefinitions: workflowDefinitions, isLoading } = this.state;
     return (
       <div>
         <Table
