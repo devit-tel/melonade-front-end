@@ -7,7 +7,7 @@ import { Button, Icon, Typography } from "antd";
 import * as R from "ramda";
 import React from "react";
 import styled from "styled-components";
-import { CreateTaskModal } from "./modal";
+import { CreateDecisionCaseModal, CreateTaskModal } from "./modal";
 
 const YellowButton = styled(Button)`
   background-color: #ffd800;
@@ -319,7 +319,7 @@ const DecisionModel = (props: IDecisionProps) => (
     <AddButton
       editing={props.editing}
       onTaskUpdate={props.onTaskUpdate}
-      path={[...props.path, "decisions", Date.now().toString(), -1]}
+      path={[...props.path, "decisions"]}
     />
 
     <DecisionModelChildContainer>
@@ -567,12 +567,29 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
               mode: undefined
             });
           }}
-          visible={!!this.state.selectingPath}
+          visible={
+            !!this.state.selectingPath &&
+            R.last(this.state.selectingPath) !== "decisions"
+          }
           task={
             this.state.selectingPath
               ? R.path(this.state.selectingPath, this.props.tasks)
               : ({} as any)
           }
+        />
+        <CreateDecisionCaseModal
+          existingCase={[]}
+          visible={
+            !!this.state.selectingPath &&
+            R.last(this.state.selectingPath) === "decisions"
+          }
+          onCancel={() => {
+            this.setState({
+              selectingPath: undefined,
+              mode: undefined
+            });
+          }}
+          onSubmit={console.log}
         />
         <StartModel />
         <AddButton
