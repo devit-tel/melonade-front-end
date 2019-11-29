@@ -54,7 +54,7 @@ export default class OutterLayout extends React.Component<IProps, IState> {
   render() {
     return (
       <StyledLayout>
-        <Sider collapsible collapsed={this.state.collapsed}>
+        <Sider collapsible collapsed={this.state.collapsed} trigger={null}>
           <Menu
             theme="dark"
             mode="inline"
