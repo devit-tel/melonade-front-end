@@ -118,7 +118,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       },
       search: {
         transactionId: "",
-        dateRange: [moment().startOf("day"), moment().endOf("day")],
+        dateRange: [moment().startOf("week"), moment().endOf("week")],
         statuses: AllTransactionStates
       },
       isLoading: false
@@ -184,8 +184,8 @@ class TransactionTable extends React.Component<IProps, IState> {
       search: {
         ...this.state.search,
         dateRange: [
-          dateRange[0] ? dateRange[0].startOf("day") : moment().startOf("day"),
-          dateRange[1] ? dateRange[1].endOf("day") : moment().endOf("day")
+          dateRange[0] ? dateRange[0].startOf("day") : moment().startOf("week"),
+          dateRange[1] ? dateRange[1].endOf("day") : moment().endOf("week")
         ]
       }
     });

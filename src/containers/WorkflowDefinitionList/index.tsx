@@ -92,14 +92,12 @@ class TransactionTable extends React.Component<IProps, IState> {
   render() {
     const { workflowDefinitions, isLoading } = this.state;
     return (
-      <div>
-        <Table
-          columns={columns}
-          dataSource={workflowDefinitions}
-          pagination={false}
-          loading={isLoading}
-        />
-      </div>
+      <Table
+        columns={columns}
+        dataSource={workflowDefinitions}
+        pagination={false}
+        loading={isLoading}
+      />
     );
   }
 }

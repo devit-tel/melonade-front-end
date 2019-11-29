@@ -3,7 +3,7 @@ import { Route, RouteComponentProps } from "react-router";
 import Layout from "./components/OutterLayout";
 import TaskDefinitionList from "./containers/TaskDefinitionList";
 import TransactionDetail from "./containers/TransactionDetail";
-import TransactionTable from "./containers/TransactionTable";
+import TransactionList from "./containers/TransactionList";
 import WorkflowDefinitionDetail from "./containers/WorkflowDefinitionDetail";
 import WorkflowDefinitionList from "./containers/WorkflowDefinitionList";
 
@@ -12,7 +12,7 @@ interface IProps extends RouteComponentProps {}
 export default (props: IProps) => {
   return (
     <Layout {...props}>
-      <Route path="/transaction/" component={TransactionTable} exact />
+      <Route path="/transaction/" component={TransactionList} exact />
       <Route
         path="/transaction/:transactionId"
         component={TransactionDetail}

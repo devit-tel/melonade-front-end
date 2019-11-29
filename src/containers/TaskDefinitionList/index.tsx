@@ -11,6 +11,7 @@ interface IProps {}
 interface IState {
   taskDefinitions: TaskDefinition.ITaskDefinition[];
   isLoading: boolean;
+  editingTaskIndex?: number;
 }
 
 const sortByPath = (path: (string | number)[]) => (a: any, b: any): number => {
