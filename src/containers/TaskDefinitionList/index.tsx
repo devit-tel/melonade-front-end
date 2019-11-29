@@ -66,7 +66,7 @@ const columns: ColumnProps<TaskDefinition.ITaskDefinition>[] = [
     sorter: sortByPath(["retry", "limit"])
   },
   {
-    title: "Retry Delay",
+    title: "Retry Delay (ms)",
     dataIndex: "retry.delay",
     key: "retry.delay",
     render: (delay: number) => <Typography.Text>{delay}</Typography.Text>,
