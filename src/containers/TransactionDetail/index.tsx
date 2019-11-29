@@ -303,10 +303,6 @@ class TransactionTable extends React.Component<IProps, IState> {
               dataSource={events}
               pagination={false}
               loading={isLoading}
-              scroll={{
-                scrollToFirstRowOnChange: true,
-                y: window.innerWidth - 420
-              }}
             />
           </TabPane>
           <TabPane tab="Workflows view" key="2"></TabPane>
