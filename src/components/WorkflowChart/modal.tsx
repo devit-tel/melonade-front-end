@@ -6,12 +6,17 @@ import {
 import { Form, Input, InputNumber, Modal, Select } from "antd";
 import * as R from "ramda";
 import React from "react";
+import JsonView, { InteractionProps } from "react-json-view";
 import styled from "styled-components";
 
 const { Option } = Select;
 
 const StyledNumberInput = styled(InputNumber)`
   width: 100%;
+`;
+
+const StyledModal = styled(Modal)`
+  min-width: 70vw;
 `;
 
 interface ICreateTaskModalProps {
@@ -56,7 +61,7 @@ export class CreateTaskModal extends React.Component<
 
   render() {
     return (
-      <Modal
+      <StyledModal
         title="Insert task"
         visible={this.props.visible}
         onOk={() =>
@@ -150,10 +155,31 @@ export class CreateTaskModal extends React.Component<
                   }}
                 />
               </Form.Item>
+
+              <JsonView
+                name="inputParameters"
+                src={R.path(["inputParameters"], this.state.task) || {}}
+                onEdit={(edit: InteractionProps) => {
+                  this.setState({
+                    task: this.onInputChanged(
+                      ["inputParameters"],
+                      edit.updated_src
+                    ) as any
+                  });
+                }}
+                onAdd={(edit: InteractionProps) => {
+                  this.setState({
+                    task: this.onInputChanged(
+                      ["inputParameters"],
+                      edit.updated_src
+                    ) as any
+                  });
+                }}
+              />
             </React.Fragment>
           )}
         </Form>
-      </Modal>
+      </StyledModal>
     );
   }
 }
@@ -194,7 +220,7 @@ export class CreateDecisionCaseModal extends React.Component<
     const { visible, onSubmit, onCancel, decisionCases } = this.props;
     const { caseName } = this.state;
     return (
-      <Modal
+      <StyledModal
         title="Insert task"
         visible={visible}
         onOk={() => onSubmit(this.state.caseName || "")}
@@ -216,7 +242,7 @@ export class CreateDecisionCaseModal extends React.Component<
             />
           </Form.Item>
         </Form>
-      </Modal>
+      </StyledModal>
     );
   }
 }
