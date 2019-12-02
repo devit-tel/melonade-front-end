@@ -181,6 +181,26 @@ const DecisionCaseModelContainer = styled.div`
   margin: 6px;
 `;
 
+const ArrowContainer = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+`;
+
+const ArrowLine = styled.div`
+  width: 2px;
+  min-height: 10px;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.65);
+`;
+
+const DownArrow = () => (
+  <ArrowContainer>
+    <ArrowLine />
+    <Icon type="caret-down" />
+  </ArrowContainer>
+);
+
 export enum taskMode {
   modify = "MODIFY",
   insert = "INSERT",
@@ -230,7 +250,7 @@ const AddButton = (props: IActionButtonProps) => {
       }
     />
   ) : (
-    <Icon type="caret-down" />
+    <DownArrow />
   );
 };
 
