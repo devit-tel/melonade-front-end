@@ -17,7 +17,9 @@ const EmptyTask = styled.div`
   align-items: center;
 `;
 
-const YellowButton = styled(Button)`
+const StyledButton = styled(Button)``;
+
+const YellowButton = styled(StyledButton)`
   background-color: #ffd800;
   border-color: #ffd800;
 
@@ -37,6 +39,7 @@ const TaskWithActionContainer = styled.div`
 const ActionContainer = styled.div`
   display: flex;
   flex-flow: column nowrap;
+
   & > button {
     margin-top: 6px;
   }
@@ -204,7 +207,7 @@ const EditButton = (props: IActionButtonProps) => {
 
 const DeleteButton = (props: IActionButtonProps) => {
   return props.editing ? (
-    <Button
+    <StyledButton
       type="danger"
       size="small"
       icon="delete"
@@ -217,7 +220,7 @@ const DeleteButton = (props: IActionButtonProps) => {
 
 const AddButton = (props: IActionButtonProps) => {
   return props.editing ? (
-    <Button
+    <StyledButton
       type="primary"
       shape="circle"
       size="small"
@@ -234,7 +237,7 @@ const AddButton = (props: IActionButtonProps) => {
 const EmptyButton = (props: IActionButtonProps) => {
   return props.editing ? (
     <EmptyTask>
-      <Button
+      <StyledButton
         type="primary"
         shape="circle"
         size="small"

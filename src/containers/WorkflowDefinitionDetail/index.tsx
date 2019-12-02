@@ -2,7 +2,7 @@ import {
   TaskDefinition,
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
-import { Button, Form, Input, InputNumber, Modal, Tabs } from "antd";
+import { Button, Form, Input, InputNumber, Modal, Switch, Tabs } from "antd";
 import * as R from "ramda";
 import React from "react";
 import JsonView, { InteractionProps } from "react-json-view";
@@ -44,6 +44,7 @@ interface IState {
   workflowDefinition?: WorkflowDefinition.IWorkflowDefinition;
   taskDefinitions?: TaskDefinition.ITaskDefinition[];
   isLoading: boolean;
+  editing: boolean;
 }
 
 class TransactionTable extends React.Component<IProps, IState> {
@@ -52,7 +53,8 @@ class TransactionTable extends React.Component<IProps, IState> {
 
     this.state = {
       workflowDefinition: undefined,
-      isLoading: false
+      isLoading: false,
+      editing: true
     };
   }
 
@@ -115,7 +117,7 @@ class TransactionTable extends React.Component<IProps, IState> {
   };
 
   render() {
-    const { workflowDefinition, taskDefinitions } = this.state;
+    const { workflowDefinition, taskDefinitions, editing } = this.state;
     return (
       <WorkflowDefinitionDetailContainer>
         <Button type="primary" onClick={this.saveWorkflowDefinition}>
@@ -167,10 +169,20 @@ class TransactionTable extends React.Component<IProps, IState> {
             </Form.Item>
           </TabPane>
           <TabPane tab="Workflow View" key="2">
+            <Switch
+              checkedChildren="Edit"
+              unCheckedChildren=""
+              checked={editing}
+              onChange={checked =>
+                this.setState({
+                  editing: checked
+                })
+              }
+            />
             <WorkflowChart
               workflowDefinition={workflowDefinition}
               taskDefinitions={taskDefinitions}
-              editing
+              editing={editing}
               workflowDefinitionChanged={workflowDefinition => {
                 this.setState({
                   workflowDefinition
