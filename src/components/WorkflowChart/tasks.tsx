@@ -9,6 +9,14 @@ import React from "react";
 import styled from "styled-components";
 import { CreateDecisionCaseModal, CreateTaskModal } from "./modal";
 
+const EmptyTask = styled.div`
+  padding: 20px 40px;
+  margin: 6px;
+  border: 2px dashed gray;
+  display: flex;
+  align-items: center;
+`;
+
 const YellowButton = styled(Button)`
   background-color: #ffd800;
   border-color: #ffd800;
@@ -221,6 +229,22 @@ const AddButton = (props: IActionButtonProps) => {
   );
 };
 
+const EmptyButton = (props: IActionButtonProps) => {
+  return props.editing ? (
+    <EmptyTask>
+      <Button
+        type="primary"
+        shape="circle"
+        size="small"
+        icon="plus"
+        onClick={() =>
+          props.onTaskUpdate && props.onTaskUpdate(props.path, taskMode.insert)
+        }
+      />
+    </EmptyTask>
+  ) : null;
+};
+
 interface ITaskProps extends IActionButtonProps {
   task: WorkflowDefinition.ITaskTask;
 }
@@ -243,17 +267,6 @@ const ParallelModel = (props: IParallelProps) => (
       <Typography.Text code>PARALLEL</Typography.Text>
     </SystemTaskModelContainer>
 
-    <AddButton
-      editing={props.editing}
-      onTaskUpdate={props.onTaskUpdate}
-      path={[
-        ...props.path,
-        "parallelTasks",
-        props.task.parallelTasks.length,
-        -1
-      ]}
-    />
-
     <ParallelModelChildsContainer>
       {props.task.parallelTasks.map(
         (tasks: WorkflowDefinition.AllTaskType[], index: number) => {
@@ -275,6 +288,16 @@ const ParallelModel = (props: IParallelProps) => (
           );
         }
       )}
+      <EmptyButton
+        editing={props.editing}
+        onTaskUpdate={props.onTaskUpdate}
+        path={[
+          ...props.path,
+          "parallelTasks",
+          props.task.parallelTasks.length,
+          -1
+        ]}
+      />
     </ParallelModelChildsContainer>
   </ParallelModelContainer>
 );
@@ -315,13 +338,6 @@ const DecisionModel = (props: IDecisionProps) => (
       <Typography.Text code>DECISION</Typography.Text>
     </SystemTaskModelContainer>
 
-    {/* TODO Add decision */}
-    <AddButton
-      editing={props.editing}
-      onTaskUpdate={props.onTaskUpdate}
-      path={[...props.path, "decisions"]}
-    />
-
     <DecisionModelChildContainer>
       {R.toPairs(props.task.decisions).map(
         ([caseKey, tasks]: [string, WorkflowDefinition.AllTaskType[]]) => {
@@ -338,6 +354,13 @@ const DecisionModel = (props: IDecisionProps) => (
           );
         }
       )}
+
+      <EmptyButton
+        editing={props.editing}
+        onTaskUpdate={props.onTaskUpdate}
+        path={[...props.path, "decisions"]}
+      />
+
       <DecisionCase
         tasks={props.task.defaultDecision}
         caseKey="default"
@@ -572,13 +595,18 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
             R.last(this.state.selectingPath) !== "decisions"
           }
           task={
-            this.state.selectingPath
+            this.state.selectingPath && this.state.mode === taskMode.modify
               ? R.path(this.state.selectingPath, this.props.tasks)
               : ({} as any)
           }
         />
+
         <CreateDecisionCaseModal
-          existingCase={[]}
+          decisionCases={
+            this.state.selectingPath
+              ? R.path(this.state.selectingPath, this.props.tasks)
+              : undefined
+          }
           visible={
             !!this.state.selectingPath &&
             R.last(this.state.selectingPath) === "decisions"
@@ -589,7 +617,26 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
               mode: undefined
             });
           }}
-          onSubmit={console.log}
+          onSubmit={(caseName: string) => {
+            if (
+              this.props.onTaskUpdated &&
+              caseName &&
+              this.state.selectingPath
+            ) {
+              this.props.onTaskUpdated(
+                R.set(
+                  R.lensPath([...this.state.selectingPath, caseName]),
+                  [],
+                  this.props.tasks as any
+                )
+              );
+            }
+
+            this.setState({
+              selectingPath: undefined,
+              mode: undefined
+            });
+          }}
         />
         <StartModel />
         <AddButton

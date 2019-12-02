@@ -160,10 +160,10 @@ export class CreateTaskModal extends React.Component<
 
 interface ICreateDecisionCaseModalProps {
   visible?: boolean;
-  onSubmit: (caseName?: string) => void;
+  onSubmit: (caseName: string) => void;
   onCancel: () => void;
+  decisionCases?: { [caseName: string]: WorkflowDefinition.IDecisionTask };
   caseName?: string;
-  existingCase: string[];
 }
 
 interface ICreateDecisionCaseModalState {
@@ -191,15 +191,17 @@ export class CreateDecisionCaseModal extends React.Component<
   }
 
   render() {
-    const { existingCase } = this.props;
+    const { visible, onSubmit, onCancel, decisionCases } = this.props;
     const { caseName } = this.state;
     return (
       <Modal
         title="Insert task"
-        visible={this.props.visible}
-        onOk={() => this.props.onSubmit(this.state.caseName)}
-        onCancel={this.props.onCancel}
-        okButtonProps={{ disabled: existingCase.includes(caseName || "") }}
+        visible={visible}
+        onOk={() => onSubmit(this.state.caseName || "")}
+        onCancel={onCancel}
+        okButtonProps={{
+          disabled: !!caseName && !!decisionCases && !!decisionCases[caseName]
+        }}
       >
         <Form>
           <Form.Item label="Decision case">
