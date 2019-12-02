@@ -30,6 +30,8 @@ const YellowButton = styled(Button)`
 const TaskWithActionContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
+  justify-content: center;
+  align-items: flex-start;
 `;
 
 const ActionContainer = styled.div`
@@ -272,19 +274,28 @@ const ParallelModel = (props: IParallelProps) => (
         (tasks: WorkflowDefinition.AllTaskType[], index: number) => {
           const path = [...props.path, "parallelTasks", index];
           return (
-            <ParallelModelChildContainer key={path.join(".")}>
-              <AddButton
-                editing={props.editing}
-                onTaskUpdate={props.onTaskUpdate}
-                path={[...path, -1]}
-              />
-              <RenderChildTasks
-                tasks={tasks}
-                path={path}
-                editing={props.editing}
-                onTaskUpdate={props.onTaskUpdate}
-              />
-            </ParallelModelChildContainer>
+            <TaskWithActionContainer>
+              <ParallelModelChildContainer key={path.join(".")}>
+                <AddButton
+                  editing={props.editing}
+                  onTaskUpdate={props.onTaskUpdate}
+                  path={[...path, -1]}
+                />
+                <RenderChildTasks
+                  tasks={tasks}
+                  path={path}
+                  editing={props.editing}
+                  onTaskUpdate={props.onTaskUpdate}
+                />
+              </ParallelModelChildContainer>
+              <ActionContainer>
+                <DeleteButton
+                  editing={props.editing}
+                  onTaskUpdate={props.onTaskUpdate}
+                  path={path}
+                />
+              </ActionContainer>
+            </TaskWithActionContainer>
           );
         }
       )}
@@ -343,14 +354,28 @@ const DecisionModel = (props: IDecisionProps) => (
         ([caseKey, tasks]: [string, WorkflowDefinition.AllTaskType[]]) => {
           const path = [...props.path, "decisions", caseKey];
           return (
-            <DecisionCase
-              key={path.join(".")}
-              tasks={tasks}
-              caseKey={caseKey}
-              path={path}
-              editing={props.editing}
-              onTaskUpdate={props.onTaskUpdate}
-            />
+            <TaskWithActionContainer>
+              <DecisionCase
+                key={path.join(".")}
+                tasks={tasks}
+                caseKey={caseKey}
+                path={path}
+                editing={props.editing}
+                onTaskUpdate={props.onTaskUpdate}
+              />
+              <ActionContainer>
+                <EditButton
+                  editing={props.editing}
+                  onTaskUpdate={props.onTaskUpdate}
+                  path={props.path}
+                />
+                <DeleteButton
+                  editing={props.editing}
+                  onTaskUpdate={props.onTaskUpdate}
+                  path={props.path}
+                />
+              </ActionContainer>
+            </TaskWithActionContainer>
           );
         }
       )}
@@ -525,10 +550,13 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
           this.props.onTaskUpdated(
             R.set(
               R.lensPath(childPath),
-              R.remove(R.last(path) as number, 1, childTasks),
+              R.is(Array, childTasks)
+                ? R.remove(R.last(path) as number, 1, childTasks)
+                : R.omit([R.last(path) as string], childTasks),
               this.props.tasks as any
             )
           );
+
           break;
 
         default:
