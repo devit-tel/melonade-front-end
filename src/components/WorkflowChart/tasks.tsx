@@ -297,8 +297,8 @@ const ParallelModel = (props: IParallelProps) => (
         (tasks: WorkflowDefinition.AllTaskType[], index: number) => {
           const path = [...props.path, "parallelTasks", index];
           return (
-            <TaskWithActionContainer>
-              <ParallelModelChildContainer key={path.join(".")}>
+            <TaskWithActionContainer key={path.join(".")}>
+              <ParallelModelChildContainer>
                 <AddButton
                   editing={props.editing}
                   onTaskUpdate={props.onTaskUpdate}
@@ -377,9 +377,8 @@ const DecisionModel = (props: IDecisionProps) => (
         ([caseKey, tasks]: [string, WorkflowDefinition.AllTaskType[]]) => {
           const path = [...props.path, "decisions", caseKey];
           return (
-            <TaskWithActionContainer>
+            <TaskWithActionContainer key={path.join(".")}>
               <DecisionCase
-                key={path.join(".")}
                 tasks={tasks}
                 caseKey={caseKey}
                 path={path}
