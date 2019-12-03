@@ -56,6 +56,7 @@ interface IState {
   taskDefinitions?: TaskDefinition.ITaskDefinition[];
   isLoading: boolean;
   editing: boolean;
+  saveCount: number;
 }
 
 class TransactionTable extends React.Component<IProps, IState> {
@@ -65,7 +66,8 @@ class TransactionTable extends React.Component<IProps, IState> {
     this.state = {
       workflowDefinition: undefined,
       isLoading: false,
-      editing: true
+      editing: true,
+      saveCount: 0
     };
   }
 
@@ -91,7 +93,10 @@ class TransactionTable extends React.Component<IProps, IState> {
 
   saveWorkflowDefinition = async () => {
     try {
-      if (this.props.location.pathname === "/definition/workflow/create") {
+      if (
+        this.props.location.pathname === "/definition/workflow/create" &&
+        this.state.saveCount === 0
+      ) {
         await createWorkflowDefinitions(
           this.state
             .workflowDefinition as WorkflowDefinition.IWorkflowDefinition
@@ -105,10 +110,12 @@ class TransactionTable extends React.Component<IProps, IState> {
       Modal.success({
         title: "Saved successfully"
       });
+      this.setState({
+        saveCount: this.state.saveCount + 1
+      });
     } catch (error) {
       Modal.error({
-        title: "This is an error message",
-        content: "some messages...some messages..."
+        title: "Save failed"
       });
     }
   };
