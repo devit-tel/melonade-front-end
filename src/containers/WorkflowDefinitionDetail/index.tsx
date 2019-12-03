@@ -1,8 +1,18 @@
 import {
+  State,
   TaskDefinition,
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
-import { Button, Form, Input, InputNumber, Modal, Switch, Tabs } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+  Switch,
+  Tabs
+} from "antd";
 import * as R from "ramda";
 import React from "react";
 import JsonView, { InteractionProps } from "react-json-view";
@@ -17,6 +27,7 @@ import {
 } from "../../services/procressManager/http";
 
 const { TabPane } = Tabs;
+const { Option } = Select;
 
 const StyledTabs = styled(Tabs)`
   width: 100%;
@@ -125,48 +136,102 @@ class TransactionTable extends React.Component<IProps, IState> {
         </Button>
         <StyledTabs>
           <TabPane tab="Form View" key="1">
-            <Form.Item label="Name">
-              <Input
-                disabled={
-                  this.props.location.pathname !== "/definition/workflow/create"
-                }
-                placeholder="The name of workflow"
-                value={R.path(["name"], workflowDefinition) as any}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  this.onInputChanged(["name"], event.target.value);
-                }}
-              />
-            </Form.Item>
-            <Form.Item label="Rev">
-              <Input
-                disabled={
-                  this.props.location.pathname !== "/definition/workflow/create"
-                }
-                placeholder="The revision of workflow"
-                value={R.path(["rev"], workflowDefinition) as any}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  this.onInputChanged(["rev"], event.target.value);
-                }}
-              />
-            </Form.Item>
-            <Form.Item label="Description">
-              <Input
-                placeholder="The description of workflow"
-                value={R.path(["description"], workflowDefinition) as any}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  this.onInputChanged(["description"], event.target.value);
-                }}
-              />
-            </Form.Item>
-            <Form.Item label="Retry Limit">
-              <StyledNumberInput
-                placeholder="Number that workflow can retry if failed"
-                value={R.path(["retry", "limit"], workflowDefinition) as any}
-                onChange={(value?: number) => {
-                  this.onInputChanged(["retry", "limit"], value);
-                }}
-              />
-            </Form.Item>
+            <Form>
+              <Form.Item label="Name">
+                <Input
+                  disabled={
+                    this.props.location.pathname !==
+                    "/definition/workflow/create"
+                  }
+                  placeholder="The name of workflow"
+                  value={R.path(["name"], workflowDefinition) as any}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(["name"], event.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Rev">
+                <Input
+                  disabled={
+                    this.props.location.pathname !==
+                    "/definition/workflow/create"
+                  }
+                  placeholder="The revision of workflow"
+                  value={R.path(["rev"], workflowDefinition) as any}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(["rev"], event.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Description">
+                <Input
+                  placeholder="The description of workflow"
+                  value={R.path(["description"], workflowDefinition) as any}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(["description"], event.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Failure Strategies">
+                <Select
+                  value={
+                    R.path(
+                      ["failureStrategy"],
+                      workflowDefinition
+                    ) as State.WorkflowFailureStrategies
+                  }
+                  onSelect={(value: State.WorkflowFailureStrategies) =>
+                    this.onInputChanged(["failureStrategy"], value)
+                  }
+                >
+                  <Option
+                    key={State.WorkflowFailureStrategies.Failed}
+                    value={State.WorkflowFailureStrategies.Failed}
+                  >
+                    {State.WorkflowFailureStrategies.Failed}
+                  </Option>
+                  <Option
+                    key={State.WorkflowFailureStrategies.Retry}
+                    value={State.WorkflowFailureStrategies.Retry}
+                  >
+                    {State.WorkflowFailureStrategies.Retry}
+                  </Option>
+                  <Option
+                    key={State.WorkflowFailureStrategies.Compensate}
+                    value={State.WorkflowFailureStrategies.Compensate}
+                  >
+                    {State.WorkflowFailureStrategies.Compensate}
+                  </Option>
+                  <Option
+                    key={State.WorkflowFailureStrategies.CompensateThenRetry}
+                    value={State.WorkflowFailureStrategies.CompensateThenRetry}
+                  >
+                    {State.WorkflowFailureStrategies.CompensateThenRetry}
+                  </Option>
+                </Select>
+              </Form.Item>
+              {[
+                State.WorkflowFailureStrategies.Retry,
+                State.WorkflowFailureStrategies.CompensateThenRetry
+              ].includes(
+                R.path(
+                  ["failureStrategy"],
+                  workflowDefinition
+                ) as State.WorkflowFailureStrategies
+              ) ? (
+                <Form.Item label="Retry Limit">
+                  <StyledNumberInput
+                    placeholder="Number that workflow can retry if failed"
+                    value={
+                      R.path(["retry", "limit"], workflowDefinition) as any
+                    }
+                    onChange={(value?: number) => {
+                      this.onInputChanged(["retry", "limit"], value);
+                    }}
+                  />
+                </Form.Item>
+              ) : null}
+            </Form>
           </TabPane>
           <TabPane tab="Workflow View" key="2">
             <Switch
