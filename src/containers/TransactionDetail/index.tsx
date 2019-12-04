@@ -27,7 +27,6 @@ interface IProps extends RouteComponentProps<ITransactionParams> {}
 
 interface IState {
   events: Event.AllEvent[];
-  mode: "table" | "timeline" | "uml";
   isLoading: boolean;
   selectedEventIndex?: number;
 }
@@ -180,7 +179,6 @@ class TransactionTable extends React.Component<IProps, IState> {
 
     this.state = {
       events: [],
-      mode: "table",
       isLoading: false,
       selectedEventIndex: undefined
     };
