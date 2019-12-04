@@ -93,6 +93,11 @@ class TransactionTable extends React.Component<IProps, IState> {
 
   saveWorkflowDefinition = async () => {
     try {
+      // Validate workflow
+      new WorkflowDefinition.WorkflowDefinition(
+        this.state.workflowDefinition as WorkflowDefinition.IWorkflowDefinition
+      );
+
       if (
         this.props.location.pathname === "/definition/workflow/create" &&
         this.state.saveCount === 0
@@ -115,7 +120,8 @@ class TransactionTable extends React.Component<IProps, IState> {
       });
     } catch (error) {
       Modal.error({
-        title: "Save failed"
+        title: "Save failed",
+        error
       });
     }
   };

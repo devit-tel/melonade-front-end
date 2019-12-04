@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@melonade/melonade-declaration": "^0.6.3",
+    "@melonade/melonade-declaration": "^0.8.5",
     "@types/antd": "^1.0.0",
     "@types/axios": "^0.14.0",
     "@types/jest": "24.0.23",
