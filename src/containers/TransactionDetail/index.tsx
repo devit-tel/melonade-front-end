@@ -116,8 +116,15 @@ const groupWorkflowById = (
         );
       } else if (event.isError === false && event.type === "WORKFLOW") {
         return R.set(
-          R.lensPath([event.details.workflowId, "workflowDefinition"]),
-          event.details.workflowDefinition,
+          R.lensPath([event.details.workflowId]),
+          {
+            tasksData: R.path(
+              [event.details.workflowId, "tasksData"],
+              groupedTask
+            ),
+            workflowDefinition: event.details.workflowDefinition,
+            timestamp: event.details.createTime
+          },
           groupedTask
         );
       }
@@ -346,7 +353,6 @@ class TransactionTable extends React.Component<IProps, IState> {
     const { events, isLoading, selectedEventIndex } = this.state;
     const isEventSelecting = isNumber(selectedEventIndex);
     const groupedWorkflow = groupWorkflowById(events);
-
     return (
       <Container>
         <StyledTabs>
@@ -379,16 +385,25 @@ class TransactionTable extends React.Component<IProps, IState> {
             />
           </TabPane>
           <TabPane tab="Workflows view" key="2">
-            {Object.keys(groupedWorkflow).map((workflowId: string) => {
-              const workflowData = groupedWorkflow[workflowId];
-              return (
-                <WorkflowChart
-                  key={workflowId}
-                  workflowDefinition={workflowData.workflowDefinition}
-                  tasksData={workflowData.tasksData}
-                />
-              );
-            })}
+            {Object.keys(groupedWorkflow)
+              .sort((workflowIdA: string, workflowIdB: string) => {
+                const workflowDataA = groupedWorkflow[workflowIdA];
+                const workflowDataB = groupedWorkflow[workflowIdB];
+                return (
+                  R.pathOr(0, ["timestamp"], workflowDataA) -
+                  R.pathOr(0, ["timestamp"], workflowDataB)
+                );
+              })
+              .map((workflowId: string) => {
+                const workflowData = groupedWorkflow[workflowId];
+                return (
+                  <WorkflowChart
+                    key={workflowId}
+                    workflowDefinition={workflowData.workflowDefinition}
+                    tasksData={workflowData.tasksData}
+                  />
+                );
+              })}
           </TabPane>
         </StyledTabs>
       </Container>
