@@ -81,7 +81,7 @@ const groupWorkflowById = (
     tasksData: { [taskReferenceName: string]: Task.ITask };
   };
 } => {
-  return events.reduce(
+  return R.reverse(R.sortBy(R.pathOr(0, ["timestamp"]), events)).reduce(
     (
       groupedTask: {
         [workflowId: string]: {
