@@ -389,12 +389,12 @@ const DecisionModel = (props: IDecisionProps) => (
                 <EditButton
                   editing={props.editing}
                   onTaskUpdate={props.onTaskUpdate}
-                  path={props.path}
+                  path={path}
                 />
                 <DeleteButton
                   editing={props.editing}
                   onTaskUpdate={props.onTaskUpdate}
-                  path={props.path}
+                  path={path}
                 />
               </ActionContainer>
             </TaskWithActionContainer>
@@ -642,7 +642,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
           }}
           visible={
             !!this.state.selectingPath &&
-            R.last(this.state.selectingPath) !== "decisions"
+            R.nth(-2, this.state.selectingPath) !== "decisions"
           }
           task={
             this.state.selectingPath && this.state.mode === taskMode.modify
@@ -650,16 +650,15 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
               : ({} as any)
           }
         />
-
         <CreateDecisionCaseModal
           decisionCases={
             this.state.selectingPath
-              ? R.path(this.state.selectingPath, this.props.tasks)
+              ? R.path(R.init(this.state.selectingPath), this.props.tasks)
               : undefined
           }
           visible={
             !!this.state.selectingPath &&
-            R.last(this.state.selectingPath) === "decisions"
+            R.nth(-2, this.state.selectingPath) === "decisions"
           }
           onCancel={() => {
             this.setState({
@@ -675,8 +674,22 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
             ) {
               this.props.onTaskUpdated(
                 R.set(
-                  R.lensPath([...this.state.selectingPath, caseName]),
-                  [],
+                  R.lensPath(R.dropLast(1, this.state.selectingPath)),
+                  {
+                    ...R.omit(
+                      [R.last(this.state.selectingPath) as string],
+                      R.pathOr(
+                        {},
+                        R.dropLast(1, this.state.selectingPath),
+                        this.props.tasks as any
+                      )
+                    ),
+                    [caseName]: R.pathOr(
+                      [],
+                      this.state.selectingPath,
+                      this.props.tasks as any
+                    )
+                  },
                   this.props.tasks as any
                 )
               );

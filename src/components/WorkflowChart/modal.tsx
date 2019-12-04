@@ -188,7 +188,7 @@ interface ICreateDecisionCaseModalProps {
   visible?: boolean;
   onSubmit: (caseName: string) => void;
   onCancel: () => void;
-  decisionCases?: { [caseName: string]: WorkflowDefinition.IDecisionTask };
+  decisionCases?: { [caseName: string]: WorkflowDefinition.AllTaskType[] };
   caseName?: string;
 }
 

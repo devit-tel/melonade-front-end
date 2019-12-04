@@ -121,7 +121,7 @@ class TransactionTable extends React.Component<IProps, IState> {
     } catch (error) {
       Modal.error({
         title: "Save failed",
-        error
+        content: error.toString()
       });
     }
   };
