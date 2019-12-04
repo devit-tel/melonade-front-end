@@ -1,4 +1,5 @@
 import {
+  State,
   Task,
   TaskDefinition,
   WorkflowDefinition
@@ -86,20 +87,27 @@ const TasksContainer = styled.div`
   }
 `;
 
-const TaskModelContainer = styled.div`
+interface ITaskModelContainer {
+  backgroundColor: string;
+}
+
+const TaskModelContainer = styled.div<ITaskModelContainer>`
   display: flex;
   flex-flow: column nowrap;
   padding: 12px;
   margin: 6px;
   align-items: center;
   align-self: center;
-  background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+  // background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+  background-color: ${(props: ITaskModelContainer) =>
+    props.backgroundColor || "white"}
   border-radius: 4px;
+  border: 1px solid black;
 `;
 
 const SystemTaskModelContainer = styled(TaskModelContainer)`
-  background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
-  border-radius: 14px;
+  // background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+  border-radius: 30px;
 `;
 
 const ParallelModelContainer = styled.div`
@@ -207,6 +215,12 @@ export enum taskMode {
   delete = "DELETE"
 }
 
+interface ITaskDataProps {
+  tasksData?: {
+    [taskReferenceName: string]: Task.ITask;
+  };
+}
+
 interface IActionButtonProps {
   path: (string | number)[];
   editing?: boolean;
@@ -270,24 +284,61 @@ const EmptyButton = (props: IActionButtonProps) => {
   ) : null;
 };
 
-interface ITaskProps extends IActionButtonProps {
-  task: WorkflowDefinition.ITaskTask;
+interface ITaskProps extends IActionButtonProps, ITaskDataProps {
+  task: WorkflowDefinition.ITaskTask | WorkflowDefinition.ICompensateTask;
 }
 
+const getBackgroundTasksData = (
+  taskReferenceName: string,
+  tasksData?: { [taskReferenceName: string]: Task.ITask }
+) => {
+  if (!tasksData) return "white";
+
+  const status = R.path<State.TaskStates>(
+    [taskReferenceName, "status"],
+    tasksData
+  );
+
+  switch (status) {
+    case State.TaskStates.Scheduled:
+      return "yellow";
+    case State.TaskStates.Inprogress:
+      return "blue";
+    case State.TaskStates.Completed:
+      return "green";
+    case State.TaskStates.AckTimeOut:
+    case State.TaskStates.Timeout:
+    case State.TaskStates.Failed:
+      return "red";
+    default:
+      return "gray";
+  }
+};
+
 const TaskModel = (props: ITaskProps) => (
-  <TaskModelContainer>
+  <TaskModelContainer
+    backgroundColor={getBackgroundTasksData(
+      props.task.taskReferenceName,
+      props.tasksData
+    )}
+  >
     <Typography.Text>{props.task.taskReferenceName}</Typography.Text>
     <Typography.Text code>{props.task.name}</Typography.Text>
   </TaskModelContainer>
 );
 
-interface IParallelProps extends IActionButtonProps {
+interface IParallelProps extends IActionButtonProps, ITaskDataProps {
   task: WorkflowDefinition.IParallelTask;
 }
 
 const ParallelModel = (props: IParallelProps) => (
   <ParallelModelContainer>
-    <SystemTaskModelContainer>
+    <SystemTaskModelContainer
+      backgroundColor={getBackgroundTasksData(
+        props.task.taskReferenceName,
+        props.tasksData
+      )}
+    >
       <Typography.Text>{props.task.taskReferenceName}</Typography.Text>
       <Typography.Text code>PARALLEL</Typography.Text>
     </SystemTaskModelContainer>
@@ -309,6 +360,7 @@ const ParallelModel = (props: IParallelProps) => (
                   path={path}
                   editing={props.editing}
                   onTaskUpdate={props.onTaskUpdate}
+                  tasksData={props.tasksData}
                 />
               </ParallelModelChildContainer>
               <ActionContainer>
@@ -336,7 +388,7 @@ const ParallelModel = (props: IParallelProps) => (
   </ParallelModelContainer>
 );
 
-interface IDecisionCaseProps extends IActionButtonProps {
+interface IDecisionCaseProps extends IActionButtonProps, ITaskDataProps {
   tasks: WorkflowDefinition.AllTaskType[];
   caseKey: string;
 }
@@ -357,17 +409,23 @@ const DecisionCase = (props: IDecisionCaseProps) => (
       path={props.path}
       editing={props.editing}
       onTaskUpdate={props.onTaskUpdate}
+      tasksData={props.tasksData}
     />
   </DecisionCaseContainer>
 );
 
-interface IDecisionProps extends IActionButtonProps {
+interface IDecisionProps extends IActionButtonProps, ITaskDataProps {
   task: WorkflowDefinition.IDecisionTask;
 }
 
 const DecisionModel = (props: IDecisionProps) => (
   <DecisionModelContainer>
-    <SystemTaskModelContainer>
+    <SystemTaskModelContainer
+      backgroundColor={getBackgroundTasksData(
+        props.task.taskReferenceName,
+        props.tasksData
+      )}
+    >
       <Typography.Text>{props.task.taskReferenceName}</Typography.Text>
       <Typography.Text code>DECISION</Typography.Text>
     </SystemTaskModelContainer>
@@ -384,6 +442,7 @@ const DecisionModel = (props: IDecisionProps) => (
                 path={path}
                 editing={props.editing}
                 onTaskUpdate={props.onTaskUpdate}
+                tasksData={props.tasksData}
               />
               <ActionContainer>
                 <EditButton
@@ -414,12 +473,13 @@ const DecisionModel = (props: IDecisionProps) => (
         path={[...props.path, "defaultDecision"]}
         editing={props.editing}
         onTaskUpdate={props.onTaskUpdate}
+        tasksData={props.tasksData}
       />
     </DecisionModelChildContainer>
   </DecisionModelContainer>
 );
 
-interface IAllTaskProps extends IActionButtonProps {
+interface IAllTaskProps extends IActionButtonProps, ITaskDataProps {
   task: WorkflowDefinition.AllTaskType;
 }
 
@@ -427,12 +487,14 @@ const AllTaskModel = (props: IAllTaskProps) => {
   const { task } = props;
   switch (task.type) {
     case Task.TaskTypes.Task:
+    case Task.TaskTypes.Compensate:
       return (
         <TaskModel
           task={task}
           path={props.path}
           editing={props.editing}
           onTaskUpdate={props.onTaskUpdate}
+          tasksData={props.tasksData}
         />
       );
     case Task.TaskTypes.Parallel:
@@ -442,6 +504,7 @@ const AllTaskModel = (props: IAllTaskProps) => {
           path={props.path}
           editing={props.editing}
           onTaskUpdate={props.onTaskUpdate}
+          tasksData={props.tasksData}
         />
       );
     case Task.TaskTypes.Decision:
@@ -451,6 +514,7 @@ const AllTaskModel = (props: IAllTaskProps) => {
           path={props.path}
           editing={props.editing}
           onTaskUpdate={props.onTaskUpdate}
+          tasksData={props.tasksData}
         />
       );
     default:
@@ -458,7 +522,7 @@ const AllTaskModel = (props: IAllTaskProps) => {
   }
 };
 
-interface IChildTasksProps extends IActionButtonProps {
+interface IChildTasksProps extends IActionButtonProps, ITaskDataProps {
   tasks: WorkflowDefinition.AllTaskType[];
 }
 
@@ -474,6 +538,7 @@ const RenderChildTasks = (props: IChildTasksProps) => (
               path={path}
               editing={props.editing}
               onTaskUpdate={props.onTaskUpdate}
+              tasksData={props.tasksData}
             />
             <ActionContainer>
               <EditButton
@@ -539,6 +604,9 @@ interface IProps {
   tasks: WorkflowDefinition.AllTaskType[];
   editing?: IActionButtonProps["editing"];
   onTaskUpdated?: (tasks: WorkflowDefinition.AllTaskType[]) => void;
+  tasksData?: {
+    [taskReferenceName: string]: Task.ITask;
+  };
 }
 
 interface IState {
@@ -578,9 +646,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
               this.props.tasks as any
             )
           );
-
           break;
-
         default:
           break;
       }
@@ -712,6 +778,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
           path={[]}
           editing={this.props.editing}
           onTaskUpdate={this.handleTaskUpdate}
+          tasksData={this.props.tasksData}
         />
         <EndModel />
       </ChartContainer>

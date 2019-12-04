@@ -1,4 +1,5 @@
 import {
+  Task,
   TaskDefinition,
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
@@ -14,6 +15,9 @@ interface IProps {
   workflowDefinitionChanged?: (
     workflowDefinition: WorkflowDefinition.IWorkflowDefinition
   ) => void;
+  tasksData?: {
+    [taskReferenceName: string]: Task.ITask;
+  };
 }
 
 const WorkflowChartDefinitionContainer = styled.div`
@@ -39,6 +43,7 @@ export default (props: IProps) => (
             tasks
           } as any);
       }}
+      tasksData={props.tasksData}
     />
   </WorkflowChartDefinitionContainer>
 );

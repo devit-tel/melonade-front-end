@@ -1,4 +1,9 @@
-import { Event, State, Task } from "@melonade/melonade-declaration";
+import {
+  Event,
+  State,
+  Task,
+  WorkflowDefinition
+} from "@melonade/melonade-declaration";
 import { Button, Icon, Table, Tabs, Typography } from "antd";
 import { headerCase } from "change-case";
 import moment from "moment";
@@ -9,6 +14,7 @@ import { RouteComponentProps } from "react-router";
 import styled from "styled-components";
 import JsonViewModal from "../../components/JsonViewModal";
 import StatusText from "../../components/StatusText";
+import WorkflowChart from "../../components/WorkflowChart";
 import { getTransactionData } from "../../services/eventLogger/http";
 
 const { TabPane } = Tabs;
@@ -52,6 +58,73 @@ const getName = (event: Event.AllEvent) => {
     default:
       return undefined;
   }
+};
+
+// const groupWorkflowById = R.compose<
+//   Event.AllEvent[],
+//   Event.AllEvent[],
+//   Event.ITaskEvent[],
+//   { [workflowId: string]: Event.ITaskEvent[] }
+// >(
+//   R.groupBy(R.pathOr("", ["details", "workflowId"])),
+//   R.filter(R.propEq("type", "TASK")) as () => Event.ITaskEvent[],
+//   R.filter<Event.AllEvent[]>(
+//     R.propEq("isError", false)
+//   ) as () => Event.AllEvent[]
+// );
+
+const groupWorkflowById = (
+  events: Event.AllEvent[]
+): {
+  [workflowId: string]: {
+    workflowDefinition: WorkflowDefinition.IWorkflowDefinition;
+    tasksData: { [taskReferenceName: string]: Task.ITask };
+  };
+} => {
+  return events.reduce(
+    (
+      groupedTask: {
+        [workflowId: string]: {
+          workflowDefinition: WorkflowDefinition.IWorkflowDefinition;
+          tasksData: { [taskReferenceName: string]: Task.ITask };
+        };
+      },
+      event: Event.AllEvent
+    ) => {
+      if (event.isError === false && event.type === "TASK") {
+        // it's already sorted new => old
+        if (
+          R.path(
+            [
+              event.details.workflowId,
+              "tasksData",
+              event.details.taskReferenceName
+            ],
+            groupedTask
+          )
+        ) {
+          return groupedTask;
+        }
+        return R.set(
+          R.lensPath([
+            event.details.workflowId,
+            "tasksData",
+            event.details.taskReferenceName
+          ]),
+          event.details,
+          groupedTask
+        );
+      } else if (event.isError === false && event.type === "WORKFLOW") {
+        return R.set(
+          R.lensPath([event.details.workflowId, "workflowDefinition"]),
+          event.details.workflowDefinition,
+          groupedTask
+        );
+      }
+      return groupedTask;
+    },
+    {}
+  );
 };
 
 const getTimelineDataFromEvents = (
@@ -272,6 +345,8 @@ class TransactionTable extends React.Component<IProps, IState> {
   render() {
     const { events, isLoading, selectedEventIndex } = this.state;
     const isEventSelecting = isNumber(selectedEventIndex);
+    const groupedWorkflow = groupWorkflowById(events);
+
     return (
       <Container>
         <StyledTabs>
@@ -303,7 +378,18 @@ class TransactionTable extends React.Component<IProps, IState> {
               loading={isLoading}
             />
           </TabPane>
-          <TabPane tab="Workflows view" key="2"></TabPane>
+          <TabPane tab="Workflows view" key="2">
+            {Object.keys(groupedWorkflow).map((workflowId: string) => {
+              const workflowData = groupedWorkflow[workflowId];
+              return (
+                <WorkflowChart
+                  key={workflowId}
+                  workflowDefinition={workflowData.workflowDefinition}
+                  tasksData={workflowData.tasksData}
+                />
+              );
+            })}
+          </TabPane>
         </StyledTabs>
       </Container>
     );
