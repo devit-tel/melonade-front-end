@@ -40,6 +40,7 @@ const TaskWithActionContainer = styled.div`
 const ActionContainer = styled.div`
   display: flex;
   flex-flow: column nowrap;
+  flex: 1 1 100%;
 
   & > button {
     margin-top: 6px;
@@ -55,6 +56,7 @@ const ChartContainer = styled.div`
 
 const StartModel = styled.div`
   position: relative;
+  flex: 0 0 35px;
   height: 35px;
   width: 35px;
   margin: 6px;
@@ -81,6 +83,7 @@ const TasksContainer = styled.div`
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  flex: 1 1 100%;
 
   :hover {
     background-color: rgba(0, 0, 255, 0.2);
@@ -136,6 +139,7 @@ const ParallelModelChildContainer = styled.div`
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  align-self: stretch;
 `;
 
 const DecisionModelContainer = styled.div`
@@ -185,14 +189,19 @@ const DecisionCaseModelContainer = styled.div`
   background-repeat: no-repeat;
 
   width: 160px;
-  height: 80px;
+  flex: 0 0 60px;
   margin: 6px;
 `;
 
-const ArrowContainer = styled.div`
+interface IDownArrowProps {
+  lockHeight?: boolean;
+}
+
+const ArrowContainer = styled.div<IDownArrowProps>`
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  flex: ${(props: IDownArrowProps) => (props.lockHeight ? "0 0" : "1 1 100%")};
 `;
 
 const ArrowLine = styled.div`
@@ -202,8 +211,8 @@ const ArrowLine = styled.div`
   background-color: rgba(0, 0, 0, 0.65);
 `;
 
-const DownArrow = () => (
-  <ArrowContainer>
+const DownArrow = (props: IDownArrowProps) => (
+  <ArrowContainer lockHeight={props.lockHeight}>
     <ArrowLine />
     <Icon type="caret-down" />
   </ArrowContainer>
@@ -252,7 +261,7 @@ const DeleteButton = (props: IActionButtonProps) => {
   ) : null;
 };
 
-const AddButton = (props: IActionButtonProps) => {
+const AddButton = (props: IActionButtonProps & IDownArrowProps) => {
   return props.editing ? (
     <StyledButton
       type="primary"
@@ -264,7 +273,7 @@ const AddButton = (props: IActionButtonProps) => {
       }
     />
   ) : (
-    <DownArrow />
+    <DownArrow lockHeight={props.lockHeight} />
   );
 };
 
@@ -354,6 +363,7 @@ const ParallelModel = (props: IParallelProps) => (
                   editing={props.editing}
                   onTaskUpdate={props.onTaskUpdate}
                   path={[...path, -1]}
+                  lockHeight
                 />
                 <RenderChildTasks
                   tasks={tasks}
