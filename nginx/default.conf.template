@@ -45,4 +45,7 @@ server {
         proxy_pass ${EVENT_LOGGER_HTTP_BASEURL};
     }
 
+    location /system/health {
+        return 200 "healthy\n";
+    }
 }
