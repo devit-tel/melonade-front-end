@@ -38,10 +38,10 @@ server {
     }
 
     location /api/process-manager {
-        proxy_pass $PROCESS_MANAGER_HTTP_BASEURL;
+        proxy_pass ${PROCESS_MANAGER_HTTP_BASEURL};
     }
 
     location /api/event-logger {
-        proxy_pass $EVENT_LOGGER_HTTP_BASEURL;
+        proxy_pass ${EVENT_LOGGER_HTTP_BASEURL};
     }
 }

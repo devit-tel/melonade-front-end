@@ -11,6 +11,8 @@ RUN yarn build
 from nginx:1.17.6-alpine
 
 COPY --from=builder ./usr/src/app/build/ /var/www/html/
-COPY ./nginx/default.conf /etc/nginx/conf.d/
+COPY ./nginx/default.conf.template /etc/nginx/conf.d/
 ENV NGINX_PORT=80
 EXPOSE 80
+
+ENTRYPOINT ["/bin/bash", "-c", "envsubst < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
