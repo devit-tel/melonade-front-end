@@ -40,11 +40,11 @@ server {
         access_log off;
     }
 
-    location /api/process-manager {
+    location /api/process-manager/ {
         proxy_pass ${PROCESS_MANAGER_HTTP_BASEURL};
     }
 
-    location /api/event-logger {
+    location /api/event-logger/ {
         proxy_pass ${EVENT_LOGGER_HTTP_BASEURL};
     }
 
