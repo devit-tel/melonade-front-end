@@ -32,7 +32,6 @@ server {
         image/svg+xml;
 
     location / {
-        root /var/www/html;
         try_files $uri $uri/ /index.html; # redirect all request to index.html
     }
 
