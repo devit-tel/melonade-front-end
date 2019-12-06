@@ -31,8 +31,10 @@ server {
         application/rss+xml
         image/svg+xml;
 
+
     location / {
-        try_files $uri /index.html; # redirect all request to index.html
+        root /var/www/html;
+        try_files $uri $uri/ /index.html; # redirect all request to index.html
     }
 
     location /api/process-manager {
@@ -42,4 +44,5 @@ server {
     location /api/event-logger {
         proxy_pass ${EVENT_LOGGER_HTTP_BASEURL};
     }
+
 }
