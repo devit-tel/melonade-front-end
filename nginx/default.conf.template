@@ -1,5 +1,3 @@
-set_by_lua $PROCESS_MANAGER_HTTP_BASEURL 'return os.getenv("PROCESS_MANAGER_HTTP_BASEURL")';
-set_by_lua $EVENT_LOGGER_HTTP_BASEURL 'return os.getenv("EVENT_LOGGER_HTTP_BASEURL")';
 
 server {
     listen   80; ## listen for ipv4; this line is default and implied
