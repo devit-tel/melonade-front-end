@@ -31,14 +31,9 @@ server {
         application/rss+xml
         image/svg+xml;
 
-
     location / {
         root /var/www/html;
         try_files $uri $uri/ /index.html; # redirect all request to index.html
-    }
-
-    location /system/health {
-        return 200 "healthy\n";
     }
 
     location /api/process-manager {
