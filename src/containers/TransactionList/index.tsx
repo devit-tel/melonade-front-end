@@ -1,19 +1,19 @@
-import { Event, State } from "@melonade/melonade-declaration";
+import { Event } from "@melonade/melonade-declaration";
 import {
   Button,
   DatePicker,
   Icon,
   Input,
   Pagination,
+  Select,
   Table,
+  Tag,
   Typography
 } from "antd";
 import moment from "moment";
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import StatusSelects from "../../components/StatusSelects";
-import StatusText from "../../components/StatusText";
 import {
   ITransactionEventPaginate,
   listTransaction
@@ -45,6 +45,10 @@ const TransactionInput = styled(Input)`
   }
 `;
 
+const StyledSelect = (styled(Select)`
+  min-width: 180px;
+` as unknown) as typeof Select;
+
 const DateRange = styled(DatePicker.RangePicker)`
   width: 270px;
 `;
@@ -57,19 +61,10 @@ interface IState {
   search: {
     transactionId: string;
     dateRange: [moment.Moment, moment.Moment];
-    statuses: State.TransactionStates[];
+    tags: string[];
   };
   isLoading: boolean;
 }
-
-const AllTransactionStates = [
-  State.TransactionStates.Cancelled,
-  State.TransactionStates.Compensated,
-  State.TransactionStates.Completed,
-  State.TransactionStates.Failed,
-  State.TransactionStates.Paused,
-  State.TransactionStates.Running
-];
 
 const columns = [
   {
@@ -77,12 +72,6 @@ const columns = [
     dataIndex: "transactionId",
     key: "transactionId",
     render: (text: string) => <Link to={`transaction/${text}`}>{text}</Link>
-  },
-  {
-    title: "Status",
-    dataIndex: "details.status",
-    key: "details.status",
-    render: (status: State.TransactionStates) => <StatusText status={status} />
   },
   {
     title: "Workflow",
@@ -103,6 +92,18 @@ const columns = [
         {moment(timestamp).format("YYYY/MM/DD HH:mm:ss.SSS")}
       </Typography.Text>
     )
+  },
+  {
+    title: "Tags",
+    dataIndex: "details.tags",
+    key: "details.tags",
+    render: (tags: string[]) => (
+      <React.Fragment>
+        {tags.map((tag: string) => (
+          <Tag key={tag}>{tag}</Tag>
+        ))}
+      </React.Fragment>
+    )
   }
 ];
 
@@ -119,7 +120,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       search: {
         transactionId: "",
         dateRange: [moment().startOf("week"), moment().endOf("week")],
-        statuses: AllTransactionStates
+        tags: []
       },
       isLoading: false
     };
@@ -129,15 +130,15 @@ class TransactionTable extends React.Component<IProps, IState> {
     this.setState({ isLoading: true });
     const {
       currentPage,
-      search: { transactionId, dateRange, statuses }
+      search: { transactionId, dateRange, tags }
     } = this.state;
     const searchPage = page || currentPage;
     try {
       const transactionEvents = await listTransaction(
-        statuses,
         +dateRange[0],
         +dateRange[1],
         transactionId,
+        tags,
         (searchPage - 1) * TRANSACTION_PER_PAGE,
         TRANSACTION_PER_PAGE
       );
@@ -161,11 +162,11 @@ class TransactionTable extends React.Component<IProps, IState> {
     this.search();
   };
 
-  handleStatusChange = (statuses: State.TransactionStates[]) => {
+  handleTagsChange = (tags: string[]) => {
     this.setState({
       search: {
         ...this.state.search,
-        statuses
+        tags
       }
     });
   };
@@ -195,7 +196,7 @@ class TransactionTable extends React.Component<IProps, IState> {
     const {
       currentPage,
       transactionEvents,
-      search: { transactionId, dateRange, statuses },
+      search: { transactionId, dateRange, tags },
       isLoading
     } = this.state;
     return (
@@ -208,12 +209,13 @@ class TransactionTable extends React.Component<IProps, IState> {
             onChange={this.handleTransactionIdChange}
             onPressEnter={() => this.search()}
           />
-          <StatusSelects
-            handleChange={this.handleStatusChange}
+          <StyledSelect
+            mode="tags"
+            onChange={this.handleTagsChange}
             size="default"
-            value={statuses}
+            value={tags}
             onBlur={() => this.search()}
-          />
+          ></StyledSelect>
           <DateRange
             size="default"
             onChange={this.handleDateRangeChange}

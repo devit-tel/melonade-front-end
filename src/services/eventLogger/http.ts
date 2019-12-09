@@ -1,4 +1,4 @@
-import { Event, State } from "@melonade/melonade-declaration";
+import { Event } from "@melonade/melonade-declaration";
 import axios from "axios";
 import * as R from "ramda";
 import { eventLogger } from "../../config";
@@ -11,10 +11,10 @@ export interface ITransactionEventPaginate {
 }
 
 export const listTransaction = async (
-  statuses: State.TransactionStates[] = [State.TransactionStates.Completed],
   fromTimestamp: number,
   toTimestamp: number,
   transactionId?: string,
+  tags: string[] = [],
   from?: number,
   size?: number
 ): Promise<ITransactionEventPaginate> => {
@@ -22,7 +22,7 @@ export const listTransaction = async (
     url: "/v1/store",
     method: "GET",
     params: {
-      statuses: JSON.stringify(statuses),
+      tags: JSON.stringify(tags),
       fromTimestamp,
       toTimestamp,
       transactionId,
