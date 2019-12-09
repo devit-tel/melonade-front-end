@@ -20,6 +20,11 @@ const EmptyTask = styled.div`
 
 const StyledButton = styled(Button)``;
 
+const Text = styled(Typography.Text)`
+  white-space: nowrap;
+  font-size: 14px;
+`;
+
 const YellowButton = styled(StyledButton)`
   background-color: #ffd800;
   border-color: #ffd800;
@@ -331,8 +336,8 @@ const TaskModel = (props: ITaskProps) => (
       props.tasksData
     )}
   >
-    <Typography.Text>{props.task.taskReferenceName}</Typography.Text>
-    <Typography.Text code>{props.task.name}</Typography.Text>
+    <Text>{props.task.taskReferenceName}</Text>
+    <Text code>{props.task.name}</Text>
   </TaskModelContainer>
 );
 
@@ -348,8 +353,8 @@ const ParallelModel = (props: IParallelProps) => (
         props.tasksData
       )}
     >
-      <Typography.Text>{props.task.taskReferenceName}</Typography.Text>
-      <Typography.Text code>PARALLEL</Typography.Text>
+      <Text>{props.task.taskReferenceName}</Text>
+      <Text code>PARALLEL</Text>
     </SystemTaskModelContainer>
 
     <ParallelModelChildsContainer>
@@ -405,8 +410,9 @@ interface IDecisionCaseProps extends IActionButtonProps, ITaskDataProps {
 
 const DecisionCase = (props: IDecisionCaseProps) => (
   <DecisionCaseContainer>
+    <DownArrow lockHeight />
     <DecisionCaseModelContainer>
-      <Typography.Text>{props.caseKey}</Typography.Text>
+      <Text>{props.caseKey}</Text>
     </DecisionCaseModelContainer>
 
     <AddButton
@@ -436,8 +442,8 @@ const DecisionModel = (props: IDecisionProps) => (
         props.tasksData
       )}
     >
-      <Typography.Text>{props.task.taskReferenceName}</Typography.Text>
-      <Typography.Text code>DECISION</Typography.Text>
+      <Text>{props.task.taskReferenceName}</Text>
+      <Text code>DECISION</Text>
     </SystemTaskModelContainer>
 
     <DecisionModelChildContainer>
