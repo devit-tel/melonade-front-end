@@ -180,7 +180,7 @@ class TransactionTable extends React.Component<IProps, IState> {
     });
   };
 
-  handleDateRangeChange = (dateRange: (moment.Moment | undefined)[]) => {
+  handleDateRangeChange = (dateRange: (moment.Moment | undefined | null)[]) => {
     this.setState({
       search: {
         ...this.state.search,
@@ -215,7 +215,7 @@ class TransactionTable extends React.Component<IProps, IState> {
             size="default"
             value={tags}
             onBlur={() => this.search()}
-          ></StyledSelect>
+          />
           <DateRange
             size="default"
             onChange={this.handleDateRangeChange}
