@@ -474,7 +474,7 @@ const DecisionModel = (props: IDecisionProps) => (
       <EmptyButton
         editing={props.editing}
         onTaskUpdate={props.onTaskUpdate}
-        path={[...props.path, "decisions"]}
+        path={[...props.path, "decisions", "placeholder"]}
       />
 
       <DecisionCase
