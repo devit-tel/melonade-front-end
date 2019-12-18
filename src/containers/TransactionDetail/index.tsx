@@ -1,9 +1,4 @@
-import {
-  Event,
-  State,
-  Task,
-  WorkflowDefinition
-} from "@melonade/melonade-declaration";
+import { Event, State, Task, WorkflowDefinition } from "@melonade/melonade-declaration";
 import { Button, Icon, Table, Tabs, Typography } from "antd";
 import { headerCase } from "change-case";
 import moment from "moment";
@@ -14,6 +9,7 @@ import { RouteComponentProps } from "react-router";
 import styled from "styled-components";
 import JsonViewModal from "../../components/JsonViewModal";
 import StatusText from "../../components/StatusText";
+import TimelineChart from '../../components/TimelineChart';
 import WorkflowChart from "../../components/WorkflowChart";
 import { getTransactionData } from "../../services/eventLogger/http";
 
@@ -29,7 +25,7 @@ interface ITransactionParams {
   transactionId: string;
 }
 
-interface IProps extends RouteComponentProps<ITransactionParams> {}
+interface IProps extends RouteComponentProps<ITransactionParams> { }
 
 interface IState {
   events: Event.AllEvent[];
@@ -52,26 +48,13 @@ const getName = (event: Event.AllEvent) => {
         <Typography.Text code>
           {`${event.details.taskName || "-"} (${
             event.details.taskReferenceName
-          })`}
+            })`}
         </Typography.Text>
       );
     default:
       return undefined;
   }
 };
-
-// const groupWorkflowById = R.compose<
-//   Event.AllEvent[],
-//   Event.AllEvent[],
-//   Event.ITaskEvent[],
-//   { [workflowId: string]: Event.ITaskEvent[] }
-// >(
-//   R.groupBy(R.pathOr("", ["details", "workflowId"])),
-//   R.filter(R.propEq("type", "TASK")) as () => Event.ITaskEvent[],
-//   R.filter<Event.AllEvent[]>(
-//     R.propEq("isError", false)
-//   ) as () => Event.AllEvent[]
-// );
 
 const groupWorkflowById = (
   events: Event.AllEvent[]
@@ -230,7 +213,7 @@ const getTimelineDataFromEvents = (
         (transactionEvent: Event.AllEvent) =>
           transactionEvent.type === "TRANSACTION" &&
           event.details.transactionId ===
-            transactionEvent.details.transactionId &&
+          transactionEvent.details.transactionId &&
           transactionEvent.details.status !== State.TransactionStates.Running,
         validEvents as Event.ITransactionEvent[]
       );
@@ -298,8 +281,8 @@ class TransactionTable extends React.Component<IProps, IState> {
             {R.path(["error"], event)}
           </span>
         ) : (
-          <Icon type="check-circle" theme="twoTone" twoToneColor="#52c41a" />
-        )
+            <Icon type="check-circle" theme="twoTone" twoToneColor="#52c41a" />
+          )
     },
     {
       title: "Workflow / Task",
@@ -363,6 +346,7 @@ class TransactionTable extends React.Component<IProps, IState> {
               visible={isEventSelecting}
               onClose={() => this.setState({ selectedEventIndex: undefined })}
             />
+            <TimelineChart events={events} />
             <Chart
               width={"100%"}
               height={"250px"}
