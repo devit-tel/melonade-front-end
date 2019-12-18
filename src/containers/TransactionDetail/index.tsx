@@ -1,15 +1,18 @@
-import { Event, State, Task, WorkflowDefinition } from "@melonade/melonade-declaration";
+import {
+  Event,
+  Task,
+  WorkflowDefinition
+} from "@melonade/melonade-declaration";
 import { Button, Icon, Table, Tabs, Typography } from "antd";
 import { headerCase } from "change-case";
 import moment from "moment";
 import * as R from "ramda";
 import React from "react";
-import { Chart } from "react-google-charts";
 import { RouteComponentProps } from "react-router";
 import styled from "styled-components";
 import JsonViewModal from "../../components/JsonViewModal";
 import StatusText from "../../components/StatusText";
-import TimelineChart from '../../components/TimelineChart';
+import TimelineChart from "../../components/TimelineChart";
 import WorkflowChart from "../../components/WorkflowChart";
 import { getTransactionData } from "../../services/eventLogger/http";
 
@@ -25,7 +28,7 @@ interface ITransactionParams {
   transactionId: string;
 }
 
-interface IProps extends RouteComponentProps<ITransactionParams> { }
+interface IProps extends RouteComponentProps<ITransactionParams> {}
 
 interface IState {
   events: Event.AllEvent[];
@@ -48,7 +51,7 @@ const getName = (event: Event.AllEvent) => {
         <Typography.Text code>
           {`${event.details.taskName || "-"} (${
             event.details.taskReferenceName
-            })`}
+          })`}
         </Typography.Text>
       );
     default:
@@ -117,125 +120,6 @@ const groupWorkflowById = (
   );
 };
 
-const getTimelineDataFromEvents = (
-  events: Event.AllEvent[]
-): [string, string, Date, Date][] => {
-  const validEvents = R.reverse(
-    events.filter((event: Event.AllEvent) => !event.isError)
-  );
-
-  const startNodeOfEachType = validEvents.filter((event: Event.AllEvent) => {
-    if (event.isError === true) return false;
-
-    if (event.type === "TASK") {
-      if (event.details.status === State.TaskStates.Scheduled) return true;
-      return false;
-    }
-
-    if (event.type === "WORKFLOW") {
-      if (event.details.status === State.WorkflowStates.Running) return true;
-      return false;
-    }
-
-    if (event.type === "TRANSACTION") {
-      if (event.details.status === State.TransactionStates.Running) return true;
-      return false;
-    }
-
-    return false;
-  });
-
-  return startNodeOfEachType.map((event: Event.AllEvent) => {
-    if (event.type === "TASK") {
-      const lastTaskEvent = R.findLast(
-        (taskEvent: Event.AllEvent) =>
-          taskEvent.type === "TASK" &&
-          event.details.taskId === taskEvent.details.taskId &&
-          taskEvent.details.status !== State.TaskStates.Scheduled,
-        validEvents as Event.ITaskEvent[]
-      );
-
-      let endTimestamp: number = lastTaskEvent
-        ? lastTaskEvent.timestamp
-        : Date.now();
-
-      if (endTimestamp < event.timestamp) endTimestamp = event.timestamp + 1;
-
-      if (
-        [Task.TaskTypes.Task, Task.TaskTypes.Compensate].includes(
-          R.pathOr(Task.TaskTypes.Task, ["details", "type"], event)
-        )
-      ) {
-        return [
-          "Task",
-          R.pathOr("-", ["details", "taskName"], event),
-          new Date(event.timestamp),
-          new Date(endTimestamp)
-        ];
-      }
-      return [
-        "Task",
-        R.pathOr("-", ["details", "type"], event),
-        new Date(event.timestamp),
-        new Date(endTimestamp)
-      ];
-    }
-
-    if (event.type === "WORKFLOW") {
-      const lastWorkflowEvent = R.findLast(
-        (workflowEvent: Event.AllEvent) =>
-          workflowEvent.type === "WORKFLOW" &&
-          event.details.workflowId === workflowEvent.details.workflowId &&
-          workflowEvent.details.status !== State.WorkflowStates.Running,
-        validEvents as Event.IWorkflowEvent[]
-      );
-
-      let endTimestamp: number = lastWorkflowEvent
-        ? lastWorkflowEvent.timestamp
-        : Date.now();
-
-      if (endTimestamp < event.timestamp) endTimestamp = event.timestamp + 1;
-
-      return [
-        "Workflow",
-        `${R.pathOr(
-          "-",
-          ["details", "workflowDefinition", "name"],
-          event
-        )} / ${R.pathOr("-", ["details", "workflowDefinition", "rev"], event)}`,
-        new Date(event.timestamp),
-        new Date(endTimestamp)
-      ];
-    }
-
-    if (event.type === "TRANSACTION") {
-      const lastTransactionEvent = R.findLast(
-        (transactionEvent: Event.AllEvent) =>
-          transactionEvent.type === "TRANSACTION" &&
-          event.details.transactionId ===
-          transactionEvent.details.transactionId &&
-          transactionEvent.details.status !== State.TransactionStates.Running,
-        validEvents as Event.ITransactionEvent[]
-      );
-
-      let endTimestamp: number = lastTransactionEvent
-        ? lastTransactionEvent.timestamp
-        : Date.now();
-
-      if (endTimestamp < event.timestamp) endTimestamp = event.timestamp + 1;
-
-      return [
-        "Transaction",
-        event.details.transactionId,
-        new Date(event.timestamp),
-        new Date(endTimestamp)
-      ];
-    }
-
-    return [event.type, "Error", new Date(event.timestamp), new Date()];
-  });
-};
-
 class TransactionTable extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
@@ -281,8 +165,8 @@ class TransactionTable extends React.Component<IProps, IState> {
             {R.path(["error"], event)}
           </span>
         ) : (
-            <Icon type="check-circle" theme="twoTone" twoToneColor="#52c41a" />
-          )
+          <Icon type="check-circle" theme="twoTone" twoToneColor="#52c41a" />
+        )
     },
     {
       title: "Workflow / Task",
@@ -319,10 +203,12 @@ class TransactionTable extends React.Component<IProps, IState> {
   getTransactionData = async () => {
     this.setState({ isLoading: true });
     const { transactionId } = this.props.match.params;
-
     try {
       const events = await getTransactionData(transactionId);
-      this.setState({ events, isLoading: false });
+      this.setState({
+        events,
+        isLoading: false
+      });
     } catch (error) {
       this.setState({ isLoading: false });
     }
@@ -347,20 +233,6 @@ class TransactionTable extends React.Component<IProps, IState> {
               onClose={() => this.setState({ selectedEventIndex: undefined })}
             />
             <TimelineChart events={events} />
-            <Chart
-              width={"100%"}
-              height={"250px"}
-              chartType="Timeline"
-              data={[
-                [
-                  { type: "string", id: "Type" },
-                  { type: "string", id: "Name" },
-                  { type: "date", id: "Start" },
-                  { type: "date", id: "End" }
-                ],
-                ...getTimelineDataFromEvents(events)
-              ]}
-            />
             <Table
               columns={this.columns}
               dataSource={events}

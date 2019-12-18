@@ -16,3 +16,28 @@ body {
   margin: 0;
   padding: 0;
 }
+
+.vis-item.processing {
+  background-color: #64b2cd;
+  border-color: #3c70a4;
+}
+
+.vis-item.success {
+  background-color: #52de97;
+  border-color: #3c9d9b;
+}
+
+.vis-item.warning {
+  background-color: #e3c878;
+  border-color: #ed9a73;
+}
+
+.vis-item.error {
+  background-color: #f75f00;
+  border-color: #c93838;
+}
+
+.vis-item.default {
+  background-color: #f7f7f7;
+  border-color: #5d5d5d;
+}

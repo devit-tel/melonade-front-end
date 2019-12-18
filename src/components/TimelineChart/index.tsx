@@ -1,4 +1,4 @@
-import { Event, State } from "@melonade/melonade-declaration";
+import { Event, State, Task } from "@melonade/melonade-declaration";
 import * as R from "ramda";
 import React from "react";
 import vis from "vis-timeline";
@@ -9,6 +9,44 @@ declare module "antd/lib/select" {
     label?: string;
   }
 }
+
+const getStatusType = (
+  status: State.TransactionStates | State.WorkflowStates | State.TaskStates,
+  lastType: string = "default"
+) => {
+  switch (status) {
+    case State.TransactionStates.Running:
+    case State.WorkflowStates.Running:
+    case State.TaskStates.Inprogress:
+      if (["default"].includes(lastType)) {
+        return "processing";
+      }
+      return lastType;
+    case State.TransactionStates.Completed:
+    case State.WorkflowStates.Completed:
+    case State.TaskStates.Completed:
+      return "success";
+    case State.TransactionStates.Cancelled:
+    case State.TransactionStates.Compensated:
+    case State.WorkflowStates.Cancelled:
+      return "warning";
+    case State.TransactionStates.Failed:
+    case State.WorkflowStates.Failed:
+    case State.WorkflowStates.Timeout:
+    case State.TaskStates.AckTimeOut:
+    case State.TaskStates.Failed:
+    case State.TaskStates.Timeout:
+      return "error";
+    case State.TransactionStates.Paused:
+    case State.WorkflowStates.Paused:
+    case State.TaskStates.Scheduled:
+    default:
+      if (lastType) {
+        return lastType;
+      }
+      return "default";
+  }
+};
 
 const getTransactionSpan = (
   events: Event.AllEvent[] = [],
@@ -36,7 +74,8 @@ const getTransactionSpan = (
             State.TransactionStates.Compensated
           ].includes(event.details.status)
             ? new Date(event.timestamp)
-            : result.end
+            : result.end,
+          className: getStatusType(event.details.status, result.className)
         };
       },
       {
@@ -80,7 +119,8 @@ const getWorkflowSpan = (
             State.WorkflowStates.Timeout
           ].includes(event.details.status)
             ? new Date(event.timestamp)
-            : result.end
+            : result.end,
+          className: getStatusType(event.details.status, result.className)
         };
       },
       {
@@ -88,6 +128,21 @@ const getWorkflowSpan = (
         end: now
       } as vis.DataItem
     );
+};
+
+const getTaskName = (event: Event.ITaskEvent): string => {
+  if (
+    [Task.TaskTypes.Task, Task.TaskTypes.Compensate].includes(
+      event.details.type
+    )
+  ) {
+    return R.pathOr("-", ["details", "taskName"], event);
+  }
+  return `${R.pathOr(
+    "-",
+    ["details", "taskReferenceName"],
+    event
+  )} - (${R.pathOr("-", ["details", "type"], event)})`;
 };
 
 const getTaskSpan = (
@@ -102,7 +157,7 @@ const getTaskSpan = (
     .reduce(
       (result: vis.DataItem, event: Event.ITaskEvent): vis.DataItem => {
         return {
-          content: R.pathOr("-", ["details", "taskName"], event),
+          content: getTaskName(event),
           id,
           group: 3,
           start:
@@ -116,7 +171,8 @@ const getTaskSpan = (
             State.TaskStates.Failed
           ].includes(event.details.status)
             ? new Date(event.timestamp)
-            : result.end
+            : result.end,
+          className: getStatusType(event.details.status, result.className)
         };
       },
       {
@@ -214,8 +270,12 @@ export default class TimelineChart extends React.Component<IProps, IState> {
     }
   }
 
-  componentDidCatch() {
-    console.log("error");
+  componentDidUpdate(prevProps: IProps) {
+    if (prevProps.events !== this.props.events) {
+      if (this.timeline) {
+        this.timeline.fit();
+      }
+    }
   }
 
   static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
@@ -234,7 +294,16 @@ export default class TimelineChart extends React.Component<IProps, IState> {
         { id: 2, content: "Workflow" },
         { id: 3, content: "Task" }
       ]);
-      this.timeline = new vis.Timeline(element, this.state.items, groups, {});
+      this.timeline = new vis.Timeline(element, this.state.items, groups, {
+        stack: true,
+        horizontalScroll: true,
+        zoomKey: "ctrlKey",
+        editable: false,
+        margin: {
+          item: 10,
+          axis: 5
+        }
+      });
     }
   };
 
