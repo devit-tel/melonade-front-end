@@ -3,16 +3,12 @@ import {
   Task,
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
-import { Button, Icon, Tabs, Typography } from "antd";
-import { headerCase } from "change-case";
-import moment from "moment";
+import { Tabs, Typography } from "antd";
 import * as R from "ramda";
 import React from "react";
 import { RouteComponentProps } from "react-router";
-import { Index } from "react-virtualized";
 import styled from "styled-components";
 import EventTable from "../../components/EventTable";
-import StatusText from "../../components/StatusText";
 import TimelineChart from "../../components/TimelineChart";
 import WorkflowChart from "../../components/WorkflowChart";
 import { getTransactionData } from "../../services/eventLogger/http";
@@ -34,10 +30,7 @@ interface IProps extends RouteComponentProps<ITransactionParams> {}
 interface IState {
   events: Event.AllEvent[];
   isLoading: boolean;
-  selectedEventIndex?: number;
 }
-
-const isNumber = R.is(Number);
 
 const getName = (event: Event.AllEvent) => {
   switch (true) {
@@ -127,81 +120,9 @@ class TransactionTable extends React.Component<IProps, IState> {
 
     this.state = {
       events: [],
-      isLoading: false,
-      selectedEventIndex: undefined
+      isLoading: false
     };
   }
-
-  columns = [
-    {
-      title: "Event Type",
-      dataIndex: "type",
-      key: "type",
-      render: (type: string, _event: Event.AllEvent, index: number) => (
-        <Button
-          type="link"
-          block
-          onClick={() =>
-            this.setState({
-              selectedEventIndex: index
-            })
-          }
-        >
-          {headerCase(type)}
-        </Button>
-      )
-    },
-    {
-      title: "Is Valid",
-      dataIndex: "isError",
-      key: "isError",
-      render: (isError: boolean, event: Event.AllEvent) =>
-        isError ? (
-          <span>
-            <Icon
-              type="exclamation-circle"
-              theme="twoTone"
-              twoToneColor="#eb2f96"
-            />
-            {R.path(["error"], event)}
-          </span>
-        ) : (
-          <Icon type="check-circle" theme="twoTone" twoToneColor="#52c41a" />
-        )
-    },
-    {
-      title: "Workflow / Task",
-      key: "details",
-      render: (_text: string, event: Event.AllEvent) => getName(event)
-    },
-    {
-      title: "Type",
-      dataIndex: "details.type",
-      key: "details.type",
-      render: (type: Event.AllEvent["details"]["type"]) =>
-        type ? <Typography.Text code>{type}</Typography.Text> : undefined
-    },
-    {
-      title: "Status",
-      dataIndex: "details.status",
-      key: "details.status",
-      render: (status: Event.AllEvent["details"]["status"]) => (
-        <StatusText status={status} />
-      )
-    },
-    {
-      title: "Updated At",
-      dataIndex: "timestamp",
-      key: "timestamp",
-      render: (timestamp: number) => (
-        <Typography.Text>
-          {moment(timestamp).format("YYYY/MM/DD HH:mm:ss.SSS")}
-        </Typography.Text>
-      )
-    }
-  ];
-
-  rowGetter = (index: Index) => R.path(["events", index.index], this.state);
 
   getTransactionData = async () => {
     this.setState({ isLoading: true });
@@ -222,8 +143,7 @@ class TransactionTable extends React.Component<IProps, IState> {
   };
 
   render() {
-    const { events, isLoading, selectedEventIndex } = this.state;
-    const isEventSelecting = isNumber(selectedEventIndex);
+    const { events, isLoading } = this.state;
     const groupedWorkflow = groupWorkflowById(events);
     return (
       <Container>
