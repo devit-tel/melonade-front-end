@@ -1,0 +1,24 @@
+.vis-item.processing {
+  background-color: #2b6cff;
+  border-color: #0b389d;
+}
+
+.vis-item.success {
+  background-color: #16c172;
+  border-color: #3e8914;
+}
+
+.vis-item.warning {
+  background-color: #ec7505;
+  border-color: #ff5c00;
+}
+
+.vis-item.error {
+  background-color: #c91a1a;
+  border-color: #a02323;
+}
+
+.vis-item.default {
+  background-color: #b2b2b2;
+  border-color: #5d5d5d;
+}

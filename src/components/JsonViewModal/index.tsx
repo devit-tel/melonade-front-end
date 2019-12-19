@@ -1,6 +1,7 @@
 import { Modal } from "antd";
 import React from "react";
 import JsonView from "react-json-view";
+import { } from 'vis-timeline';
 
 declare module "antd/lib/select" {
   export interface OptionProps {
