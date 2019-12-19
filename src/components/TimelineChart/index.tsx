@@ -3,6 +3,7 @@ import * as R from "ramda";
 import React from "react";
 import vis from "vis-timeline";
 import "vis-timeline/dist/vis-timeline-graph2d.css";
+import "./index.css";
 
 declare module "antd/lib/select" {
   export interface OptionProps {
