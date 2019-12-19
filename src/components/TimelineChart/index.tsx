@@ -280,7 +280,6 @@ export default class TimelineChart extends React.Component<IProps, IState> {
   }
 
   static getDerivedStateFromProps(nextProps: IProps, prevState: IState) {
-    console.log(mapEventsToDataItems(nextProps.events));
     prevState.items.clear();
     prevState.items.add(mapEventsToDataItems(nextProps.events));
     return {
