@@ -102,6 +102,7 @@ interface IState {
   showSystemError?: boolean;
   showIdField?: boolean;
   viewingEvent?: any;
+  searchText?: string;
 }
 
 export default class EventsTable extends React.Component<IProps, IState> {
@@ -138,25 +139,55 @@ export default class EventsTable extends React.Component<IProps, IState> {
     });
   };
 
-  getFilteredEvents = (): Event.AllEvent[] => {
-    const { events } = this.props;
-    const { showSystemError } = this.state;
-
-    if (showSystemError) {
-      return events;
-    }
-
-    return events.filter((event: Event.AllEvent) => {
-      return !(
-        event.isError === true &&
-        event.type === "TASK" &&
-        event.details.isSystem === true
-      );
+  onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      searchText: e.target.value
     });
   };
 
+  getFilteredEvents = (): Event.AllEvent[] => {
+    const { events } = this.props;
+    const { showSystemError, searchText = "" } = this.state;
+
+    if (showSystemError && !searchText) {
+      return events;
+    }
+
+    try {
+      const searchRegexp = new RegExp(searchText, "i");
+
+      return events.filter((event: Event.AllEvent) => {
+        return (
+          !(
+            event.isError === true &&
+            event.type === "TASK" &&
+            event.details.isSystem === true
+          ) &&
+          (searchRegexp.test(R.pathOr("", ["type"], event)) ||
+            searchRegexp.test(R.pathOr("", ["details", "workflowId"], event)) ||
+            searchRegexp.test(R.pathOr("", ["details", "taskId"], event)) ||
+            searchRegexp.test(R.pathOr("", ["details", "type"], event)) ||
+            searchRegexp.test(R.pathOr("", ["details", "status"], event)) ||
+            searchRegexp.test(
+              R.pathOr("", ["details", "workflowDefinition", "name"], event)
+            ) ||
+            searchRegexp.test(
+              R.pathOr("", ["details", "workflowDefinition", "rev"], event)
+            ) ||
+            searchRegexp.test(R.pathOr("", ["details", "taskName"], event)) ||
+            searchRegexp.test(
+              R.pathOr("", ["details", "taskReferenceName"], event)
+            ))
+        );
+      });
+    } catch (error) {
+      console.warn(error);
+      return events;
+    }
+  };
+
   render() {
-    const { showIdField, viewingEvent } = this.state;
+    const { showIdField, viewingEvent, searchText } = this.state;
     const filteredEvents = this.getFilteredEvents();
     return (
       <React.Fragment>
@@ -165,7 +196,6 @@ export default class EventsTable extends React.Component<IProps, IState> {
           visible={viewingEvent}
           onClose={() => this.setState({ viewingEvent: undefined })}
         />
-
         <Form layout="inline">
           <Form.Item>
             <Checkbox onChange={this.onCheckBoxChanged("showIdField")}>
@@ -178,7 +208,11 @@ export default class EventsTable extends React.Component<IProps, IState> {
             </Checkbox>
           </Form.Item>
           <Form.Item>
-            <Input placeholder="Search" />
+            <Input
+              placeholder="Search"
+              value={searchText}
+              onChange={this.onSearchChange}
+            />
           </Form.Item>
         </Form>
         <AutoSizer disableHeight>
