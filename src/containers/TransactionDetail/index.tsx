@@ -3,14 +3,15 @@ import {
   Task,
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
-import { Button, Icon, Table, Tabs, Typography } from "antd";
+import { Button, Icon, Tabs, Typography } from "antd";
 import { headerCase } from "change-case";
 import moment from "moment";
 import * as R from "ramda";
 import React from "react";
 import { RouteComponentProps } from "react-router";
+import { Index } from "react-virtualized";
 import styled from "styled-components";
-import JsonViewModal from "../../components/JsonViewModal";
+import EventTable from "../../components/EventTable";
 import StatusText from "../../components/StatusText";
 import TimelineChart from "../../components/TimelineChart";
 import WorkflowChart from "../../components/WorkflowChart";
@@ -200,6 +201,8 @@ class TransactionTable extends React.Component<IProps, IState> {
     }
   ];
 
+  rowGetter = (index: Index) => R.path(["events", index.index], this.state);
+
   getTransactionData = async () => {
     this.setState({ isLoading: true });
     const { transactionId } = this.props.match.params;
@@ -226,19 +229,8 @@ class TransactionTable extends React.Component<IProps, IState> {
       <Container>
         <StyledTabs>
           <TabPane tab="Timeline view" key="1">
-            <JsonViewModal
-              // @ts-ignore: Fuck the TS lint
-              data={isEventSelecting ? events[selectedEventIndex] : []}
-              visible={isEventSelecting}
-              onClose={() => this.setState({ selectedEventIndex: undefined })}
-            />
             <TimelineChart events={events} />
-            <Table
-              columns={this.columns}
-              dataSource={events}
-              pagination={false}
-              loading={isLoading}
-            />
+            <EventTable events={events || []} isLoading={isLoading} />
           </TabPane>
           <TabPane tab="Workflows view" key="2">
             {Object.keys(groupedWorkflow)
