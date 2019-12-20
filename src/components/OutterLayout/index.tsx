@@ -68,6 +68,10 @@ export default class OutterLayout extends React.Component<IProps, IState> {
             defaultOpenKeys={["/definition"]}
             selectedKeys={[this.props.location.pathname]}
           >
+            <Menu.Item key="/dashboard" onClick={this.changePath}>
+              <Icon type="dashboard" />
+              <span>Dashboard</span>
+            </Menu.Item>
             <Menu.Item key="/transaction" onClick={this.changePath}>
               <Icon type="unordered-list" />
               <span>Transactions</span>

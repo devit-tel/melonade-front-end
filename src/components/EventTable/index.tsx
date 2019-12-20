@@ -219,7 +219,7 @@ export default class EventsTable extends React.Component<IProps, IState> {
           {({ width }) => (
             <Table
               headerHeight={30}
-              height={window.innerHeight - 80}
+              height={window.innerHeight - 64}
               overscanRowCount={20}
               rowCount={filteredEvents.length}
               rowGetter={this.rowGetter(filteredEvents)}

@@ -3,7 +3,7 @@ import {
   Task,
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
-import { Tabs, Typography } from "antd";
+import { Tabs } from "antd";
 import * as R from "ramda";
 import React from "react";
 import { RouteComponentProps } from "react-router";
@@ -31,27 +31,6 @@ interface IState {
   events: Event.AllEvent[];
   isLoading: boolean;
 }
-
-const getName = (event: Event.AllEvent) => {
-  switch (true) {
-    case event.isError === false && event.type === "WORKFLOW":
-      return (
-        <Typography.Text code>
-          {`${event.details.workflowDefinition.name} / ${event.details.workflowDefinition.rev}`}
-        </Typography.Text>
-      );
-    case event.isError === false && event.type === "TASK":
-      return (
-        <Typography.Text code>
-          {`${event.details.taskName || "-"} (${
-            event.details.taskReferenceName
-          })`}
-        </Typography.Text>
-      );
-    default:
-      return undefined;
-  }
-};
 
 const groupWorkflowById = (
   events: Event.AllEvent[]
