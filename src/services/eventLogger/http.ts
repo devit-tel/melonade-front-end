@@ -1,4 +1,4 @@
-import { Event } from "@melonade/melonade-declaration";
+import { Event, State } from "@melonade/melonade-declaration";
 import axios from "axios";
 import * as R from "ramda";
 import { eventLogger } from "../../config";
@@ -47,6 +47,22 @@ export const getTransactionData = async (
   const resp = await client({
     url: `/v1/store/${transactionId}`,
     method: "GET"
+  });
+
+  return R.path(["data", "data"], resp) as Event.AllEvent[];
+};
+
+export const getWeeklyTransactionsByStatus = async (
+  status: State.TransactionStates,
+  now: number | Date
+): Promise<any> => {
+  const resp = await client({
+    url: `/v1/statistics/transaction/week`,
+    method: "GET",
+    params: {
+      status,
+      now
+    }
   });
 
   return R.path(["data", "data"], resp) as Event.AllEvent[];

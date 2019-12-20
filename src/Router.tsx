@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, RouteComponentProps } from "react-router";
 import Layout from "./components/OutterLayout";
+import Dashboard from "./containers/Dashboard";
 import TaskDefinitionList from "./containers/TaskDefinitionList";
 import TransactionDetail from "./containers/TransactionDetail";
 import TransactionList from "./containers/TransactionList";
@@ -12,6 +13,7 @@ interface IProps extends RouteComponentProps {}
 export default (props: IProps) => {
   return (
     <Layout {...props}>
+      <Route path="/dashboard/" component={Dashboard} exact />
       <Route path="/transaction/" component={TransactionList} exact />
       <Route
         path="/transaction/:transactionId"
