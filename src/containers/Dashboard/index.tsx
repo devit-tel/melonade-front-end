@@ -196,7 +196,6 @@ export default class Dashboard extends React.Component<IProps, IState> {
             />
           </Chart>
         </Section>
-        {console.log(tasksExecutionStatistics)}
         {tasksExecutionStatistics && (
           <Section>
             <Title level={4}>Task Execution times</Title>
