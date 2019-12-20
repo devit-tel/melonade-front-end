@@ -19,3 +19,5 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           tag_names: true
           dockerfile: .Dockerfile
+        env:
+          CI: "true"
