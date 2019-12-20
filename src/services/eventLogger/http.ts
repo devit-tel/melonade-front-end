@@ -67,3 +67,17 @@ export const getWeeklyTransactionsByStatus = async (
 
   return R.path(["data", "data"], resp) as Event.AllEvent[];
 };
+
+export const getWeeklyTaskExecuteTime = async (
+  now: number | Date
+): Promise<any> => {
+  const resp = await client({
+    url: `/v1/statistics/task/execute/week`,
+    method: "GET",
+    params: {
+      now
+    }
+  });
+
+  return R.path(["data", "data"], resp) as Event.AllEvent[];
+};

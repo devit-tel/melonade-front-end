@@ -1,10 +1,26 @@
+// @ts-ignore
+import * as DataSet from "@antv/data-set";
 import { State } from "@melonade/melonade-declaration";
 import { Typography } from "antd";
 import { Axis, Chart, Geom, Tooltip } from "bizcharts";
 import moment from "moment";
+import * as R from "ramda";
 import React from "react";
+import { max, median, min, quantile } from "simple-statistics";
 import styled from "styled-components";
-import { getWeeklyTransactionsByStatus } from "../../services/eventLogger/http";
+import {
+  getWeeklyTaskExecuteTime,
+  getWeeklyTransactionsByStatus
+} from "../../services/eventLogger/http";
+
+interface IBoxChartRow {
+  x: string;
+  low: number;
+  q1: number;
+  median: number;
+  q3: number;
+  high: number;
+}
 
 const { Title } = Typography;
 
@@ -44,9 +60,15 @@ interface IWeeklyTransactionChartData {
   hour: number;
 }
 
+export interface ITaskExecutionTime {
+  executionTime: number;
+  taskName: string;
+}
+
 interface IProps {}
 
 interface IState {
+  tasksExecutionStatistics?: DataSet.DataView;
   weeklyTransactionData: IWeeklyTransactionChartData[];
   isLoading: boolean;
 }
@@ -64,10 +86,44 @@ export default class Dashboard extends React.Component<IProps, IState> {
   getWeeklyTransactionsByStatus = async () => {
     this.setState({ isLoading: true });
     try {
-      const startedTransaction = await getWeeklyTransactionsByStatus(
-        State.TransactionStates.Running,
-        new Date()
+      const [startedTransaction, tasksExecutionTime]: [
+        any[],
+        ITaskExecutionTime[]
+      ] = await Promise.all([
+        getWeeklyTransactionsByStatus(
+          State.TransactionStates.Running,
+          new Date()
+        ),
+        getWeeklyTaskExecuteTime(new Date())
+      ]);
+
+      const tasksExecutionStatisticsData = R.values(
+        R.groupBy(R.pathOr("", ["taskName"]), tasksExecutionTime)
+      ).map(
+        (taskExecutionTime: ITaskExecutionTime[]): IBoxChartRow => {
+          const executionTimes: number[] = taskExecutionTime.map(
+            R.pathOr(0, ["executionTime"])
+          );
+          return {
+            x: taskExecutionTime[0].taskName,
+            high: max(executionTimes),
+            low: min(executionTimes),
+            median: median(executionTimes),
+            q1: quantile(executionTimes, 0.2),
+            q3: quantile(executionTimes, 0.8)
+          };
+        }
       );
+
+      const tasksExecutionStatistics = new DataSet.DataView()
+        .source(tasksExecutionStatisticsData)
+        .transform({
+          type: "map",
+          callback: (obj: IBoxChartRow & any) => {
+            obj.range = [obj.low, obj.q1, obj.median, obj.q3, obj.high];
+            return obj;
+          }
+        });
 
       const weeklyTransactionData = startedTransaction.map(
         (data: any): IWeeklyTransactionChartData => {
@@ -81,6 +137,7 @@ export default class Dashboard extends React.Component<IProps, IState> {
       );
       this.setState({
         isLoading: false,
+        tasksExecutionStatistics,
         weeklyTransactionData: [
           ...fillUpWeeklyTransaction,
           ...weeklyTransactionData
@@ -96,7 +153,7 @@ export default class Dashboard extends React.Component<IProps, IState> {
   };
 
   render() {
-    const { weeklyTransactionData } = this.state;
+    const { weeklyTransactionData, tasksExecutionStatistics } = this.state;
     return (
       <Container>
         <Section>
@@ -139,6 +196,33 @@ export default class Dashboard extends React.Component<IProps, IState> {
             />
           </Chart>
         </Section>
+        {console.log(tasksExecutionStatistics)}
+        {tasksExecutionStatistics && (
+          <Section>
+            <Title level={4}>Task Execution times</Title>
+            <Chart height={700} data={tasksExecutionStatistics} forceFit>
+              <Axis name="x" />
+              <Tooltip
+                showTitle={false}
+                crosshairs={{
+                  type: "rect"
+                }}
+              />
+              <Geom
+                type="schema"
+                position="x*range"
+                shape="box"
+                style={
+                  {
+                    stroke: "#545454",
+                    fill: "#1890FF",
+                    fillOpacity: 0.3
+                  } as object
+                }
+              />
+            </Chart>
+          </Section>
+        )}
       </Container>
     );
   }
