@@ -11,8 +11,8 @@ import styled from "styled-components";
 import EventTable from "../../components/EventTable";
 import {
   getFalseEvents,
-  getWeeklyTaskExecuteTime,
-  getWeeklyTransactionsByStatus
+  getTaskExecuteime,
+  getTransactionDateHistogram
 } from "../../services/eventLogger/http";
 
 interface IBoxChartRow {
@@ -98,12 +98,12 @@ export default class Dashboard extends React.Component<IProps, IState> {
         ITaskExecutionTime[],
         Event.AllEvent[]
       ] = await Promise.all([
-        getWeeklyTransactionsByStatus(
+        getTransactionDateHistogram(
           startOfWeek,
           endOfWeek,
           State.TransactionStates.Running
         ),
-        getWeeklyTaskExecuteTime(startOfWeek, endOfWeek),
+        getTaskExecuteime(startOfWeek, endOfWeek),
         getFalseEvents(startOfWeek, endOfWeek)
       ]);
 

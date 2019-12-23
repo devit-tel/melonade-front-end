@@ -54,7 +54,7 @@ export const getTransactionData = async (
   return R.path(["data", "data"], resp) as Event.AllEvent[];
 };
 
-export const getWeeklyTransactionsByStatus = async (
+export const getTransactionDateHistogram = async (
   fromTimestamp: number,
   toTimestamp: number,
   status: State.TransactionStates
@@ -72,7 +72,7 @@ export const getWeeklyTransactionsByStatus = async (
   return R.path(["data", "data"], resp) as Event.AllEvent[];
 };
 
-export const getWeeklyTaskExecuteTime = async (
+export const getTaskExecuteime = async (
   fromTimestamp: number,
   toTimestamp: number
 ): Promise<any> => {
