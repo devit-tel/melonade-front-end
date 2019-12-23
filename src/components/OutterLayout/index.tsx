@@ -65,17 +65,43 @@ export default class OutterLayout extends React.Component<IProps, IState> {
             theme="dark"
             mode="inline"
             selectable={true}
-            defaultOpenKeys={["/definition"]}
+            defaultOpenKeys={["/definition", "/transaction-head"]}
             selectedKeys={[this.props.location.pathname]}
           >
             <Menu.Item key="/dashboard" onClick={this.changePath}>
               <Icon type="dashboard" />
               <span>Dashboard</span>
             </Menu.Item>
-            <Menu.Item key="/transaction" onClick={this.changePath}>
-              <Icon type="unordered-list" />
-              <span>Transactions</span>
-            </Menu.Item>
+            <SubMenu
+              key="/transaction-head"
+              title={
+                <span>
+                  <Icon type="unordered-list" />
+                  <span>Transactions</span>
+                </span>
+              }
+            >
+              <Menu.Item key="/transaction" onClick={this.changePath}>
+                <Icon type="unordered-list" />
+                <span>All Transactions</span>
+              </Menu.Item>
+              <Menu.Item key="/completed-transaction" onClick={this.changePath}>
+                <Icon type="unordered-list" />
+                <span>Completed Transactions</span>
+              </Menu.Item>
+              <Menu.Item
+                key="/compensated-transaction"
+                onClick={this.changePath}
+              >
+                <Icon type="unordered-list" />
+                <span>Compenstated Transactions</span>
+              </Menu.Item>
+              <Menu.Item key="/failed-transaction" onClick={this.changePath}>
+                <Icon type="unordered-list" />
+                <span>Failed Transactions</span>
+              </Menu.Item>
+            </SubMenu>
+
             <SubMenu
               key="/definition"
               title={
