@@ -1,6 +1,6 @@
 // @ts-ignore
 import * as DataSet from "@antv/data-set";
-import { State } from "@melonade/melonade-declaration";
+import { Event, State } from "@melonade/melonade-declaration";
 import { Typography } from "antd";
 import { Axis, Chart, Geom, Tooltip } from "bizcharts";
 import moment from "moment";
@@ -8,9 +8,11 @@ import * as R from "ramda";
 import React from "react";
 import { max, median, min, quantile } from "simple-statistics";
 import styled from "styled-components";
+import EventTable from "../../components/EventTable";
 import {
-  getWeeklyTaskExecuteTime,
-  getWeeklyTransactionsByStatus
+  getFalseEvents,
+  getTaskExecuteime,
+  getTransactionDateHistogram
 } from "../../services/eventLogger/http";
 
 interface IBoxChartRow {
@@ -68,6 +70,7 @@ export interface ITaskExecutionTime {
 interface IProps {}
 
 interface IState {
+  falseEvents: Event.AllEvent[];
   tasksExecutionStatistics?: DataSet.DataView;
   weeklyTransactionData: IWeeklyTransactionChartData[];
   isLoading: boolean;
@@ -78,23 +81,30 @@ export default class Dashboard extends React.Component<IProps, IState> {
     super(props);
 
     this.state = {
+      falseEvents: [],
       weeklyTransactionData: [],
       isLoading: false
     };
   }
 
-  getWeeklyTransactionsByStatus = async () => {
+  getData = async () => {
     this.setState({ isLoading: true });
     try {
-      const [startedTransaction, tasksExecutionTime]: [
+      const startOfWeek = +moment().startOf("week");
+      const endOfWeek = +moment().endOf("week");
+
+      const [startedTransaction, tasksExecutionTime, falseEvents]: [
         any[],
-        ITaskExecutionTime[]
+        ITaskExecutionTime[],
+        Event.AllEvent[]
       ] = await Promise.all([
-        getWeeklyTransactionsByStatus(
-          State.TransactionStates.Running,
-          new Date()
+        getTransactionDateHistogram(
+          startOfWeek,
+          endOfWeek,
+          State.TransactionStates.Running
         ),
-        getWeeklyTaskExecuteTime(new Date())
+        getTaskExecuteime(startOfWeek, endOfWeek),
+        getFalseEvents(startOfWeek, endOfWeek)
       ]);
 
       const tasksExecutionStatisticsData = R.values(
@@ -138,6 +148,7 @@ export default class Dashboard extends React.Component<IProps, IState> {
       this.setState({
         isLoading: false,
         tasksExecutionStatistics,
+        falseEvents,
         weeklyTransactionData: [
           ...fillUpWeeklyTransaction,
           ...weeklyTransactionData
@@ -149,11 +160,15 @@ export default class Dashboard extends React.Component<IProps, IState> {
   };
 
   componentDidMount = async () => {
-    this.getWeeklyTransactionsByStatus();
+    this.getData();
   };
 
   render() {
-    const { weeklyTransactionData, tasksExecutionStatistics } = this.state;
+    const {
+      weeklyTransactionData,
+      tasksExecutionStatistics,
+      falseEvents
+    } = this.state;
     return (
       <Container>
         <Section>
@@ -222,6 +237,10 @@ export default class Dashboard extends React.Component<IProps, IState> {
             </Chart>
           </Section>
         )}
+        <Section>
+          <Title level={4}>False Events</Title>
+          <EventTable events={falseEvents} />
+        </Section>
       </Container>
     );
   }

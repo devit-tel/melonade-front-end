@@ -16,7 +16,8 @@ export const listTransaction = async (
   transactionId?: string,
   tags: string[] = [],
   from?: number,
-  size?: number
+  size?: number,
+  statuses: State.TransactionStates[] = [State.TransactionStates.Running]
 ): Promise<ITransactionEventPaginate> => {
   const resp = await client({
     url: "/v1/store",
@@ -27,7 +28,8 @@ export const listTransaction = async (
       toTimestamp,
       transactionId,
       from,
-      size
+      size,
+      statuses: JSON.stringify(statuses)
     }
   });
 
@@ -52,32 +54,59 @@ export const getTransactionData = async (
   return R.path(["data", "data"], resp) as Event.AllEvent[];
 };
 
-export const getWeeklyTransactionsByStatus = async (
-  status: State.TransactionStates,
-  now: number | Date
+export const getTransactionDateHistogram = async (
+  fromTimestamp: number,
+  toTimestamp: number,
+  status: State.TransactionStates
 ): Promise<any> => {
   const resp = await client({
-    url: `/v1/statistics/transaction/week`,
+    url: `/v1/statistics/transaction-histogram`,
     method: "GET",
     params: {
       status,
-      now
+      fromTimestamp,
+      toTimestamp
     }
   });
 
   return R.path(["data", "data"], resp) as Event.AllEvent[];
 };
 
-export const getWeeklyTaskExecuteTime = async (
-  now: number | Date
+export const getTaskExecuteime = async (
+  fromTimestamp: number,
+  toTimestamp: number
 ): Promise<any> => {
   const resp = await client({
-    url: `/v1/statistics/task/execute/week`,
+    url: `/v1/statistics/task-execution-time`,
     method: "GET",
     params: {
-      now
+      fromTimestamp,
+      toTimestamp
     }
   });
 
   return R.path(["data", "data"], resp) as Event.AllEvent[];
+};
+
+export const getFalseEvents = async (
+  fromTimestamp: number,
+  toTimestamp: number
+): Promise<ITransactionEventPaginate> => {
+  const resp = await client({
+    url: "/v1/statistics/false-events",
+    method: "GET",
+    params: {
+      fromTimestamp,
+      toTimestamp
+    }
+  });
+
+  return R.pathOr(
+    {
+      total: 0,
+      events: []
+    },
+    ["data", "data"],
+    resp
+  );
 };
