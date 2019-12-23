@@ -124,9 +124,9 @@ export default class EventsTable extends React.Component<IProps, IState> {
 
     return (
       <Button
-        type="primary"
+        type={event.isError ? "danger" : "primary"}
         shape="circle"
-        icon="snippets"
+        icon="file-search"
         size="small"
         onClick={() => this.setState({ viewingEvent: event })}
       />
