@@ -214,6 +214,7 @@ class TransactionTable extends React.Component<IProps, IState> {
             onPressEnter={() => this.search()}
           />
           <StyledSelect
+            placeholder="Find by tag"
             mode="tags"
             onChange={this.handleTagsChange}
             size="default"
