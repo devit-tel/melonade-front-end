@@ -1,4 +1,4 @@
-import { Event } from "@melonade/melonade-declaration";
+import { Event, State } from "@melonade/melonade-declaration";
 import {
   Button,
   DatePicker,
@@ -53,7 +53,9 @@ const DateRange = styled(DatePicker.RangePicker)`
   width: 270px;
 `;
 
-interface IProps {}
+interface IProps {
+  statuses: State.TransactionStates[];
+}
 
 interface IState {
   currentPage: number;
@@ -127,6 +129,7 @@ class TransactionTable extends React.Component<IProps, IState> {
   }
 
   search = async (page?: number) => {
+    const { statuses } = this.props;
     this.setState({ isLoading: true });
     const {
       currentPage,
@@ -140,7 +143,8 @@ class TransactionTable extends React.Component<IProps, IState> {
         transactionId,
         tags,
         (searchPage - 1) * TRANSACTION_PER_PAGE,
-        TRANSACTION_PER_PAGE
+        TRANSACTION_PER_PAGE,
+        statuses
       );
       this.setState({
         transactionEvents,

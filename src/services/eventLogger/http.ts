@@ -16,7 +16,8 @@ export const listTransaction = async (
   transactionId?: string,
   tags: string[] = [],
   from?: number,
-  size?: number
+  size?: number,
+  statuses: State.TransactionStates[] = [State.TransactionStates.Running]
 ): Promise<ITransactionEventPaginate> => {
   const resp = await client({
     url: "/v1/store",
@@ -27,7 +28,8 @@ export const listTransaction = async (
       toTimestamp,
       transactionId,
       from,
-      size
+      size,
+      statuses: JSON.stringify(statuses)
     }
   });
 
