@@ -4,6 +4,7 @@ import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import moment from "moment";
 import * as R from "ramda";
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   AutoSizer,
   Column,
@@ -14,6 +15,27 @@ import {
 import "react-virtualized/styles.css";
 import JsonViewModal from "../JsonViewModal";
 import Status from "../StatusText";
+
+const DEFAULT_COLUMNS = [
+  "DETAILS",
+  "EVENT_TYPE",
+  "DETAILS_NAME",
+  "DETAILS_TYPE",
+  "DETAILS_ID",
+  "DETAILS_STATUS",
+  "TIME"
+];
+
+export type EventColumn =
+  | "EVENT_TYPE"
+  | "TRANSACTION_ID"
+  | "ERROR"
+  | "TIME"
+  | "DETAILS"
+  | "DETAILS_ID"
+  | "DETAILS_STATUS"
+  | "DETAILS_NAME"
+  | "DETAILS_TYPE";
 
 const nameRenderrer = (cell: TableCellDataGetterParams) => {
   const event: Event.AllEvent = cell.rowData;
@@ -40,15 +62,25 @@ const nameRenderrer = (cell: TableCellDataGetterParams) => {
 
 const idRenderrer = (cell: TableCellDataGetterParams) => {
   const event: Event.AllEvent = cell.rowData;
-  if (!event.isError) {
-    switch (event.type) {
-      case "TRANSACTION":
-        return <Typography.Text>{event.details.transactionId}</Typography.Text>;
-      case "WORKFLOW":
-        return <Typography.Text>{event.details.workflowId}</Typography.Text>;
-      case "TASK":
-        return <Typography.Text>{event.details.taskId}</Typography.Text>;
-    }
+  switch (event.type) {
+    case "TRANSACTION":
+      return (
+        <Typography.Text>
+          {R.path(["details", "transactionId"], event)}
+        </Typography.Text>
+      );
+    case "WORKFLOW":
+      return (
+        <Typography.Text>
+          {R.path(["details", "workflowId"], event)}
+        </Typography.Text>
+      );
+    case "TASK":
+      return (
+        <Typography.Text>
+          {R.path(["details", "taskId"], event)}
+        </Typography.Text>
+      );
   }
 
   return null;
@@ -83,6 +115,14 @@ const statusRenderrer = (cell: TableCellDataGetterParams) => {
   );
 };
 
+const transactionIDRenderrer = (cell: TableCellDataGetterParams) => {
+  const event: Event.AllEvent = cell.rowData;
+
+  return (
+    <Link to={`transaction/${event.transactionId}`}>{event.transactionId}</Link>
+  );
+};
+
 const timeRenderrer = (cell: TableCellDataGetterParams) => {
   const event: Event.AllEvent = cell.rowData;
 
@@ -96,6 +136,7 @@ const timeRenderrer = (cell: TableCellDataGetterParams) => {
 interface IProps {
   events: Event.AllEvent[];
   isLoading?: boolean;
+  columns?: EventColumn[];
 }
 
 interface IState {
@@ -188,6 +229,7 @@ export default class EventsTable extends React.Component<IProps, IState> {
 
   render() {
     const { showIdField, viewingEvent, searchText } = this.state;
+    const { columns = DEFAULT_COLUMNS } = this.props;
     const filteredEvents = this.getFilteredEvents();
     return (
       <React.Fragment>
@@ -226,44 +268,72 @@ export default class EventsTable extends React.Component<IProps, IState> {
               rowHeight={30}
               width={width}
             >
-              <Column
-                cellRenderer={this.detailsRenderer}
-                dataKey="details"
-                width={30}
-              />
-              <Column label="Event Type" dataKey="type" width={120} />
-              {showIdField ? (
+              {columns.includes("DETAILS") && (
+                <Column
+                  cellRenderer={this.detailsRenderer}
+                  dataKey="details"
+                  width={30}
+                />
+              )}
+              {columns.includes("TRANSACTION_ID") && (
+                <Column
+                  label="TransactionId"
+                  cellRenderer={transactionIDRenderrer}
+                  dataKey="transactionId"
+                  width={250}
+                />
+              )}
+              {columns.includes("DETAILS_TYPE") && (
+                <Column label="Event Type" dataKey="type" width={120} />
+              )}
+              {columns.includes("DETAILS_ID") && showIdField && (
                 <Column
                   label="ID"
                   cellRenderer={idRenderrer}
                   dataKey="details.id"
                   width={350}
                 />
-              ) : null}
-              <Column
-                label="Name"
-                cellRenderer={nameRenderrer}
-                dataKey="details.name"
-                width={200}
-              />
-              <Column
-                label="Type"
-                cellRenderer={fieldRenderrer(["details", "type"])}
-                dataKey="details.type"
-                width={150}
-              />
-              <Column
-                label="Status"
-                cellRenderer={statusRenderrer}
-                dataKey="details.status"
-                width={100}
-              />
-              <Column
-                label="Occured At"
-                cellRenderer={timeRenderrer}
-                dataKey="timestamp"
-                width={220}
-              />
+              )}
+              {columns.includes("DETAILS_NAME") && (
+                <Column
+                  label="Name"
+                  cellRenderer={nameRenderrer}
+                  dataKey="details.name"
+                  width={200}
+                />
+              )}
+              {columns.includes("DETAILS_TYPE") && (
+                <Column
+                  label="Type"
+                  cellRenderer={fieldRenderrer(["details", "type"])}
+                  dataKey="details.type"
+                  width={150}
+                />
+              )}
+              {columns.includes("ERROR") && (
+                <Column
+                  label="Error"
+                  cellRenderer={fieldRenderrer(["error"])}
+                  dataKey="error"
+                  width={400}
+                />
+              )}
+              {columns.includes("DETAILS_STATUS") && (
+                <Column
+                  label="Status"
+                  cellRenderer={statusRenderrer}
+                  dataKey="details.status"
+                  width={100}
+                />
+              )}
+              {columns.includes("TIME") && (
+                <Column
+                  label="Occured At"
+                  cellRenderer={timeRenderrer}
+                  dataKey="timestamp"
+                  width={220}
+                />
+              )}
             </Table>
           )}
         </AutoSizer>

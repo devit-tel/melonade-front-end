@@ -239,7 +239,18 @@ export default class Dashboard extends React.Component<IProps, IState> {
         )}
         <Section>
           <Title level={4}>False Events</Title>
-          <EventTable events={falseEvents} />
+          <EventTable
+            events={falseEvents}
+            columns={[
+              "DETAILS",
+              "TRANSACTION_ID",
+              "EVENT_TYPE",
+              "ERROR",
+              "DETAILS_ID",
+              "DETAILS_STATUS",
+              "TIME"
+            ]}
+          />
         </Section>
       </Container>
     );

@@ -1,23 +1,10 @@
 import { Event, State } from "@melonade/melonade-declaration";
-import {
-  Button,
-  DatePicker,
-  Icon,
-  Input,
-  Pagination,
-  Select,
-  Table,
-  Tag,
-  Typography
-} from "antd";
+import { Button, DatePicker, Icon, Input, Pagination, Select, Table, Tag, Typography } from "antd";
 import moment from "moment";
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import {
-  ITransactionEventPaginate,
-  listTransaction
-} from "../../services/eventLogger/http";
+import { ITransactionEventPaginate, listTransaction } from "../../services/eventLogger/http";
 
 const TRANSACTION_PER_PAGE = 50;
 
