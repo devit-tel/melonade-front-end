@@ -1,10 +1,23 @@
 import { Event, State } from "@melonade/melonade-declaration";
-import { Button, DatePicker, Icon, Input, Pagination, Select, Table, Tag, Typography } from "antd";
+import {
+  Button,
+  Icon,
+  Input,
+  Pagination,
+  Select,
+  Table,
+  Tag,
+  Typography
+} from "antd";
 import moment from "moment";
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { ITransactionEventPaginate, listTransaction } from "../../services/eventLogger/http";
+import DateRangePicker from "../../components/DateRangePicker";
+import {
+  ITransactionEventPaginate,
+  listTransaction
+} from "../../services/eventLogger/http";
 
 const TRANSACTION_PER_PAGE = 50;
 
@@ -35,10 +48,6 @@ const TransactionInput = styled(Input)`
 const StyledSelect = (styled(Select)`
   min-width: 180px;
 ` as unknown) as typeof Select;
-
-const DateRange = styled(DatePicker.RangePicker)`
-  width: 270px;
-`;
 
 interface IProps {
   statuses: State.TransactionStates[];
@@ -187,9 +196,10 @@ class TransactionTable extends React.Component<IProps, IState> {
     const {
       currentPage,
       transactionEvents,
-      search: { transactionId, dateRange, tags },
+      search: { transactionId, tags },
       isLoading
     } = this.state;
+
     return (
       <div>
         <ToolBarContainer>
@@ -208,11 +218,7 @@ class TransactionTable extends React.Component<IProps, IState> {
             value={tags}
             onBlur={() => this.search()}
           />
-          <DateRange
-            size="default"
-            onChange={this.handleDateRangeChange}
-            value={dateRange}
-          />
+          <DateRangePicker />
           <Button
             type="primary"
             icon="search"
