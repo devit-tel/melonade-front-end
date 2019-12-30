@@ -29,11 +29,18 @@ interface IBoxChartRow {
 
 const { Title } = Typography;
 
-const Container = styled.div``;
+const Container = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-end;
+`;
 
 const Section = styled.div`
   display: flex;
   flex-flow: column nowrap;
+  flex: 1 1 100%;
+  align-self: stretch;
+
   padding: 12px;
 
   & + & {
@@ -44,7 +51,7 @@ const Section = styled.div`
 const scale = {
   date: {
     alias: "Date",
-    formatter: (date: number) => moment(date).format("YYYY/MM/DD HH:mm:ss.SSS")
+    formatter: (date: number) => moment(date).format("YYYY/MM/DD HH:mm")
   },
   count: {
     alias: "Count"
