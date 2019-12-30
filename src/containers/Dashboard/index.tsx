@@ -85,15 +85,11 @@ export default (props: IProps) => {
       );
       setStartedTransactionHistogram(startedTransactionHistogram);
     })();
-  }, [dateRange]);
 
-  useEffect(() => {
     (async () => {
       setFalseEvents(await getFalseEvents(+dateRange[0], +dateRange[1]));
     })();
-  }, [dateRange]);
 
-  useEffect(() => {
     (async () => {
       const tasksExecutionTime = await getTaskExecuteime(
         +dateRange[0],
