@@ -91,7 +91,7 @@ export const getTaskExecuteime = async (
 export const getFalseEvents = async (
   fromTimestamp: number,
   toTimestamp: number
-): Promise<ITransactionEventPaginate> => {
+): Promise<Event.AllEvent[]> => {
   const resp = await client({
     url: "/v1/statistics/false-events",
     method: "GET",
@@ -101,12 +101,5 @@ export const getFalseEvents = async (
     }
   });
 
-  return R.pathOr(
-    {
-      total: 0,
-      events: []
-    },
-    ["data", "data"],
-    resp
-  );
+  return R.pathOr([], ["data", "data"], resp);
 };

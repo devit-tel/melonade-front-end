@@ -5,10 +5,12 @@ import { Typography } from "antd";
 import { Axis, Chart, Geom, Tooltip } from "bizcharts";
 import moment from "moment";
 import * as R from "ramda";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { max, median, min, quantile } from "simple-statistics";
 import styled from "styled-components";
+import DateRangePicker from "../../components/DateRangePicker";
 import EventTable from "../../components/EventTable";
+import { DateRangeContext } from "../../contexts/DateRangeContext";
 import {
   getFalseEvents,
   getTaskExecuteime,
@@ -76,7 +78,170 @@ interface IState {
   isLoading: boolean;
 }
 
-export default class Dashboard extends React.Component<IProps, IState> {
+export default (props: IProps) => {
+  const [dateRange] = useContext(DateRangeContext);
+  const [weeklyTransactionData, setWeeklyTransactionData] = useState<
+    IWeeklyTransactionChartData[]
+  >([]);
+  const [tasksExecutionStatistics, settasksExecutionStatistics] = useState<
+    DataSet.DataView
+  >(new DataSet.DataView());
+  const [falseEvents, setFalseEvents] = useState<Event.AllEvent[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const startedTransaction = await getTransactionDateHistogram(
+        +dateRange[0],
+        +dateRange[1],
+        State.TransactionStates.Running
+      );
+      const weeklyTransactionData = startedTransaction.map(
+        (data: any): IWeeklyTransactionChartData => {
+          const date = moment(data.date);
+          return {
+            count: data.count,
+            hour: date.hour(),
+            weekday: date.weekday()
+          };
+        }
+      );
+
+      setWeeklyTransactionData([
+        ...fillUpWeeklyTransaction,
+        ...weeklyTransactionData
+      ]);
+    })();
+  }, [dateRange]);
+
+  useEffect(() => {
+    (async () => {
+      setFalseEvents(await getFalseEvents(+dateRange[0], +dateRange[1]));
+    })();
+  }, [dateRange]);
+
+  useEffect(() => {
+    (async () => {
+      const tasksExecutionTime = await getTaskExecuteime(
+        +dateRange[0],
+        +dateRange[1]
+      );
+      const tasksExecutionStatisticsData = R.values(
+        R.groupBy(R.pathOr("", ["taskName"]), tasksExecutionTime)
+      ).map(
+        (taskExecutionTime: ITaskExecutionTime[]): IBoxChartRow => {
+          const executionTimes: number[] = taskExecutionTime.map(
+            R.pathOr(0, ["executionTime"])
+          );
+          return {
+            x: taskExecutionTime[0].taskName,
+            high: max(executionTimes),
+            low: min(executionTimes),
+            median: median(executionTimes),
+            q1: quantile(executionTimes, 0.2),
+            q3: quantile(executionTimes, 0.8)
+          };
+        }
+      );
+      settasksExecutionStatistics(
+        new DataSet.DataView().source(tasksExecutionStatisticsData).transform({
+          type: "map",
+          callback: (obj: IBoxChartRow & any) => {
+            obj.range = [obj.low, obj.q1, obj.median, obj.q3, obj.high];
+            return obj;
+          }
+        })
+      );
+    })();
+  }, [dateRange]);
+
+  return (
+    <Container>
+      <DateRangePicker />
+      <Section>
+        <Title level={4}>Transaction started</Title>
+        <Chart
+          height={400}
+          data={weeklyTransactionData}
+          forceFit
+          padding={[20, 60, 40, 100]}
+          scale={{
+            hour: {
+              min: 0,
+              max: 23,
+              tickInterval: 1,
+              tickCount: 24
+            },
+            weekday: {
+              min: 0,
+              max: 6,
+              tickInterval: 1,
+              tickCount: 7
+            }
+          }}
+        >
+          <Axis
+            name="weekday"
+            label={{
+              formatter: (weekday: any): string => weekdayString[weekday] || "-"
+            }}
+          />
+          <Axis name="hour" />
+          <Tooltip showTitle={false} />
+          <Geom
+            type="point"
+            position="hour*weekday"
+            size={["count", [2, (window.innerWidth - 120) / 48]]}
+            shape="circle"
+            color={"#49BEAA"}
+          />
+        </Chart>
+      </Section>
+      {tasksExecutionStatistics && (
+        <Section>
+          <Title level={4}>Task Execution times</Title>
+          <Chart height={700} data={tasksExecutionStatistics} forceFit>
+            <Axis name="x" />
+            <Tooltip
+              showTitle={false}
+              crosshairs={{
+                type: "rect"
+              }}
+            />
+            <Geom
+              type="schema"
+              position="x*range"
+              shape="box"
+              style={
+                {
+                  stroke: "#545454",
+                  fill: "#1890FF",
+                  fillOpacity: 0.3
+                } as object
+              }
+            />
+          </Chart>
+        </Section>
+      )}
+      <Section>
+        <Title level={4}>False Events</Title>
+        <EventTable
+          events={falseEvents}
+          columns={[
+            "DETAILS",
+            "TRANSACTION_ID",
+            "EVENT_TYPE",
+            "ERROR",
+            "DETAILS_ID",
+            "DETAILS_STATUS",
+            "TIME"
+          ]}
+        />
+      </Section>
+    </Container>
+  );
+};
+
+export class Dashboard extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
