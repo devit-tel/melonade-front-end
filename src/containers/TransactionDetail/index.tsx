@@ -1,9 +1,10 @@
 import {
   Event,
+  State,
   Task,
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
-import { Tabs } from "antd";
+import { Button, Tabs } from "antd";
 import * as R from "ramda";
 import React from "react";
 import { RouteComponentProps } from "react-router";
@@ -12,6 +13,7 @@ import EventTable from "../../components/EventTable";
 import TimelineChart from "../../components/TimelineChart";
 import WorkflowChart from "../../components/WorkflowChart";
 import { getTransactionData } from "../../services/eventLogger/http";
+import { cancelTranasaction } from "../../services/procressManager/http";
 
 const { TabPane } = Tabs;
 
@@ -123,9 +125,33 @@ class TransactionTable extends React.Component<IProps, IState> {
 
   render() {
     const { events, isLoading } = this.state;
+    const { transactionId } = this.props.match.params;
     const groupedWorkflow = groupWorkflowById(events);
     return (
       <Container>
+        <Button type="primary" icon="reload" onClick={this.getTransactionData}>
+          Reload
+        </Button>
+        {!events.find(
+          (event: Event.AllEvent) =>
+            event.type === "TRANSACTION" &&
+            event.isError === false &&
+            [
+              State.TransactionStates.Cancelled,
+              State.TransactionStates.Compensated,
+              State.TransactionStates.Completed,
+              State.TransactionStates.Failed
+            ].includes(event.details.status)
+        ) && (
+          <Button
+            type="danger"
+            icon="rollback"
+            onClick={() => cancelTranasaction(transactionId)}
+          >
+            Cancel transaction
+          </Button>
+        )}
+
         <StyledTabs>
           <TabPane tab="Timeline view" key="1">
             <TimelineChart events={events} />
