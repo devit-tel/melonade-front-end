@@ -2,7 +2,7 @@
 import * as DataSet from "@antv/data-set";
 import { Event, State } from "@melonade/melonade-declaration";
 import { Typography } from "antd";
-import { Axis, Chart, Geom, Tooltip, View } from "bizcharts";
+import { Axis, Chart, Geom, Legend, Tooltip } from "bizcharts";
 import moment from "moment";
 import * as R from "ramda";
 import React, { useContext, useEffect, useState } from "react";
@@ -67,10 +67,10 @@ interface IProps {}
 
 export default (props: IProps) => {
   const [dateRange] = useContext(DateRangeContext);
-  const [
-    startedTransactionHistogram,
-    setStartedTransactionHistogram
-  ] = useState<IHistogramCount[]>([]);
+  const [transactionHistogram, setTransactionHistogram] = useState<
+    IHistogramCount[]
+  >([]);
+
   const [tasksExecutionStatistics, settasksExecutionStatistics] = useState<
     DataSet.DataView
   >(new DataSet.DataView());
@@ -78,12 +78,45 @@ export default (props: IProps) => {
 
   useEffect(() => {
     (async () => {
-      const startedTransactionHistogram = await getTransactionDateHistogram(
-        +dateRange[0],
-        +dateRange[1],
-        State.TransactionStates.Running
-      );
-      setStartedTransactionHistogram(startedTransactionHistogram);
+      const [
+        startedHistogram,
+        completedHistogram,
+        compensatedHistogram,
+        failedHistogram
+      ] = await Promise.all([
+        getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
+          State.TransactionStates.Running
+        ]),
+        getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
+          State.TransactionStates.Completed
+        ]),
+        getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
+          State.TransactionStates.Compensated,
+          State.TransactionStates.Cancelled
+        ]),
+        getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
+          State.TransactionStates.Failed
+        ])
+      ]);
+
+      setTransactionHistogram([
+        ...startedHistogram.map((histogram: IHistogramCount) => ({
+          ...histogram,
+          type: "Running"
+        })),
+        ...completedHistogram.map((histogram: IHistogramCount) => ({
+          ...histogram,
+          type: "Completed"
+        })),
+        ...compensatedHistogram.map((histogram: IHistogramCount) => ({
+          ...histogram,
+          type: "Compensated"
+        })),
+        ...failedHistogram.map((histogram: IHistogramCount) => ({
+          ...histogram,
+          type: "Failed"
+        }))
+      ]);
     })();
 
     (async () => {
@@ -128,28 +161,13 @@ export default (props: IProps) => {
     <Container>
       <DateRangePicker />
       <Section>
-        <Title level={4}>Started Transaction</Title>
-        <Chart
-          height={400}
-          forceFit
-          padding={[20, 60, 40, 100]}
-          scale={{
-            date: {
-              sync: true
-            }
-          }}
-        >
+        <Title level={4}>Transaction Hourly Histogram</Title>
+        <Chart height={400} forceFit scale={scale} data={transactionHistogram}>
+          <Legend />
           <Tooltip />
-          <View data={startedTransactionHistogram} scale={scale}>
-            <Axis name="date" />
-            <Axis name="count" />
-            <Tooltip
-              crosshairs={{
-                type: "y"
-              }}
-            />
-            <Geom type="line" position="date*count" size={2} />
-          </View>
+          <Axis name="date" />
+          <Axis name="count" />
+          <Geom type="line" position="date*count" size={2} color="type" />
         </Chart>
       </Section>
 

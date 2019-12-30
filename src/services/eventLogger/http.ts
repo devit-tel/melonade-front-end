@@ -13,6 +13,7 @@ export interface ITransactionEventPaginate {
 export interface IHistogramCount {
   date: number | Date;
   count: number;
+  type: string;
 }
 
 export const listTransaction = async (
@@ -62,13 +63,13 @@ export const getTransactionData = async (
 export const getTransactionDateHistogram = async (
   fromTimestamp: number,
   toTimestamp: number,
-  status: State.TransactionStates
+  statuses: State.TransactionStates[]
 ): Promise<IHistogramCount[]> => {
   const resp = await client({
     url: `/v1/statistics/transaction-histogram`,
     method: "GET",
     params: {
-      status,
+      statuses: JSON.stringify(statuses),
       fromTimestamp,
       toTimestamp
     }
