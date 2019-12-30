@@ -94,3 +94,12 @@ export const createWorkflowDefinitions = async (
     resp
   ) as WorkflowDefinition.IWorkflowDefinition;
 };
+
+export const cancelTranasaction = async (
+  transactionId: string
+): Promise<void> => {
+  await client({
+    url: `/v1/transaction/cancel/${transactionId}`,
+    method: "delete"
+  });
+};

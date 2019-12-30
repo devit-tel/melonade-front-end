@@ -10,6 +10,12 @@ export interface ITransactionEventPaginate {
   events: Event.ITransactionEvent[];
 }
 
+export interface IHistogramCount {
+  date: number | Date;
+  count: number;
+  type: string;
+}
+
 export const listTransaction = async (
   fromTimestamp: number,
   toTimestamp: number,
@@ -57,19 +63,19 @@ export const getTransactionData = async (
 export const getTransactionDateHistogram = async (
   fromTimestamp: number,
   toTimestamp: number,
-  status: State.TransactionStates
-): Promise<any> => {
+  statuses: State.TransactionStates[]
+): Promise<IHistogramCount[]> => {
   const resp = await client({
     url: `/v1/statistics/transaction-histogram`,
     method: "GET",
     params: {
-      status,
+      statuses: JSON.stringify(statuses),
       fromTimestamp,
       toTimestamp
     }
   });
 
-  return R.path(["data", "data"], resp) as Event.AllEvent[];
+  return R.path(["data", "data"], resp) as IHistogramCount[];
 };
 
 export const getTaskExecuteime = async (
@@ -91,7 +97,7 @@ export const getTaskExecuteime = async (
 export const getFalseEvents = async (
   fromTimestamp: number,
   toTimestamp: number
-): Promise<ITransactionEventPaginate> => {
+): Promise<Event.AllEvent[]> => {
   const resp = await client({
     url: "/v1/statistics/false-events",
     method: "GET",
@@ -101,12 +107,5 @@ export const getFalseEvents = async (
     }
   });
 
-  return R.pathOr(
-    {
-      total: 0,
-      events: []
-    },
-    ["data", "data"],
-    resp
-  );
+  return R.pathOr([], ["data", "data"], resp);
 };

@@ -1323,10 +1323,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@melonade/melonade-declaration@^0.8.5":
-  version "0.8.5"
-  resolved "https://registry.yarnpkg.com/@melonade/melonade-declaration/-/melonade-declaration-0.8.5.tgz#0c3f25f3d144bdc7babddb0debc8bebde6cbf67d"
-  integrity sha512-3N/5chJRscO3vOkXJ+RRRGVqtujOlPHUQS4ILS3zm1/g5QdSq7IgY4VyjZpoAUrsThh553gZq3dcn3wCStgpWQ==
+"@melonade/melonade-declaration@^0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@melonade/melonade-declaration/-/melonade-declaration-0.10.0.tgz#84d29ae1671cbd8b18a32e370c10d3e683f3aaec"
+  integrity sha512-pqFZz7NkZ6yD7Le4NsWQOmchaOmqYRqR1e4m++U+4xzYRAFOLbtZbJqzU0q+Hj2B4tWKgg+cEGSuHMeondf6xA==
   dependencies:
     ajv "^6.10.2"
     ramda "^0.26.1"
@@ -1541,6 +1541,18 @@
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.3.tgz#bdfd69d61e464dcc81b25159c270d75a73c1a636"
   integrity sha512-Il2DtDVRGDcqjDtE+rF8iqg1CArehSK84HZJCT7AMITlyXRBpuPhqGLDQMowraqqu1coEaimg4ZOqggt6L6L+A==
+
+"@types/lodash.debounce@^4.0.6":
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/@types/lodash.debounce/-/lodash.debounce-4.0.6.tgz#c5a2326cd3efc46566c47e4c0aa248dc0ee57d60"
+  integrity sha512-4WTmnnhCfDvvuLMaF3KV4Qfki93KebocUF45msxhYyjMttZDQYzHkO639ohhk8+oco2cluAFL3t5+Jn4mleylQ==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*":
+  version "4.14.149"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.149.tgz#1342d63d948c6062838fbf961012f74d4e638440"
+  integrity sha512-ijGqzZt/b7BfzcK9vTrS6MFljQRPn5BFWOx8oE0GYxribu6uV+aA9zZuXI1zc/etK9E8nrgdoF2+LgUw7+9tJQ==
 
 "@types/moment@^2.13.0":
   version "2.13.0"

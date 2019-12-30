@@ -2,17 +2,20 @@
 import * as DataSet from "@antv/data-set";
 import { Event, State } from "@melonade/melonade-declaration";
 import { Typography } from "antd";
-import { Axis, Chart, Geom, Tooltip } from "bizcharts";
+import { Axis, Chart, Geom, Legend, Tooltip } from "bizcharts";
 import moment from "moment";
 import * as R from "ramda";
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { max, median, min, quantile } from "simple-statistics";
 import styled from "styled-components";
+import DateRangePicker from "../../components/DateRangePicker";
 import EventTable from "../../components/EventTable";
+import { DateRangeContext } from "../../contexts/DateRangeContext";
 import {
   getFalseEvents,
   getTaskExecuteime,
-  getTransactionDateHistogram
+  getTransactionDateHistogram,
+  IHistogramCount
 } from "../../services/eventLogger/http";
 
 interface IBoxChartRow {
@@ -26,11 +29,18 @@ interface IBoxChartRow {
 
 const { Title } = Typography;
 
-const Container = styled.div``;
+const Container = styled.div`
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-end;
+`;
 
 const Section = styled.div`
   display: flex;
   flex-flow: column nowrap;
+  flex: 1 1 100%;
+  align-self: stretch;
+
   padding: 12px;
 
   & + & {
@@ -38,29 +48,15 @@ const Section = styled.div`
   }
 `;
 
-const fillUpWeeklyTransaction = new Array(7 * 24)
-  .fill(null)
-  .map((_value: any, index: number) => ({
-    count: 0,
-    weekday: index % 7,
-    hour: Math.floor(index / 7)
-  }));
-
-const weekdayString = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday"
-];
-
-interface IWeeklyTransactionChartData {
-  count: number;
-  weekday: number;
-  hour: number;
-}
+const scale = {
+  date: {
+    alias: "Date",
+    formatter: (date: number) => moment(date).format("YYYY/MM/DD HH:mm")
+  },
+  count: {
+    alias: "Count"
+  }
+};
 
 export interface ITaskExecutionTime {
   executionTime: number;
@@ -69,44 +65,69 @@ export interface ITaskExecutionTime {
 
 interface IProps {}
 
-interface IState {
-  falseEvents: Event.AllEvent[];
-  tasksExecutionStatistics?: DataSet.DataView;
-  weeklyTransactionData: IWeeklyTransactionChartData[];
-  isLoading: boolean;
-}
+export default (props: IProps) => {
+  const [dateRange] = useContext(DateRangeContext);
+  const [transactionHistogram, setTransactionHistogram] = useState<
+    IHistogramCount[]
+  >([]);
 
-export default class Dashboard extends React.Component<IProps, IState> {
-  constructor(props: IProps) {
-    super(props);
+  const [tasksExecutionStatistics, settasksExecutionStatistics] = useState<
+    DataSet.DataView
+  >(new DataSet.DataView());
+  const [falseEvents, setFalseEvents] = useState<Event.AllEvent[]>([]);
 
-    this.state = {
-      falseEvents: [],
-      weeklyTransactionData: [],
-      isLoading: false
-    };
-  }
-
-  getData = async () => {
-    this.setState({ isLoading: true });
-    try {
-      const startOfWeek = +moment().startOf("week");
-      const endOfWeek = +moment().endOf("week");
-
-      const [startedTransaction, tasksExecutionTime, falseEvents]: [
-        any[],
-        ITaskExecutionTime[],
-        Event.AllEvent[]
+  useEffect(() => {
+    (async () => {
+      const [
+        startedHistogram,
+        completedHistogram,
+        compensatedHistogram,
+        failedHistogram
       ] = await Promise.all([
-        getTransactionDateHistogram(
-          startOfWeek,
-          endOfWeek,
+        getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
           State.TransactionStates.Running
-        ),
-        getTaskExecuteime(startOfWeek, endOfWeek),
-        getFalseEvents(startOfWeek, endOfWeek)
+        ]),
+        getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
+          State.TransactionStates.Completed
+        ]),
+        getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
+          State.TransactionStates.Compensated,
+          State.TransactionStates.Cancelled
+        ]),
+        getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
+          State.TransactionStates.Failed
+        ])
       ]);
 
+      setTransactionHistogram([
+        ...startedHistogram.map((histogram: IHistogramCount) => ({
+          ...histogram,
+          type: "Running"
+        })),
+        ...completedHistogram.map((histogram: IHistogramCount) => ({
+          ...histogram,
+          type: "Completed"
+        })),
+        ...compensatedHistogram.map((histogram: IHistogramCount) => ({
+          ...histogram,
+          type: "Compensated"
+        })),
+        ...failedHistogram.map((histogram: IHistogramCount) => ({
+          ...histogram,
+          type: "Failed"
+        }))
+      ]);
+    })();
+
+    (async () => {
+      setFalseEvents(await getFalseEvents(+dateRange[0], +dateRange[1]));
+    })();
+
+    (async () => {
+      const tasksExecutionTime = await getTaskExecuteime(
+        +dateRange[0],
+        +dateRange[1]
+      );
       const tasksExecutionStatisticsData = R.values(
         R.groupBy(R.pathOr("", ["taskName"]), tasksExecutionTime)
       ).map(
@@ -124,124 +145,73 @@ export default class Dashboard extends React.Component<IProps, IState> {
           };
         }
       );
-
-      const tasksExecutionStatistics = new DataSet.DataView()
-        .source(tasksExecutionStatisticsData)
-        .transform({
+      settasksExecutionStatistics(
+        new DataSet.DataView().source(tasksExecutionStatisticsData).transform({
           type: "map",
           callback: (obj: IBoxChartRow & any) => {
             obj.range = [obj.low, obj.q1, obj.median, obj.q3, obj.high];
             return obj;
           }
-        });
-
-      const weeklyTransactionData = startedTransaction.map(
-        (data: any): IWeeklyTransactionChartData => {
-          const date = moment(data.date);
-          return {
-            count: data.count,
-            hour: date.hour(),
-            weekday: date.weekday()
-          };
-        }
+        })
       );
-      this.setState({
-        isLoading: false,
-        tasksExecutionStatistics,
-        falseEvents,
-        weeklyTransactionData: [
-          ...fillUpWeeklyTransaction,
-          ...weeklyTransactionData
-        ]
-      });
-    } catch (error) {
-      this.setState({ isLoading: false });
-    }
-  };
+    })();
+  }, [dateRange]);
 
-  componentDidMount = async () => {
-    this.getData();
-  };
+  return (
+    <Container>
+      <DateRangePicker />
+      <Section>
+        <Title level={4}>Transaction Hourly Histogram</Title>
+        <Chart height={400} forceFit scale={scale} data={transactionHistogram}>
+          <Legend />
+          <Tooltip />
+          <Axis name="date" />
+          <Axis name="count" />
+          <Geom type="line" position="date*count" size={2} color="type" />
+        </Chart>
+      </Section>
 
-  render() {
-    const {
-      weeklyTransactionData,
-      tasksExecutionStatistics,
-      falseEvents
-    } = this.state;
-    return (
-      <Container>
+      {tasksExecutionStatistics && (
         <Section>
-          <Title level={4}>Transaction started</Title>
-          <Chart
-            height={400}
-            data={weeklyTransactionData}
-            forceFit
-            padding={[20, 60, 40, 100]}
-            scale={{
-              hour: {
-                min: 0,
-                max: 23,
-                tickInterval: 1,
-                tickCount: 24
-              },
-              weekday: {
-                min: 0,
-                max: 6,
-                tickInterval: 1,
-                tickCount: 7
-              }
-            }}
-          >
-            <Axis
-              name="weekday"
-              label={{
-                formatter: (weekday: any): string =>
-                  weekdayString[weekday] || "-"
+          <Title level={4}>Task Execution times</Title>
+          <Chart height={700} data={tasksExecutionStatistics} forceFit>
+            <Axis name="x" />
+            <Tooltip
+              showTitle={false}
+              crosshairs={{
+                type: "rect"
               }}
             />
-            <Axis name="hour" />
-            <Tooltip showTitle={false} />
             <Geom
-              type="point"
-              position="hour*weekday"
-              size={["count", [2, (window.innerWidth - 120) / 48]]}
-              shape="circle"
-              color={"#49BEAA"}
+              type="schema"
+              position="x*range"
+              shape="box"
+              style={
+                {
+                  stroke: "#545454",
+                  fill: "#1890FF",
+                  fillOpacity: 0.3
+                } as object
+              }
             />
           </Chart>
         </Section>
-        {tasksExecutionStatistics && (
-          <Section>
-            <Title level={4}>Task Execution times</Title>
-            <Chart height={700} data={tasksExecutionStatistics} forceFit>
-              <Axis name="x" />
-              <Tooltip
-                showTitle={false}
-                crosshairs={{
-                  type: "rect"
-                }}
-              />
-              <Geom
-                type="schema"
-                position="x*range"
-                shape="box"
-                style={
-                  {
-                    stroke: "#545454",
-                    fill: "#1890FF",
-                    fillOpacity: 0.3
-                  } as object
-                }
-              />
-            </Chart>
-          </Section>
-        )}
-        <Section>
-          <Title level={4}>False Events</Title>
-          <EventTable events={falseEvents} />
-        </Section>
-      </Container>
-    );
-  }
-}
+      )}
+      <Section>
+        <Title level={4}>False Events</Title>
+        <EventTable
+          events={falseEvents}
+          columns={[
+            "DETAILS",
+            "TRANSACTION_ID",
+            "EVENT_TYPE",
+            "ERROR",
+            "DETAILS_ID",
+            "DETAILS_STATUS",
+            "TIME"
+          ]}
+        />
+      </Section>
+    </Container>
+  );
+};

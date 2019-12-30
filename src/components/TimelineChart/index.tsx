@@ -5,12 +5,6 @@ import vis from "vis-timeline";
 import "vis-timeline/dist/vis-timeline-graph2d.css";
 import "./index.scss";
 
-declare module "antd/lib/select" {
-  export interface OptionProps {
-    label?: string;
-  }
-}
-
 const getStatusType = (
   status: State.TransactionStates | State.WorkflowStates | State.TaskStates,
   lastType: string = "default"
