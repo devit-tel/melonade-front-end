@@ -10,6 +10,11 @@ export interface ITransactionEventPaginate {
   events: Event.ITransactionEvent[];
 }
 
+export interface IHistogramCount {
+  date: number | Date;
+  count: number;
+}
+
 export const listTransaction = async (
   fromTimestamp: number,
   toTimestamp: number,
@@ -58,7 +63,7 @@ export const getTransactionDateHistogram = async (
   fromTimestamp: number,
   toTimestamp: number,
   status: State.TransactionStates
-): Promise<any> => {
+): Promise<IHistogramCount[]> => {
   const resp = await client({
     url: `/v1/statistics/transaction-histogram`,
     method: "GET",
@@ -69,7 +74,7 @@ export const getTransactionDateHistogram = async (
     }
   });
 
-  return R.path(["data", "data"], resp) as Event.AllEvent[];
+  return R.path(["data", "data"], resp) as IHistogramCount[];
 };
 
 export const getTaskExecuteime = async (
