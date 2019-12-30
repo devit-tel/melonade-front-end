@@ -103,8 +103,6 @@ export default (props: IProps) => {
 
   useEffect(() => {
     (async () => {
-      const { statuses } = props;
-
       setIsLoading(true);
       try {
         const transactionEvents = await listTransaction(
@@ -114,7 +112,7 @@ export default (props: IProps) => {
           tags,
           (currentPage - 1) * TRANSACTION_PER_PAGE,
           TRANSACTION_PER_PAGE,
-          statuses
+          props.statuses
         );
 
         setTransactionEvents(transactionEvents);
@@ -127,7 +125,7 @@ export default (props: IProps) => {
         setIsLoading(false);
       }
     })();
-  }, [currentPage, transactionId, dateRange, tags]);
+  }, [currentPage, transactionId, dateRange, tags, props.statuses]);
 
   useEffect(() => {
     setCurrentPage(1);
