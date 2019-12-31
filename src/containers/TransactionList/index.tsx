@@ -77,7 +77,7 @@ const columns = [
     title: "Tags",
     dataIndex: "details.tags",
     key: "details.tags",
-    render: (tags: string[]) => (
+    render: (tags: string[] = []) => (
       <React.Fragment>
         {tags.map((tag: string) => (
           <Tag key={tag}>{tag}</Tag>
