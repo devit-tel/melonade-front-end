@@ -4,6 +4,7 @@ import { Route, RouteComponentProps, StaticContext } from "react-router";
 import { BrowserRouter, Redirect } from "react-router-dom";
 import Layout from "./components/OutterLayout";
 import Dashboard from "./containers/Dashboard";
+import RunningTransactionList from "./containers/RunningTransactionList";
 import TaskDefinitionList from "./containers/TaskDefinitionList";
 import TransactionDetail from "./containers/TransactionDetail";
 import TransactionList from "./containers/TransactionList";
@@ -23,6 +24,11 @@ const LayoutRouter = (props: ILayoutRouterProps) => (
           statuses={[State.TransactionStates.Running]}
         />
       )}
+      exact
+    />
+    <Route
+      path="/running-transaction/"
+      component={RunningTransactionList}
       exact
     />
     <Route

@@ -1,6 +1,7 @@
 import {
   TaskDefinition,
-  WorkflowDefinition
+  WorkflowDefinition,
+  Store
 } from "@melonade/melonade-declaration";
 import axios from "axios";
 import * as R from "ramda";
@@ -102,4 +103,27 @@ export const cancelTranasaction = async (
     url: `/v1/transaction/cancel/${transactionId}`,
     method: "delete"
   });
+};
+
+export const listRunningTransaction = async (
+  from?: number,
+  size?: number
+): Promise<Store.ITransactionPaginate> => {
+  const resp = await client({
+    url: "/v1/transaction/",
+    method: "GET",
+    params: {
+      from,
+      size
+    }
+  });
+
+  return R.pathOr(
+    {
+      total: 0,
+      transactions: []
+    },
+    ["data", "data"],
+    resp
+  );
 };

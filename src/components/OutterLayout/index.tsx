@@ -85,6 +85,10 @@ export default class OutterLayout extends React.Component<IProps, IState> {
                 <Icon type="unordered-list" />
                 <span>All</span>
               </Menu.Item>
+              <Menu.Item key="/running-transaction" onClick={this.changePath}>
+                <Icon type="loading" />
+                <span>Running</span>
+              </Menu.Item>
               <Menu.Item key="/completed-transaction" onClick={this.changePath}>
                 <Icon type="check" />
                 <span>Completed</span>
