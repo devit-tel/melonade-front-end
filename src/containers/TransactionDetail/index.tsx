@@ -96,6 +96,7 @@ const groupWorkflowById = (
 };
 
 class TransactionTable extends React.Component<IProps, IState> {
+  private timer?: number;
   constructor(props: IProps) {
     super(props);
 
@@ -129,10 +130,16 @@ class TransactionTable extends React.Component<IProps, IState> {
   };
 
   componentDidMount = async () => {
-    this.getTransactionData();
-    setInterval(() => {
+    await this.getTransactionData();
+    this.timer = setInterval(() => {
       this.getTransactionData();
     }, 5000);
+  };
+
+  componentWillUnmount = () => {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
   };
 
   render() {
