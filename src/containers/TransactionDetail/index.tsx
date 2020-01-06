@@ -4,7 +4,7 @@ import {
   Task,
   WorkflowDefinition
 } from "@melonade/melonade-declaration";
-import { Button, Tabs } from "antd";
+import { Button, Modal, Tabs } from "antd";
 import * as R from "ramda";
 import React from "react";
 import { RouteComponentProps } from "react-router";
@@ -119,8 +119,20 @@ class TransactionTable extends React.Component<IProps, IState> {
     }
   };
 
+  onCancelButtonClick = (transactionId: string) => {
+    Modal.confirm({
+      title: "Do you Want to cancel this transaction?",
+      onOk() {
+        cancelTranasaction(transactionId);
+      }
+    });
+  };
+
   componentDidMount = async () => {
     this.getTransactionData();
+    setInterval(() => {
+      this.getTransactionData();
+    }, 5000);
   };
 
   render() {
@@ -130,7 +142,7 @@ class TransactionTable extends React.Component<IProps, IState> {
     return (
       <Container>
         <Button type="primary" icon="reload" onClick={this.getTransactionData}>
-          Reload
+          Refresh
         </Button>
         {!events.find(
           (event: Event.AllEvent) =>
@@ -146,7 +158,7 @@ class TransactionTable extends React.Component<IProps, IState> {
           <Button
             type="danger"
             icon="rollback"
-            onClick={() => cancelTranasaction(transactionId)}
+            onClick={() => this.onCancelButtonClick(transactionId)}
           >
             Cancel transaction
           </Button>
