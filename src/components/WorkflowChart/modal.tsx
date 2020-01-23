@@ -1,8 +1,4 @@
-import {
-  Task,
-  TaskDefinition,
-  WorkflowDefinition
-} from "@melonade/melonade-declaration";
+import { Task, TaskDefinition, WorkflowDefinition } from "@melonade/melonade-declaration";
 import { Form, Input, InputNumber, Modal, Select } from "antd";
 import * as R from "ramda";
 import React from "react";
@@ -34,7 +30,7 @@ interface ICreateTaskModalState {
 export class CreateTaskModal extends React.Component<
   ICreateTaskModalProps,
   ICreateTaskModalState
-> {
+  > {
   constructor(props: ICreateTaskModalProps) {
     super(props);
 
@@ -160,20 +156,16 @@ export class CreateTaskModal extends React.Component<
                 name="inputParameters"
                 src={R.path(["inputParameters"], this.state.task) || {}}
                 onEdit={(edit: InteractionProps) => {
-                  this.setState({
-                    task: this.onInputChanged(
-                      ["inputParameters"],
-                      edit.updated_src
-                    ) as any
-                  });
+                  this.onInputChanged(
+                    ["inputParameters"],
+                    edit.updated_src
+                  )
                 }}
                 onAdd={(edit: InteractionProps) => {
-                  this.setState({
-                    task: this.onInputChanged(
-                      ["inputParameters"],
-                      edit.updated_src
-                    ) as any
-                  });
+                  this.onInputChanged(
+                    ["inputParameters"],
+                    edit.updated_src
+                  )
                 }}
               />
             </React.Fragment>
@@ -199,7 +191,7 @@ interface ICreateDecisionCaseModalState {
 export class CreateDecisionCaseModal extends React.Component<
   ICreateDecisionCaseModalProps,
   ICreateDecisionCaseModalState
-> {
+  > {
   constructor(props: ICreateDecisionCaseModalProps) {
     super(props);
 
