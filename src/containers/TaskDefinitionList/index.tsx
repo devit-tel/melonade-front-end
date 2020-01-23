@@ -5,11 +5,7 @@ import * as R from "ramda";
 import React from "react";
 import styled from "styled-components";
 import TaskDefinitionModal from "../../components/TaskDefinitionModal";
-import {
-  createTaskDefinitions,
-  listTaskDefinitions,
-  updateTaskDefinitions
-} from "../../services/procressManager/http";
+import { createTaskDefinitions, listTaskDefinitions, updateTaskDefinitions } from "../../services/procressManager/http";
 
 const Container = styled.div`
   & > button {
@@ -17,7 +13,7 @@ const Container = styled.div`
   }
 `;
 
-interface IProps {}
+interface IProps { }
 
 interface IState {
   taskDefinitions: TaskDefinition.ITaskDefinition[];
@@ -142,13 +138,14 @@ class TransactionTable extends React.Component<IProps, IState> {
         editingTask: undefined
       });
 
-      await this.listTaskDefinitions();
     } catch (error) {
       const errorResp = R.path(["response", "data", "error", "message"], error);
 
       this.setState({
         errorMessage: errorResp ? JSON.stringify(errorResp) : error.toString()
       });
+    } finally {
+      await this.listTaskDefinitions();
     }
   };
 
