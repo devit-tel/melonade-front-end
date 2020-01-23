@@ -2,8 +2,8 @@ import { Task, TaskDefinition, WorkflowDefinition } from "@melonade/melonade-dec
 import { Form, Input, InputNumber, Modal, Select } from "antd";
 import * as R from "ramda";
 import React from "react";
-import JsonView, { InteractionProps } from "react-json-view";
 import styled from "styled-components";
+import JsonEditor from "../../components/JsonEditor";
 
 const { Option } = Select;
 
@@ -152,19 +152,12 @@ export class CreateTaskModal extends React.Component<
                 />
               </Form.Item>
 
-              <JsonView
-                name="inputParameters"
-                src={R.path(["inputParameters"], this.state.task) || {}}
-                onEdit={(edit: InteractionProps) => {
+              <JsonEditor
+                data={R.path(["inputParameters"], this.state.task) || {}}
+                onChange={(data: any) => {
                   this.onInputChanged(
                     ["inputParameters"],
-                    edit.updated_src
-                  )
-                }}
-                onAdd={(edit: InteractionProps) => {
-                  this.onInputChanged(
-                    ["inputParameters"],
-                    edit.updated_src
+                    data
                   )
                 }}
               />

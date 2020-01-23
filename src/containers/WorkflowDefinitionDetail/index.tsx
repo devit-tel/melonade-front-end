@@ -1,30 +1,12 @@
-import {
-  State,
-  TaskDefinition,
-  WorkflowDefinition
-} from "@melonade/melonade-declaration";
-import {
-  Button,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Select,
-  Switch,
-  Tabs
-} from "antd";
+import { State, TaskDefinition, WorkflowDefinition } from "@melonade/melonade-declaration";
+import { Button, Form, Input, InputNumber, Modal, Select, Switch, Tabs } from "antd";
 import * as R from "ramda";
 import React from "react";
-import JsonView, { InteractionProps } from "react-json-view";
 import { RouteComponentProps } from "react-router-dom";
 import styled from "styled-components";
+import JsonEditor from "../../components/JsonEditor";
 import WorkflowChart from "../../components/WorkflowChart";
-import {
-  createWorkflowDefinitions,
-  getWorkflowDefinitionData,
-  listTaskDefinitions,
-  updateWorkflowDefinitions
-} from "../../services/procressManager/http";
+import { createWorkflowDefinitions, getWorkflowDefinitionData, listTaskDefinitions, updateWorkflowDefinitions } from "../../services/procressManager/http";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -49,7 +31,7 @@ interface IWorkflowDefinitionParams {
   rev: string;
 }
 
-interface IProps extends RouteComponentProps<IWorkflowDefinitionParams> {}
+interface IProps extends RouteComponentProps<IWorkflowDefinitionParams> { }
 
 interface IState {
   workflowDefinition?: WorkflowDefinition.IWorkflowDefinition;
@@ -232,18 +214,18 @@ class TransactionTable extends React.Component<IProps, IState> {
                   workflowDefinition
                 ) as State.WorkflowFailureStrategies
               ) ? (
-                <Form.Item label="Retry Limit">
-                  <StyledNumberInput
-                    placeholder="Number that workflow can retry if failed"
-                    value={
-                      R.path(["retry", "limit"], workflowDefinition) as any
-                    }
-                    onChange={(value?: number) => {
-                      this.onInputChanged(["retry", "limit"], value);
-                    }}
-                  />
-                </Form.Item>
-              ) : null}
+                  <Form.Item label="Retry Limit">
+                    <StyledNumberInput
+                      placeholder="Number that workflow can retry if failed"
+                      value={
+                        R.path(["retry", "limit"], workflowDefinition) as any
+                      }
+                      onChange={(value?: number) => {
+                        this.onInputChanged(["retry", "limit"], value);
+                      }}
+                    />
+                  </Form.Item>
+                ) : null}
             </Form>
           </TabPane>
           <TabPane tab="Workflow View" key="2">
@@ -269,16 +251,11 @@ class TransactionTable extends React.Component<IProps, IState> {
             />
           </TabPane>
           <TabPane tab="JSON View" key="3">
-            <JsonView
-              src={workflowDefinition || {}}
-              onEdit={(edit: InteractionProps) => {
+            <JsonEditor
+              data={workflowDefinition || {}}
+              onChange={(data: any) => {
                 this.setState({
-                  workflowDefinition: edit.updated_src as any
-                });
-              }}
-              onAdd={(edit: InteractionProps) => {
-                this.setState({
-                  workflowDefinition: edit.updated_src as any
+                  workflowDefinition: data
                 });
               }}
             />
