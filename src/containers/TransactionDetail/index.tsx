@@ -23,6 +23,24 @@ const Container = styled.div`
 
 const StyledTabs = styled(Tabs)``;
 
+const getTaskStatePriority = (task?: Task.ITask): number => {
+  if (!task) return 2;
+
+  switch (task.status) {
+    case State.TaskStates.Scheduled:
+      return 2;
+    case State.TaskStates.Inprogress:
+      return 1;
+    case State.TaskStates.Completed:
+    case State.TaskStates.Failed:
+    case State.TaskStates.AckTimeOut:
+    case State.TaskStates.Timeout:
+      return 0;
+    default:
+      return 2;
+  }
+};
+
 interface ITransactionParams {
   transactionId: string;
 }
@@ -54,15 +72,17 @@ const groupWorkflowById = (
     ) => {
       if (event.isError === false && event.type === "TASK") {
         // it's already sorted new => old
+        const previousTaskData = R.path(
+          [
+            event.details.workflowId,
+            "tasksData",
+            event.details.taskReferenceName
+          ],
+          groupedTask
+        ) as Task.ITask;
         if (
-          R.path(
-            [
-              event.details.workflowId,
-              "tasksData",
-              event.details.taskReferenceName
-            ],
-            groupedTask
-          )
+          getTaskStatePriority(previousTaskData) <=
+          getTaskStatePriority(event.details)
         ) {
           return groupedTask;
         }
