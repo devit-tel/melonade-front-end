@@ -242,6 +242,7 @@ const mapEventsToDataItems = (
 
 interface IState {
   items: vis.DataSet<vis.DataItem>;
+  isFitted: boolean;
 }
 
 interface IProps {
@@ -255,7 +256,8 @@ export default class TimelineChart extends React.Component<IProps, IState> {
     super(props);
 
     this.state = {
-      items: new vis.DataSet([])
+      items: new vis.DataSet([]),
+      isFitted: false
     };
   }
 
@@ -267,8 +269,9 @@ export default class TimelineChart extends React.Component<IProps, IState> {
 
   componentDidUpdate(prevProps: IProps) {
     if (prevProps.events !== this.props.events) {
-      if (this.timeline) {
+      if (this.timeline && !this.state.isFitted) {
         this.timeline.fit();
+        this.setState({ isFitted: true });
       }
     }
   }
