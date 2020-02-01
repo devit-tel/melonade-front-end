@@ -315,17 +315,17 @@ const getBackgroundTasksData = (
 
   switch (status) {
     case State.TaskStates.Scheduled:
-      return "yellow";
+      return "#ec7505";
     case State.TaskStates.Inprogress:
-      return "blue";
+      return "#2b6cff";
     case State.TaskStates.Completed:
-      return "green";
+      return "#16c172";
     case State.TaskStates.AckTimeOut:
     case State.TaskStates.Timeout:
     case State.TaskStates.Failed:
-      return "red";
+      return "#c91a1a";
     default:
-      return "gray";
+      return "#b2b2b2";
   }
 };
 
