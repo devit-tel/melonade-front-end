@@ -167,7 +167,21 @@ export default (props: IProps) => {
           <Tooltip />
           <Axis name="date" />
           <Axis name="count" />
-          <Geom type="line" position="date*count" size={2} color="type" />
+
+          <Geom
+            type="point"
+            position="date*count"
+            size={2}
+            color="type"
+            shape={"circle"}
+          />
+          <Geom
+            type="line"
+            position="date*count"
+            size={2}
+            color="type"
+            shape={"smooth"}
+          />
         </Chart>
       </Section>
 
