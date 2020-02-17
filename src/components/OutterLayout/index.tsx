@@ -86,7 +86,7 @@ export default class OutterLayout extends React.Component<IProps, IState> {
                 <span>All</span>
               </Menu.Item>
               <Menu.Item key="/running-transaction" onClick={this.changePath}>
-                <Icon type="loading" />
+                <Icon type="play-circle" />
                 <span>Running</span>
               </Menu.Item>
               <Menu.Item key="/completed-transaction" onClick={this.changePath}>
