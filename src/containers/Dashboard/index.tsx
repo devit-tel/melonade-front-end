@@ -61,6 +61,7 @@ const scale = {
 export interface ITaskExecutionTime {
   executionTime: number;
   taskName: string;
+  executedAt: number | Date | string;
 }
 
 interface IProps {}
@@ -70,8 +71,10 @@ export default (props: IProps) => {
   const [transactionHistogram, setTransactionHistogram] = useState<
     IHistogramCount[]
   >([]);
-
-  const [tasksExecutionStatistics, settasksExecutionStatistics] = useState<
+  const [tasksExecutionStatistics, setTasksExecutionStatistics] = useState<
+    DataSet.DataView
+  >(new DataSet.DataView());
+  const [tasksExecutionTimes, setTasksExecutionTimes] = useState<
     DataSet.DataView
   >(new DataSet.DataView());
   const [falseEvents, setFalseEvents] = useState<Event.AllEvent[]>([]);
@@ -128,6 +131,16 @@ export default (props: IProps) => {
         +dateRange[0],
         +dateRange[1]
       );
+
+      setTasksExecutionTimes(
+        new DataSet.DataView().source(
+          tasksExecutionTime.map((taskExecutionTime: ITaskExecutionTime) => ({
+            ...taskExecutionTime,
+            executedAt: +new Date(taskExecutionTime.executedAt)
+          }))
+        )
+      );
+
       const tasksExecutionStatisticsData = R.values(
         R.groupBy(R.pathOr("", ["taskName"]), tasksExecutionTime)
       ).map(
@@ -145,7 +158,7 @@ export default (props: IProps) => {
           };
         }
       );
-      settasksExecutionStatistics(
+      setTasksExecutionStatistics(
         new DataSet.DataView().source(tasksExecutionStatisticsData).transform({
           type: "map",
           callback: (obj: IBoxChartRow & any) => {
@@ -171,7 +184,7 @@ export default (props: IProps) => {
           <Geom
             type="point"
             position="date*count"
-            size={2}
+            size={3}
             color="type"
             shape={"circle"}
           />
@@ -185,9 +198,45 @@ export default (props: IProps) => {
         </Chart>
       </Section>
 
+      {tasksExecutionTimes && (
+        <Section>
+          <Title level={4}>Task Execution times (scatter plot)</Title>
+          <Chart height={700} data={tasksExecutionTimes} forceFit>
+            <Tooltip showTitle={false} />
+            <Axis
+              name="executedAt"
+              label={{
+                formatter: value => {
+                  return moment(+value).format("YYYY/MM/DD HH:mm");
+                }
+              }}
+            />
+            <Axis name="executionTime" />
+            <Legend />
+            <Geom
+              type="point"
+              position="executedAt*executionTime"
+              color={"taskName"}
+              opacity={0.65}
+              shape="circle"
+              size={5}
+              style={[
+                "taskName",
+                {
+                  lineWidth: 1,
+                  strokeOpacity: 1,
+                  fillOpacity: 0.3,
+                  opacity: 0.65
+                }
+              ]}
+            />
+          </Chart>
+        </Section>
+      )}
+
       {tasksExecutionStatistics && (
         <Section>
-          <Title level={4}>Task Execution times</Title>
+          <Title level={4}>Task Execution times (box plot)</Title>
           <Chart height={700} data={tasksExecutionStatistics} forceFit>
             <Axis name="x" />
             <Tooltip
