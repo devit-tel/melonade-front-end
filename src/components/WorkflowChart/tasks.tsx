@@ -599,15 +599,15 @@ const pickTaskProperties = (
       return {
         taskReferenceName: task.taskReferenceName,
         inputParameters: task.inputParameters || {},
-        decisions: {},
-        defaultDecision: [],
+        decisions: task.decisions || {},
+        defaultDecision: task.defaultDecision || [],
         type: task.type
       } as WorkflowDefinition.IDecisionTask;
     case Task.TaskTypes.Parallel:
       return {
         taskReferenceName: task.taskReferenceName,
-        parallelTasks: [],
-        inputParameters: {},
+        parallelTasks: task.parallelTasks || [],
+        inputParameters: task.inputParameters || {},
         type: task.type
       } as WorkflowDefinition.IParallelTask;
     default:
@@ -682,6 +682,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
           }}
           onSubmit={(task: WorkflowDefinition.AllTaskType) => {
             if (this.props.onTaskUpdated) {
+              console.log(this.state.mode, task);
               switch (this.state.mode) {
                 case taskMode.insert:
                   const childPath = R.init(
