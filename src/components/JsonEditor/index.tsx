@@ -1,13 +1,28 @@
-import React from "react";
-// @ts-ignore
-import JSONInput from 'react-json-editor-ajrm';
+import { Input } from "antd";
+import React, { useState } from "react";
 import JsonView from "react-json-view";
 import styled from "styled-components";
-
 
 const JsonEditorContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
+  .react-json-view {
+    display: flex;
+    flex: 1 1 50%;
+  }
+`;
+
+interface IStyledTextAreaProp {
+  isError: boolean;
+}
+
+const StyledTextArea = styled(Input.TextArea)`
+  display: flex;
+  flex: 1 1 50%;
+  font-family: monospace;
+
+  ${(props: IStyledTextAreaProp) =>
+    props.isError ? "background-color: red;" : ""}
 `;
 
 interface IProps {
@@ -15,25 +30,33 @@ interface IProps {
   data?: object;
 }
 
-export default (props: IProps) => (
-  <JsonEditorContainer>
-    <JsonView
-      src={props.data || {}}
-      onEdit={(data: any) => {
-        console.log(data)
-        props.onChange && props.onChange(data.updated_src)
-      }}
-      onAdd={(data: any) => {
-        props.onChange && props.onChange(data.updated_src)
-      }} />
-    <JSONInput
-      placeholder={props.data || {}}
-      theme="light_mitsuketa_tribute"
-      width="100%"
-      height="100%"
-      onChange={(data: any) => {
-        props.onChange && props.onChange(data.jsObject)
-      }}
-    />
-  </JsonEditorContainer>
-);
+export default (props: IProps) => {
+  const [isError, setIsError] = useState(false);
+  return (
+    <JsonEditorContainer>
+      <JsonView
+        name={false}
+        src={props.data || {}}
+        onEdit={(data: any) => {
+          console.log(data);
+          props.onChange && props.onChange(data.updated_src);
+        }}
+        onAdd={(data: any) => {
+          props.onChange && props.onChange(data.updated_src);
+        }}
+      />
+      <StyledTextArea
+        isError={isError}
+        defaultValue={JSON.stringify(props.data || {}, null, 2)}
+        onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => {
+          try {
+            props.onChange && props.onChange(JSON.parse(event.target.value));
+            setIsError(false);
+          } catch (error) {
+            setIsError(true);
+          }
+        }}
+      />
+    </JsonEditorContainer>
+  );
+};

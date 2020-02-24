@@ -1,4 +1,8 @@
-import { Task, TaskDefinition, WorkflowDefinition } from "@melonade/melonade-declaration";
+import {
+  Task,
+  TaskDefinition,
+  WorkflowDefinition
+} from "@melonade/melonade-declaration";
 import { Form, Input, InputNumber, Modal, Select } from "antd";
 import * as R from "ramda";
 import React from "react";
@@ -30,7 +34,7 @@ interface ICreateTaskModalState {
 export class CreateTaskModal extends React.Component<
   ICreateTaskModalProps,
   ICreateTaskModalState
-  > {
+> {
   constructor(props: ICreateTaskModalProps) {
     super(props);
 
@@ -60,9 +64,10 @@ export class CreateTaskModal extends React.Component<
       <StyledModal
         title="Insert task"
         visible={this.props.visible}
-        onOk={() =>
-          this.props.onSubmit(this.state.task as WorkflowDefinition.ITaskTask)
-        }
+        onOk={() => {
+          console.log(this.state.task);
+          this.props.onSubmit(this.state.task as WorkflowDefinition.ITaskTask);
+        }}
         onCancel={this.props.onCancel}
       >
         <Form>
@@ -155,13 +160,28 @@ export class CreateTaskModal extends React.Component<
               <JsonEditor
                 data={R.path(["inputParameters"], this.state.task) || {}}
                 onChange={(data: any) => {
-                  this.onInputChanged(
-                    ["inputParameters"],
-                    data
-                  )
+                  this.onInputChanged(["inputParameters"], data);
                 }}
               />
             </React.Fragment>
+          )}
+
+          {R.pathEq(["task", "type"], Task.TaskTypes.Decision, this.state) && (
+            <Form.Item label="Case path">
+              <Input
+                // eslint-disable-next-line no-template-curly-in-string
+                placeholder="path it get case value (e.g. ${workflow.input.paymentType})"
+                value={
+                  R.path(["inputParameters", "case"], this.state.task) as string
+                }
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  this.onInputChanged(
+                    ["inputParameters", "case"],
+                    event.target.value
+                  );
+                }}
+              />
+            </Form.Item>
           )}
         </Form>
       </StyledModal>
@@ -184,7 +204,7 @@ interface ICreateDecisionCaseModalState {
 export class CreateDecisionCaseModal extends React.Component<
   ICreateDecisionCaseModalProps,
   ICreateDecisionCaseModalState
-  > {
+> {
   constructor(props: ICreateDecisionCaseModalProps) {
     super(props);
 
