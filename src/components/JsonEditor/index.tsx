@@ -19,6 +19,8 @@ interface IStyledTextAreaProp {
 const StyledTextArea = styled(Input.TextArea)`
   display: flex;
   flex: 1 1 50%;
+  font-family: monospace;
+
   ${(props: IStyledTextAreaProp) =>
     props.isError ? "background-color: red;" : ""}
 `;
