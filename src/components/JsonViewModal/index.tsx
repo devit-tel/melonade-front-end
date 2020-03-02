@@ -18,6 +18,6 @@ export default (props: IProps) => (
     onOk={props.onClose}
     onCancel={props.onClose}
   >
-    <JsonView src={props.data} />
+    <JsonView src={props.data} name={false} />
   </Modal>
 );
