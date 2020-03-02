@@ -24,7 +24,7 @@ const Container = styled.div`
 const StyledTabs = styled(Tabs)``;
 
 const getTaskStatePriority = (task?: Task.ITask): number => {
-  if (!task) return 2;
+  if (!task) return 3;
 
   switch (task.status) {
     case State.TaskStates.Scheduled:
@@ -37,7 +37,7 @@ const getTaskStatePriority = (task?: Task.ITask): number => {
     case State.TaskStates.Timeout:
       return 0;
     default:
-      return 2;
+      return 3;
   }
 };
 

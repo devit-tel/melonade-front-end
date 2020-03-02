@@ -315,7 +315,7 @@ const getBackgroundTasksData = (
 
   switch (status) {
     case State.TaskStates.Scheduled:
-      return "#ec7505";
+      return "#b2b2b2";
     case State.TaskStates.Inprogress:
       return "#2b6cff";
     case State.TaskStates.Completed:
@@ -325,7 +325,7 @@ const getBackgroundTasksData = (
     case State.TaskStates.Failed:
       return "#c91a1a";
     default:
-      return "#b2b2b2";
+      return "#ffffff";
   }
 };
 
@@ -789,6 +789,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
           onTaskUpdate={this.handleTaskUpdate}
           path={[-1]}
         />
+        {console.log(this.props.tasksData)}
         <RenderChildTasks
           tasks={this.props.tasks}
           path={[]}
