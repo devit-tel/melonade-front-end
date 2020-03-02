@@ -682,7 +682,6 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
           }}
           onSubmit={(task: WorkflowDefinition.AllTaskType) => {
             if (this.props.onTaskUpdated) {
-              console.log(this.state.mode, task);
               switch (this.state.mode) {
                 case taskMode.insert:
                   const childPath = R.init(

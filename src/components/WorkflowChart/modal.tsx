@@ -1,8 +1,4 @@
-import {
-  Task,
-  TaskDefinition,
-  WorkflowDefinition
-} from "@melonade/melonade-declaration";
+import { Task, TaskDefinition, WorkflowDefinition } from "@melonade/melonade-declaration";
 import { Form, Input, InputNumber, Modal, Select } from "antd";
 import * as R from "ramda";
 import React from "react";
@@ -65,7 +61,6 @@ export class CreateTaskModal extends React.Component<
         title="Insert task"
         visible={this.props.visible}
         onOk={() => {
-          console.log(this.state.task);
           this.props.onSubmit(this.state.task as WorkflowDefinition.ITaskTask);
         }}
         onCancel={this.props.onCancel}
