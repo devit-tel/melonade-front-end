@@ -65,7 +65,6 @@ export class CreateTaskModal extends React.Component<
         title="Insert task"
         visible={this.props.visible}
         onOk={() => {
-          console.log(this.state.task);
           this.props.onSubmit(this.state.task as WorkflowDefinition.ITaskTask);
         }}
         onCancel={this.props.onCancel}
@@ -97,6 +96,7 @@ export class CreateTaskModal extends React.Component<
             <React.Fragment>
               <Form.Item label="Task Name">
                 <Select
+                  showSearch
                   value={R.path(["name"], this.state.task) as any}
                   onSelect={(value: Task.TaskTypes) =>
                     this.onInputChanged(["name"], value)

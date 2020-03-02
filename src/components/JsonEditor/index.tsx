@@ -38,7 +38,6 @@ export default (props: IProps) => {
         name={false}
         src={props.data || {}}
         onEdit={(data: any) => {
-          console.log(data);
           props.onChange && props.onChange(data.updated_src);
         }}
         onAdd={(data: any) => {

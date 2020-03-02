@@ -28,8 +28,8 @@ const columns = [
   },
   {
     title: "Created at",
-    dataIndex: "createdAt",
-    key: "createdAt",
+    dataIndex: "createTime",
+    key: "createTime",
     render: (createdAt: number) => (
       <Typography.Text>
         {moment(createdAt).format("YYYY/MM/DD HH:mm:ss.SSS")}

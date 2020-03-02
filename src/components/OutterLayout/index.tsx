@@ -27,7 +27,7 @@ const ToggleContainer = styled.div`
   font-size: 1.8em;
   justify-content: center;
   cursor: pointer;
-  background-color: #f35588;
+  background-color: #f35555;
 `;
 
 interface IProps extends RouteComponentProps {}

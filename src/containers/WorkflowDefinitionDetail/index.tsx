@@ -1,12 +1,31 @@
-import { State, TaskDefinition, WorkflowDefinition } from "@melonade/melonade-declaration";
-import { Button, Form, Input, InputNumber, Modal, Select, Switch, Tabs } from "antd";
+import {
+  State,
+  TaskDefinition,
+  WorkflowDefinition
+} from "@melonade/melonade-declaration";
+import {
+  Button,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+  Switch,
+  Tabs
+} from "antd";
 import * as R from "ramda";
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import styled from "styled-components";
 import JsonEditor from "../../components/JsonEditor";
 import WorkflowChart from "../../components/WorkflowChart";
-import { createWorkflowDefinitions, getWorkflowDefinitionData, listTaskDefinitions, updateWorkflowDefinitions } from "../../services/procressManager/http";
+import {
+  createWorkflowDefinition,
+  deleteWorkflowDefinition,
+  getWorkflowDefinitionData,
+  listTaskDefinitions,
+  updateWorkflowDefinition
+} from "../../services/procressManager/http";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -26,12 +45,19 @@ const WorkflowDefinitionDetailContainer = styled.div`
   align-items: flex-end;
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-self: stretch;
+`;
+
 interface IWorkflowDefinitionParams {
   name: string;
   rev: string;
 }
 
-interface IProps extends RouteComponentProps<IWorkflowDefinitionParams> { }
+interface IProps extends RouteComponentProps<IWorkflowDefinitionParams> {}
 
 interface IState {
   workflowDefinition?: WorkflowDefinition.IWorkflowDefinition;
@@ -84,12 +110,12 @@ class TransactionTable extends React.Component<IProps, IState> {
         this.props.location.pathname === "/definition/workflow/create" &&
         this.state.saveCount === 0
       ) {
-        await createWorkflowDefinitions(
+        await createWorkflowDefinition(
           this.state
             .workflowDefinition as WorkflowDefinition.IWorkflowDefinition
         );
       } else {
-        await updateWorkflowDefinitions(
+        await updateWorkflowDefinition(
           this.state
             .workflowDefinition as WorkflowDefinition.IWorkflowDefinition
         );
@@ -106,6 +132,30 @@ class TransactionTable extends React.Component<IProps, IState> {
         content: error.toString()
       });
     }
+  };
+
+  deleteWorkflowDefinition = () => {
+    Modal.confirm({
+      title: "Are you sure delete this workflow definition?",
+      content: `You will not able to start transaction with this workflow anymore.`,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "No",
+      onOk: async () => {
+        try {
+          await deleteWorkflowDefinition(
+            R.pathOr("", ["workflowDefinition", "name"], this.state),
+            R.pathOr("", ["workflowDefinition", "rev"], this.state)
+          );
+          this.props.history.push("/definition/workflow");
+        } catch (error) {
+          Modal.error({
+            title: "Failed to delete workflow definition",
+            content: error.toString()
+          });
+        }
+      }
+    });
   };
 
   onInputChanged = (path: (string | number)[], value: any) => {
@@ -126,9 +176,15 @@ class TransactionTable extends React.Component<IProps, IState> {
     const { workflowDefinition, taskDefinitions, editing } = this.state;
     return (
       <WorkflowDefinitionDetailContainer>
-        <Button type="primary" onClick={this.saveWorkflowDefinition}>
-          Save Workflow Definition
-        </Button>
+        <ButtonContainer>
+          <Button type="primary" onClick={this.saveWorkflowDefinition}>
+            Save Workflow Definition
+          </Button>
+          <Button type="danger" onClick={this.deleteWorkflowDefinition}>
+            Delete Workflow Definition
+          </Button>
+        </ButtonContainer>
+
         <StyledTabs>
           <TabPane tab="Form View" key="1">
             <Form>
@@ -214,18 +270,18 @@ class TransactionTable extends React.Component<IProps, IState> {
                   workflowDefinition
                 ) as State.WorkflowFailureStrategies
               ) ? (
-                  <Form.Item label="Retry Limit">
-                    <StyledNumberInput
-                      placeholder="Number that workflow can retry if failed"
-                      value={
-                        R.path(["retry", "limit"], workflowDefinition) as any
-                      }
-                      onChange={(value?: number) => {
-                        this.onInputChanged(["retry", "limit"], value);
-                      }}
-                    />
-                  </Form.Item>
-                ) : null}
+                <Form.Item label="Retry Limit">
+                  <StyledNumberInput
+                    placeholder="Number that workflow can retry if failed"
+                    value={
+                      R.path(["retry", "limit"], workflowDefinition) as any
+                    }
+                    onChange={(value?: number) => {
+                      this.onInputChanged(["retry", "limit"], value);
+                    }}
+                  />
+                </Form.Item>
+              ) : null}
             </Form>
           </TabPane>
           <TabPane tab="Workflow View" key="2">
