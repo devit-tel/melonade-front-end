@@ -48,15 +48,22 @@ const Section = styled.div`
   }
 `;
 
-const scale = {
-  date: {
-    alias: "Date",
-    formatter: (date: number) => moment(date).format("YYYY/MM/DD HH:mm")
-  },
-  count: {
-    alias: "Count"
+function getInterval(values: any[], key: string, interval: number) {
+  if (values.length < interval) return [];
+
+  const num = Math.floor(values.length / interval);
+  const ticks = [];
+
+  for (let i = 0; i <= interval; i += 1) {
+    if (i * num >= values.length) {
+      ticks.push(values[values.length - 1][key]);
+    } else {
+      ticks.push(values[num * i][key]);
+    }
   }
-};
+
+  return ticks;
+}
 
 export interface ITaskExecutionTime {
   executionTime: number;
@@ -105,7 +112,7 @@ export default (props: IProps) => {
       setTransactionHistogram([
         ...startedHistogram.map((histogram: IHistogramCount) => ({
           ...histogram,
-          type: "Running"
+          type: "Started"
         })),
         ...completedHistogram.map((histogram: IHistogramCount) => ({
           ...histogram,
@@ -175,12 +182,26 @@ export default (props: IProps) => {
       <DateRangePicker />
       <Section>
         <Title level={4}>Transaction Hourly Histogram</Title>
-        <Chart height={400} forceFit scale={scale} data={transactionHistogram}>
+        <Chart
+          height={400}
+          forceFit
+          scale={{
+            date: {
+              alias: "Date",
+              formatter: (date: number) =>
+                moment(date).format("YYYY/MM/DD HH:mm"),
+              ticks: getInterval(transactionHistogram, "date", 5)
+            },
+            count: {
+              alias: "Count"
+            }
+          }}
+          data={transactionHistogram}
+        >
           <Legend />
           <Tooltip />
           <Axis name="date" />
           <Axis name="count" />
-
           <Geom
             type="point"
             position="date*count"

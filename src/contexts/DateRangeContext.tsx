@@ -8,14 +8,25 @@ interface IProps {
 export type DateRange = [moment.Moment, moment.Moment];
 
 export const DateRangeContext = React.createContext<[DateRange, Function]>([
-  [moment().startOf("week"), moment().endOf("week")],
+  [
+    moment()
+      .startOf("hour")
+      .subtract(7, "day"),
+    moment()
+      .startOf("hour")
+      .add(1, "hour")
+  ],
   () => {}
 ]);
 
 export const DateRangeProvider = (props: IProps) => {
   const [dateRange, setDateRange] = useState<DateRange>([
-    moment().startOf("hour").subtract(7, 'day'),
-    moment().endOf("hour")
+    moment()
+      .startOf("hour")
+      .subtract(7, "day"),
+    moment()
+      .startOf("hour")
+      .add(1, "hour")
   ]);
   return (
     <DateRangeContext.Provider

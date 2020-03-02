@@ -12,7 +12,9 @@ export default () => {
       moment()
         .startOf("hour")
         .subtract(7, "day"),
-      moment().endOf("hour")
+      moment()
+        .startOf("hour")
+        .add(1, "hour")
     ]);
   };
 
