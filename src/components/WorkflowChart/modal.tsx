@@ -158,6 +158,7 @@ export class CreateTaskModal extends React.Component<
               </Form.Item>
 
               <JsonEditor
+                key={`${this.props.visible}`} // Remount every time
                 data={R.path(["inputParameters"], this.state.task) || {}}
                 onChange={(data: any) => {
                   this.onInputChanged(["inputParameters"], data);
