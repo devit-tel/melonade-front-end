@@ -14,8 +14,8 @@ export const DateRangeContext = React.createContext<[DateRange, Function]>([
 
 export const DateRangeProvider = (props: IProps) => {
   const [dateRange, setDateRange] = useState<DateRange>([
-    moment().startOf("week"),
-    moment().endOf("week")
+    moment().startOf("hour").subtract(7, 'day'),
+    moment().endOf("hour")
   ]);
   return (
     <DateRangeContext.Provider

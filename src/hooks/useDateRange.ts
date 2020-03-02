@@ -8,7 +8,12 @@ export default () => {
   const [dateRange, setDateRange] = useContext(DateRangeContext);
 
   const resetDate = () => {
-    setDateRange([moment().startOf("week"), moment().endOf("week")]);
+    setDateRange([
+      moment()
+        .startOf("hour")
+        .subtract(7, "day"),
+      moment().endOf("hour")
+    ]);
   };
 
   const setDates = (start?: DateType, end?: DateType) => {
