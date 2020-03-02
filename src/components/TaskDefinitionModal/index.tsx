@@ -84,7 +84,7 @@ export default class TaskDefinitionModal extends React.Component<
               placeholder="Time before task time out (ms)"
               value={R.path(["ackTimeout"], taskDefinition) as any}
               onChange={(value?: number) => {
-                this.onInputChanged(["ackTimeout"], value);
+                this.onInputChanged(["ackTimeout"], value || 0);
               }}
             />
           </Form.Item>
@@ -93,7 +93,7 @@ export default class TaskDefinitionModal extends React.Component<
               placeholder="Time before task time out (ms)"
               value={R.path(["timeout"], taskDefinition) as any}
               onChange={(value?: number) => {
-                this.onInputChanged(["timeout"], value);
+                this.onInputChanged(["timeout"], value || 0);
               }}
             />
           </Form.Item>
@@ -102,7 +102,7 @@ export default class TaskDefinitionModal extends React.Component<
               placeholder="Wait (ms) before restart the task"
               value={R.path(["retry", "delay"], taskDefinition) as any}
               onChange={(value?: number) => {
-                this.onInputChanged(["retry", "delay"], value);
+                this.onInputChanged(["retry", "delay"], value || 0);
               }}
             />
           </Form.Item>
@@ -111,7 +111,7 @@ export default class TaskDefinitionModal extends React.Component<
               placeholder="Time that task can retry if failed"
               value={R.path(["retry", "limit"], taskDefinition) as any}
               onChange={(value?: number) => {
-                this.onInputChanged(["retry", "limit"], value);
+                this.onInputChanged(["retry", "limit"], value || 0);
               }}
             />
           </Form.Item>
