@@ -81,6 +81,7 @@ export class CreateTaskModal extends React.Component<
               <Option value={Task.TaskTypes.Task}>Task</Option>
               <Option value={Task.TaskTypes.Parallel}>Parallel</Option>
               <Option value={Task.TaskTypes.Decision}>Decision</Option>
+              <Option value={Task.TaskTypes.Schedule}>Schedule</Option>
             </Select>
           </Form.Item>
           <Form.Item label="Task ReferenceName">
@@ -183,6 +184,67 @@ export class CreateTaskModal extends React.Component<
                 }}
               />
             </Form.Item>
+          )}
+
+          {R.pathEq(["task", "type"], Task.TaskTypes.Schedule, this.state) && (
+            <React.Fragment>
+              <p>
+                You still able to use input template e.g. $
+                {"{workflow.input.whenToStart}"}
+              </p>
+              <Form.Item label="Completed After">
+                <StyledNumberInput
+                  min={0}
+                  placeholder="Delay milliseconds before task completed"
+                  value={
+                    R.path(
+                      ["inputParameters", "completedAfter"],
+                      this.state.task
+                    ) as number
+                  }
+                  onChange={(value?: number) => {
+                    this.onInputChanged(
+                      ["inputParameters", "completedAfter"],
+                      value
+                    );
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Completed At">
+                <Input
+                  placeholder="ISO 8601 date"
+                  value={
+                    R.path(
+                      ["inputParameters", "completedAt"],
+                      this.state.task
+                    ) as string
+                  }
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(
+                      ["inputParameters", "completedAt"],
+                      event.target.value
+                    );
+                  }}
+                />{" "}
+              </Form.Item>
+              <Form.Item label="Completed When">
+                <Input
+                  placeholder='crontab e.g. "*/5 * * * 0"'
+                  value={
+                    R.path(
+                      ["inputParameters", "completedAt"],
+                      this.state.task
+                    ) as string
+                  }
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(
+                      ["inputParameters", "completedAt"],
+                      event.target.value
+                    );
+                  }}
+                />
+              </Form.Item>
+            </React.Fragment>
           )}
         </Form>
       </StyledModal>
