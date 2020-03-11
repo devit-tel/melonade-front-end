@@ -198,6 +198,19 @@ const DecisionCaseModelContainer = styled.div`
   margin: 6px;
 `;
 
+const ScheduleModelContainer = styled.div<ITaskModelContainer>`
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 12px;
+  margin: 6px;
+  align-items: center;
+  align-self: center;
+  background-color: ${(props: ITaskModelContainer) =>
+    props.backgroundColor || "white"}
+  border-radius: 50%;
+  border: 1px solid black;
+`;
+
 interface IDownArrowProps {
   lockHeight?: boolean;
 }
@@ -298,10 +311,6 @@ const EmptyButton = (props: IActionButtonProps) => {
   ) : null;
 };
 
-interface ITaskProps extends IActionButtonProps, ITaskDataProps {
-  task: WorkflowDefinition.ITaskTask | WorkflowDefinition.ICompensateTask;
-}
-
 const getBackgroundTasksData = (
   taskReferenceName: string,
   tasksData?: { [taskReferenceName: string]: Task.ITask }
@@ -328,6 +337,10 @@ const getBackgroundTasksData = (
       return "#ffffff";
   }
 };
+
+interface ITaskProps extends IActionButtonProps, ITaskDataProps {
+  task: WorkflowDefinition.ITaskTask | WorkflowDefinition.ICompensateTask;
+}
 
 const TaskModel = (props: ITaskProps) => (
   <TaskModelContainer
@@ -495,6 +508,21 @@ const DecisionModel = (props: IDecisionProps) => (
   </DecisionModelContainer>
 );
 
+interface IScheduleProps extends IActionButtonProps, ITaskDataProps {
+  task: WorkflowDefinition.IScheduleTask;
+}
+
+const ScheduleModel = (props: IScheduleProps) => (
+  <ScheduleModelContainer
+    backgroundColor={getBackgroundTasksData(
+      props.task.taskReferenceName,
+      props.tasksData
+    )}
+  >
+    <Text>{props.task.taskReferenceName}</Text>
+  </ScheduleModelContainer>
+);
+
 interface IAllTaskProps extends IActionButtonProps, ITaskDataProps {
   task: WorkflowDefinition.AllTaskType;
 }
@@ -526,6 +554,16 @@ const AllTaskModel = (props: IAllTaskProps) => {
     case Task.TaskTypes.Decision:
       return (
         <DecisionModel
+          task={task}
+          path={props.path}
+          editing={props.editing}
+          onTaskUpdate={props.onTaskUpdate}
+          tasksData={props.tasksData}
+        />
+      );
+    case Task.TaskTypes.Schedule:
+      return (
+        <ScheduleModel
           task={task}
           path={props.path}
           editing={props.editing}
