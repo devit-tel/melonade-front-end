@@ -232,13 +232,13 @@ export class CreateTaskModal extends React.Component<
                   placeholder='crontab e.g. "*/5 * * * 0"'
                   value={
                     R.path(
-                      ["inputParameters", "completedAt"],
+                      ["inputParameters", "completedWhen"],
                       this.state.task
                     ) as string
                   }
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                     this.onInputChanged(
-                      ["inputParameters", "completedAt"],
+                      ["inputParameters", "completedWhen"],
                       event.target.value
                     );
                   }}
