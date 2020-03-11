@@ -24,6 +24,7 @@ import {
   deleteWorkflowDefinition,
   getWorkflowDefinitionData,
   listTaskDefinitions,
+  startTranasaction,
   updateWorkflowDefinition
 } from "../../services/procressManager/http";
 
@@ -65,6 +66,7 @@ interface IState {
   isLoading: boolean;
   editing: boolean;
   saveCount: number;
+  workflowInput: any;
 }
 
 class TransactionTable extends React.Component<IProps, IState> {
@@ -75,7 +77,8 @@ class TransactionTable extends React.Component<IProps, IState> {
       workflowDefinition: undefined,
       isLoading: false,
       editing: true,
-      saveCount: 0
+      saveCount: 0,
+      workflowInput: {}
     };
   }
 
@@ -172,8 +175,36 @@ class TransactionTable extends React.Component<IProps, IState> {
     this.getWorkflowAndTasksDefinitionData();
   };
 
+  startTransaction = async () => {
+    const transactionId = `web-${this.state.workflowDefinition?.name}-${
+      this.state.workflowDefinition?.rev
+    }-${new Date().toTimeString()}`;
+
+    try {
+      await startTranasaction(
+        {
+          name: this.state.workflowDefinition?.name || "",
+          rev: this.state.workflowDefinition?.rev || ""
+        },
+        this.state.workflowInput,
+        transactionId
+      );
+      window.open(`/transaction/${transactionId}`, transactionId);
+    } catch (error) {
+      Modal.error({
+        title: "Cannot start transaction",
+        content: error.toString()
+      });
+    }
+  };
+
   render() {
-    const { workflowDefinition, taskDefinitions, editing } = this.state;
+    const {
+      workflowDefinition,
+      taskDefinitions,
+      editing,
+      workflowInput
+    } = this.state;
     return (
       <WorkflowDefinitionDetailContainer>
         <ButtonContainer>
@@ -312,6 +343,19 @@ class TransactionTable extends React.Component<IProps, IState> {
               onChange={(data: any) => {
                 this.setState({
                   workflowDefinition: data
+                });
+              }}
+            />
+          </TabPane>
+          <TabPane tab="Start" key="4">
+            <Button type="primary" onClick={this.startTransaction}>
+              Start Workflow
+            </Button>
+            <JsonEditor
+              data={workflowInput || {}}
+              onChange={(data: any) => {
+                this.setState({
+                  workflowInput: data
                 });
               }}
             />

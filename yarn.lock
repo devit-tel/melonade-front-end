@@ -1323,10 +1323,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@melonade/melonade-declaration@0.10.2":
-  version "0.10.2"
-  resolved "https://registry.yarnpkg.com/@melonade/melonade-declaration/-/melonade-declaration-0.10.2.tgz#0ad8ff4fd892285fec7e317aff77a0d60c526d14"
-  integrity sha512-T+YqVawFbBG++jWIVY9KV+qWltRtNEsMtiHSLxIMwk8YvZOxTSOmQXQAGQSQ5Fz0GZA3NhkJyp334H/iQiTXMg==
+"@melonade/melonade-declaration@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@melonade/melonade-declaration/-/melonade-declaration-0.15.0.tgz#b6b86a6cb73723f6d103cd6ea29131981e79f925"
+  integrity sha512-Nx4PRrjgvygc3+ivPZQLoggw9R28kbQ2miXLnb+fpTSM0QoPxIgJ7rcG+RITCeAC474AVQBbfxEl1VCRB/pHnA==
   dependencies:
     ajv "^6.10.2"
     ramda "^0.26.1"
