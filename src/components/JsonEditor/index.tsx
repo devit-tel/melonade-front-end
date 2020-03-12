@@ -20,6 +20,8 @@ const StyledTextArea = styled(Input.TextArea)`
   display: flex;
   flex: 1 1 50%;
   font-family: monospace;
+  min-height: 100vh !important;
+  line-height: 1.8em !important;
 
   ${(props: IStyledTextAreaProp) =>
     props.isError ? "background-color: red;" : ""}

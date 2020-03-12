@@ -53,6 +53,10 @@ const ButtonContainer = styled.div`
   align-self: stretch;
 `;
 
+const StartTransactionButton = styled(Button)`
+  margin: 20px 0;
+`;
+
 interface IWorkflowDefinitionParams {
   name: string;
   rev: string;
@@ -354,9 +358,13 @@ class TransactionTable extends React.Component<IProps, IState> {
             />
           </TabPane>
           <TabPane tab="Start" key="4">
-            <Button type="primary" onClick={this.startTransaction}>
+            <StartTransactionButton
+              type="ghost"
+              onClick={this.startTransaction}
+              icon="play-circle"
+            >
               Start Workflow
-            </Button>
+            </StartTransactionButton>
             <JsonEditor
               key={currentTab}
               data={workflowInput || {}}
