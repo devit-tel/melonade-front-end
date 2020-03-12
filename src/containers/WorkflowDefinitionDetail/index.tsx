@@ -67,6 +67,7 @@ interface IState {
   editing: boolean;
   saveCount: number;
   workflowInput: any;
+  currentTab: string;
 }
 
 class TransactionTable extends React.Component<IProps, IState> {
@@ -78,7 +79,8 @@ class TransactionTable extends React.Component<IProps, IState> {
       isLoading: false,
       editing: true,
       saveCount: 0,
-      workflowInput: {}
+      workflowInput: {},
+      currentTab: "1"
     };
   }
 
@@ -203,7 +205,8 @@ class TransactionTable extends React.Component<IProps, IState> {
       workflowDefinition,
       taskDefinitions,
       editing,
-      workflowInput
+      workflowInput,
+      currentTab
     } = this.state;
     return (
       <WorkflowDefinitionDetailContainer>
@@ -216,7 +219,9 @@ class TransactionTable extends React.Component<IProps, IState> {
           </Button>
         </ButtonContainer>
 
-        <StyledTabs>
+        <StyledTabs
+          onChange={(currentTab: string) => this.setState({ currentTab })}
+        >
           <TabPane tab="Form View" key="1">
             <Form>
               <Form.Item label="Name">
@@ -339,6 +344,7 @@ class TransactionTable extends React.Component<IProps, IState> {
           </TabPane>
           <TabPane tab="JSON View" key="3">
             <JsonEditor
+              key={currentTab} // Make sure it unmount when tab change
               data={workflowDefinition || {}}
               onChange={(data: any) => {
                 this.setState({
@@ -352,6 +358,7 @@ class TransactionTable extends React.Component<IProps, IState> {
               Start Workflow
             </Button>
             <JsonEditor
+              key={currentTab}
               data={workflowInput || {}}
               onChange={(data: any) => {
                 this.setState({

@@ -193,16 +193,17 @@ export class CreateTaskModal extends React.Component<
                 {"{workflow.input.whenToStart}"}
               </p>
               <Form.Item label="Completed After">
-                <StyledNumberInput
-                  min={0}
+                <Input
                   placeholder="Delay milliseconds before task completed"
-                  value={
-                    R.path(
-                      ["inputParameters", "completedAfter"],
-                      this.state.task
-                    ) as number
-                  }
-                  onChange={(value?: number) => {
+                  value={R.path(
+                    ["inputParameters", "completedAfter"],
+                    this.state.task
+                  )}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    const value = isNaN(event.target.value as any)
+                      ? event.target.value
+                      : +event.target.value;
+
                     this.onInputChanged(
                       ["inputParameters", "completedAfter"],
                       value
