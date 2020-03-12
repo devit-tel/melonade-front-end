@@ -263,12 +263,32 @@ export default (props: IProps) => {
             <Tooltip
               showTitle={false}
               crosshairs={{
-                type: "rect"
+                type: "rect",
+                style: {
+                  fill: "#E4E8F1",
+                  fillOpacity: 0.43
+                }
               }}
+              itemTpl='<li data-index={index} style="margin-bottom:4px;"><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}<br/><span style="padding-left: 16px">Max：{high}ms</span><br/><span style="padding-left: 16px">Quantile top 20%：{q3}ms</span><br/><span style="padding-left: 16px">Median：{median}ms</span><br/><span style="padding-left: 16px">Quantile bottom 20%：{q1}ms</span><br/><span style="padding-left: 16px">Min：{low}ms</span><br/></li>'
             />
+
             <Geom
               type="schema"
               position="x*range"
+              // @ts-ignore
+              tooltip={[
+                "x*low*q1*median*q3*high",
+                (x, low, q1, median, q3, high) => {
+                  return {
+                    name: x,
+                    low,
+                    q1,
+                    median,
+                    q3,
+                    high
+                  };
+                }
+              ]}
               shape="box"
               style={
                 {
