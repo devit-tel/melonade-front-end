@@ -247,6 +247,64 @@ export class CreateTaskModal extends React.Component<
               </Form.Item>
             </React.Fragment>
           )}
+
+          {R.pathEq(
+            ["task", "type"],
+            Task.TaskTypes.SubTransaction,
+            this.state
+          ) && (
+            <React.Fragment>
+              <p>
+                You still able to use input template e.g. $
+                {"{workflow.input.workflowToStart}"}
+              </p>
+              <Form.Item label="Workflow name">
+                <Input
+                  placeholder="Name of the workflow"
+                  value={R.path(
+                    ["inputParameters", "workflowName"],
+                    this.state.task
+                  )}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    const value = isNaN(event.target.value as any)
+                      ? event.target.value
+                      : +event.target.value;
+
+                    this.onInputChanged(
+                      ["inputParameters", "workflowName"],
+                      value
+                    );
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Workflow rev">
+                <Input
+                  placeholder="Revision of the workflow"
+                  value={
+                    R.path(
+                      ["inputParameters", "workflowRev"],
+                      this.state.task
+                    ) as string
+                  }
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(
+                      ["inputParameters", "workflowRev"],
+                      event.target.value
+                    );
+                  }}
+                />{" "}
+              </Form.Item>
+              <JsonEditor
+                key={`${this.props.visible}`} // Remount every time
+                data={
+                  R.path(["inputParameters", "input"], this.state.task) || {}
+                }
+                onChange={(data: any) => {
+                  this.onInputChanged(["inputParameters", "input"], data);
+                }}
+              />
+            </React.Fragment>
+          )}
         </Form>
       </StyledModal>
     );

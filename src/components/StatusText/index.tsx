@@ -3,12 +3,6 @@ import { Badge } from "antd";
 import { param } from "change-case";
 import React from "react";
 
-declare module "antd/lib/select" {
-  export interface OptionProps {
-    label?: string;
-  }
-}
-
 interface IProps {
   status: State.TransactionStates | State.WorkflowStates | State.TaskStates;
 }

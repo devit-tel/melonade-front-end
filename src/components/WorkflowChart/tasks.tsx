@@ -211,6 +211,19 @@ const ScheduleModelContainer = styled.div<ITaskModelContainer>`
   border: 1px solid black;
 `;
 
+const SubTransactionModelContainer = styled.div<ITaskModelContainer>`
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 12px;
+  margin: 6px;
+  align-items: center;
+  align-self: center;
+  background-color: ${(props: ITaskModelContainer) =>
+    props.backgroundColor || "white"}
+  border: 1px solid black;
+  transform: skew(-15deg);
+`;
+
 interface IDownArrowProps {
   lockHeight?: boolean;
 }
@@ -523,6 +536,21 @@ const ScheduleModel = (props: IScheduleProps) => (
   </ScheduleModelContainer>
 );
 
+interface ISubTransactionProps extends IActionButtonProps, ITaskDataProps {
+  task: WorkflowDefinition.ISubTransactionTask;
+}
+
+const SubTransactionModel = (props: ISubTransactionProps) => (
+  <SubTransactionModelContainer
+    backgroundColor={getBackgroundTasksData(
+      props.task.taskReferenceName,
+      props.tasksData
+    )}
+  >
+    <Text>{props.task.taskReferenceName}</Text>
+  </SubTransactionModelContainer>
+);
+
 interface IAllTaskProps extends IActionButtonProps, ITaskDataProps {
   task: WorkflowDefinition.AllTaskType;
 }
@@ -564,6 +592,16 @@ const AllTaskModel = (props: IAllTaskProps) => {
     case Task.TaskTypes.Schedule:
       return (
         <ScheduleModel
+          task={task}
+          path={props.path}
+          editing={props.editing}
+          onTaskUpdate={props.onTaskUpdate}
+          tasksData={props.tasksData}
+        />
+      );
+    case Task.TaskTypes.SubTransaction:
+      return (
+        <SubTransactionModel
           task={task}
           path={props.path}
           editing={props.editing}

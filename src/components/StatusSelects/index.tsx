@@ -4,12 +4,6 @@ import { param } from "change-case";
 import React from "react";
 import styled from "styled-components";
 
-declare module "antd/lib/select" {
-  export interface OptionProps {
-    label?: string;
-  }
-}
-
 const { Option } = Select;
 
 const StyledSelect = (styled(Select)`
