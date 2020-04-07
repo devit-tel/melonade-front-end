@@ -1,7 +1,7 @@
 import {
   Task,
   TaskDefinition,
-  WorkflowDefinition
+  WorkflowDefinition,
 } from "@melonade/melonade-declaration";
 import { Form, Input, InputNumber, Modal, Select } from "antd";
 import * as R from "ramda";
@@ -40,22 +40,22 @@ export class CreateTaskModal extends React.Component<
 
     this.state = {
       task: {
-        type: Task.TaskTypes.Task
-      } as any
+        type: Task.TaskTypes.Task,
+      } as any,
     };
   }
 
   componentWillReceiveProps(nextProps: ICreateTaskModalProps) {
     if (!this.props.visible && nextProps.visible) {
       this.setState({
-        task: nextProps.task
+        task: nextProps.task,
       });
     }
   }
 
   onInputChanged = (path: (string | number)[], value: any) => {
     this.setState({
-      task: R.set(R.lensPath(path), value, this.state.task)
+      task: R.set(R.lensPath(path), value, this.state.task),
     });
   };
 
@@ -82,6 +82,9 @@ export class CreateTaskModal extends React.Component<
               <Option value={Task.TaskTypes.Parallel}>Parallel</Option>
               <Option value={Task.TaskTypes.Decision}>Decision</Option>
               <Option value={Task.TaskTypes.Schedule}>Schedule</Option>
+              <Option value={Task.TaskTypes.SubTransaction}>
+                Sub-transaction
+              </Option>
             </Select>
           </Form.Item>
           <Form.Item label="Task ReferenceName">
@@ -331,14 +334,14 @@ export class CreateDecisionCaseModal extends React.Component<
     super(props);
 
     this.state = {
-      caseName: ""
+      caseName: "",
     };
   }
 
   componentWillReceiveProps(nextProps: ICreateDecisionCaseModalProps) {
     if (!this.props.visible && nextProps.visible) {
       this.setState({
-        caseName: nextProps.caseName
+        caseName: nextProps.caseName,
       });
     }
   }
@@ -353,7 +356,7 @@ export class CreateDecisionCaseModal extends React.Component<
         onOk={() => onSubmit(this.state.caseName || "")}
         onCancel={onCancel}
         okButtonProps={{
-          disabled: !!caseName && !!decisionCases && !!decisionCases[caseName]
+          disabled: !!caseName && !!decisionCases && !!decisionCases[caseName],
         }}
       >
         <Form>
@@ -363,7 +366,7 @@ export class CreateDecisionCaseModal extends React.Component<
               value={caseName}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 this.setState({
-                  caseName: event.target.value
+                  caseName: event.target.value,
                 });
               }}
             />
