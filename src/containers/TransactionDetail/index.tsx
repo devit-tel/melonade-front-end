@@ -2,7 +2,7 @@ import {
   Event,
   State,
   Task,
-  WorkflowDefinition
+  WorkflowDefinition,
 } from "@melonade/melonade-declaration";
 import { Button, Modal, Tabs } from "antd";
 import * as R from "ramda";
@@ -76,7 +76,7 @@ const groupWorkflowById = (
           [
             event.details.workflowId,
             "tasksData",
-            event.details.taskReferenceName
+            event.details.taskReferenceName,
           ],
           groupedTask
         ) as Task.ITask;
@@ -90,7 +90,7 @@ const groupWorkflowById = (
           R.lensPath([
             event.details.workflowId,
             "tasksData",
-            event.details.taskReferenceName
+            event.details.taskReferenceName,
           ]),
           event.details,
           groupedTask
@@ -104,7 +104,7 @@ const groupWorkflowById = (
               groupedTask
             ),
             workflowDefinition: event.details.workflowDefinition,
-            timestamp: event.details.createTime
+            timestamp: event.details.createTime,
           },
           groupedTask
         );
@@ -115,6 +115,11 @@ const groupWorkflowById = (
   );
 };
 
+const getLastestTransactionData = R.find<Event.AllEvent>(
+  (event: Event.AllEvent) =>
+    event.type === "TRANSACTION" && event.isError === false
+);
+
 class TransactionTable extends React.Component<IProps, IState> {
   private timer?: number;
   constructor(props: IProps) {
@@ -122,7 +127,7 @@ class TransactionTable extends React.Component<IProps, IState> {
 
     this.state = {
       events: [],
-      isLoading: false
+      isLoading: false,
     };
   }
 
@@ -133,7 +138,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       const events = await getTransactionData(transactionId);
       this.setState({
         events,
-        isLoading: false
+        isLoading: false,
       });
     } catch (error) {
       this.setState({ isLoading: false });
@@ -145,7 +150,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       title: "Do you Want to cancel this transaction?",
       onOk() {
         cancelTranasaction(transactionId);
-      }
+      },
     });
   };
 
@@ -166,30 +171,23 @@ class TransactionTable extends React.Component<IProps, IState> {
     const { events, isLoading } = this.state;
     const { transactionId } = this.props.match.params;
     const groupedWorkflow = groupWorkflowById(events);
+    const lastestTransactionEvent = getLastestTransactionData(events);
     return (
       <Container>
         <Button type="primary" icon="reload" onClick={this.getTransactionData}>
           Refresh
         </Button>
-        {!events.find(
-          (event: Event.AllEvent) =>
-            event.type === "TRANSACTION" &&
-            event.isError === false &&
-            [
-              State.TransactionStates.Cancelled,
-              State.TransactionStates.Compensated,
-              State.TransactionStates.Completed,
-              State.TransactionStates.Failed
-            ].includes(event.details.status)
-        ) && (
-          <Button
-            type="danger"
-            icon="rollback"
-            onClick={() => this.onCancelButtonClick(transactionId)}
-          >
-            Cancel transaction
-          </Button>
-        )}
+        {lastestTransactionEvent?.details?.status ===
+          State.TransactionStates.Running &&
+          !lastestTransactionEvent?.details?.parent && (
+            <Button
+              type="danger"
+              icon="rollback"
+              onClick={() => this.onCancelButtonClick(transactionId)}
+            >
+              Cancel transaction
+            </Button>
+          )}
 
         <StyledTabs>
           <TabPane tab="Timeline view" key="1">
