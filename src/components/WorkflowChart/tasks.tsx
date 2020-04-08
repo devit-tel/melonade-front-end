@@ -2,7 +2,7 @@ import {
   State,
   Task,
   TaskDefinition,
-  WorkflowDefinition
+  WorkflowDefinition,
 } from "@melonade/melonade-declaration";
 import { Button, Icon, Typography } from "antd";
 import * as R from "ramda";
@@ -222,6 +222,7 @@ const SubTransactionModelContainer = styled.div<ITaskModelContainer>`
     props.backgroundColor || "white"}
   border: 1px solid black;
   transform: skew(-15deg);
+  cursor: pointer;
 `;
 
 interface IDownArrowProps {
@@ -252,7 +253,7 @@ const DownArrow = (props: IDownArrowProps) => (
 export enum taskMode {
   modify = "MODIFY",
   insert = "INSERT",
-  delete = "DELETE"
+  delete = "DELETE",
 }
 
 interface ITaskDataProps {
@@ -422,7 +423,7 @@ const ParallelModel = (props: IParallelProps) => (
           ...props.path,
           "parallelTasks",
           props.task.parallelTasks.length,
-          -1
+          -1,
         ]}
       />
     </ParallelModelChildsContainer>
@@ -542,6 +543,13 @@ interface ISubTransactionProps extends IActionButtonProps, ITaskDataProps {
 
 const SubTransactionModel = (props: ISubTransactionProps) => (
   <SubTransactionModelContainer
+    onClick={() =>
+      window.open(
+        `/transaction/${
+          props.tasksData?.[props.task.taskReferenceName]?.transactionId
+        }-${props.task.taskReferenceName}`
+      )
+    }
     backgroundColor={getBackgroundTasksData(
       props.task.taskReferenceName,
       props.tasksData
@@ -669,7 +677,7 @@ const pickTaskProperties = (
         inputParameters: task.inputParameters || {},
         retry: task.retry,
         timeout: task.timeout,
-        type: task.type
+        type: task.type,
       } as WorkflowDefinition.ITaskTask;
     case Task.TaskTypes.Decision:
       return {
@@ -677,14 +685,14 @@ const pickTaskProperties = (
         inputParameters: task.inputParameters || {},
         decisions: task.decisions || {},
         defaultDecision: task.defaultDecision || [],
-        type: task.type
+        type: task.type,
       } as WorkflowDefinition.IDecisionTask;
     case Task.TaskTypes.Parallel:
       return {
         taskReferenceName: task.taskReferenceName,
         parallelTasks: task.parallelTasks || [],
         inputParameters: task.inputParameters || {},
-        type: task.type
+        type: task.type,
       } as WorkflowDefinition.IParallelTask;
     default:
       return task;
@@ -712,7 +720,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
 
     this.state = {
       selectingPath: undefined,
-      mode: undefined
+      mode: undefined,
     };
   }
 
@@ -723,7 +731,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
         case taskMode.modify:
           this.setState({
             selectingPath: path,
-            mode
+            mode,
           });
           break;
         case taskMode.delete:
@@ -753,7 +761,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
           onCancel={() => {
             this.setState({
               selectingPath: undefined,
-              mode: undefined
+              mode: undefined,
             });
           }}
           onSubmit={(task: WorkflowDefinition.AllTaskType) => {
@@ -795,7 +803,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
 
             this.setState({
               selectingPath: undefined,
-              mode: undefined
+              mode: undefined,
             });
           }}
           visible={
@@ -821,7 +829,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
           onCancel={() => {
             this.setState({
               selectingPath: undefined,
-              mode: undefined
+              mode: undefined,
             });
           }}
           onSubmit={(caseName: string) => {
@@ -846,7 +854,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
                       [],
                       this.state.selectingPath,
                       this.props.tasks as any
-                    )
+                    ),
                   },
                   this.props.tasks as any
                 )
@@ -855,7 +863,7 @@ export default class WorkflowChart extends React.Component<IProps, IState> {
 
             this.setState({
               selectingPath: undefined,
-              mode: undefined
+              mode: undefined,
             });
           }}
         />
