@@ -1,4 +1,8 @@
-import { Event, State } from "@melonade/melonade-declaration";
+import {
+  Event,
+  State,
+  WorkflowDefinition,
+} from "@melonade/melonade-declaration";
 import { Icon, Input, Pagination, Select, Table, Tag, Typography } from "antd";
 import debounce from "lodash.debounce";
 import moment from "moment";
@@ -9,8 +13,11 @@ import DateRangePicker from "../../components/DateRangePicker";
 import { DateRangeContext } from "../../contexts/DateRangeContext";
 import {
   ITransactionEventPaginate,
-  listTransaction
+  listTransactions,
 } from "../../services/eventLogger/http";
+import { listWorkflowDefinitions } from "../../services/procressManager/http";
+
+const { Option } = Select;
 
 const TRANSACTION_PER_PAGE = 50;
 
@@ -51,7 +58,7 @@ const columns = [
     title: "TransactionId",
     dataIndex: "transactionId",
     key: "transactionId",
-    render: (text: string) => <Link to={`transaction/${text}`}>{text}</Link>
+    render: (text: string) => <Link to={`transaction/${text}`}>{text}</Link>,
   },
   {
     title: "Workflow",
@@ -61,7 +68,7 @@ const columns = [
       <Typography.Text code>
         {`${event.details.workflowDefinition.name} / ${event.details.workflowDefinition.rev}`}
       </Typography.Text>
-    )
+    ),
   },
   {
     title: "Updated at",
@@ -71,7 +78,7 @@ const columns = [
       <Typography.Text>
         {moment(timestamp).format("YYYY/MM/DD HH:mm:ss.SSS")}
       </Typography.Text>
-    )
+    ),
   },
   {
     title: "Tags",
@@ -83,8 +90,8 @@ const columns = [
           <Tag key={tag}>{tag}</Tag>
         ))}
       </React.Fragment>
-    )
-  }
+    ),
+  },
 ];
 
 export default (props: IProps) => {
@@ -97,35 +104,60 @@ export default (props: IProps) => {
   const [transactionId, setTransactionId] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
 
+  const [workflowName, setWorkflowName] = useState<string>("");
+  const [workflowRev, setWorkflowRev] = useState<string>("");
+  const [workflowDefs, setWorkflowDefs] = useState<
+    WorkflowDefinition.IWorkflowDefinition[]
+  >([]);
+
   const throttled = useRef(
     debounce((transactionId: string) => setTransactionId(transactionId), 200)
   );
 
   useEffect(() => {
     (async () => {
+      const workflowDefs = await listWorkflowDefinitions();
+      setWorkflowDefs(workflowDefs);
+
+      console.log(workflowDefs);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
       setIsLoading(true);
       try {
-        const transactionEvents = await listTransaction(
+        const transactionEvents = await listTransactions(
           +dateRange[0],
           +dateRange[1],
           transactionId,
           tags,
           (currentPage - 1) * TRANSACTION_PER_PAGE,
           TRANSACTION_PER_PAGE,
-          props.statuses
+          props.statuses,
+          workflowName,
+          workflowRev
         );
 
         setTransactionEvents(transactionEvents);
       } catch (error) {
         setTransactionEvents({
           events: [],
-          total: 0
+          total: 0,
         });
       } finally {
         setIsLoading(false);
       }
     })();
-  }, [currentPage, transactionId, dateRange, tags, props.statuses]);
+  }, [
+    currentPage,
+    transactionId,
+    dateRange,
+    tags,
+    props.statuses,
+    workflowName,
+    workflowRev,
+  ]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -134,6 +166,21 @@ export default (props: IProps) => {
   return (
     <div>
       <ToolBarContainer>
+        <StyledSelect
+          placeholder="Find by workflow definition"
+          onChange={(i: number) => {
+            setWorkflowName(workflowDefs[i]?.name);
+            setWorkflowRev(workflowDefs[i]?.rev);
+          }}
+        >
+          {workflowDefs.map(
+            (wd: WorkflowDefinition.IWorkflowDefinition, i: number) => (
+              <Option key={`${wd.name}-${wd.rev}`} value={i}>
+                {wd.name} / {wd.rev}
+              </Option>
+            )
+          )}
+        </StyledSelect>
         <TransactionInput
           placeholder="Find transaction ID"
           prefix={<Icon type="number" />}

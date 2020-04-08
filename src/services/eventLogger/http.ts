@@ -16,14 +16,16 @@ export interface IHistogramCount {
   type: string;
 }
 
-export const listTransaction = async (
+export const listTransactions = async (
   fromTimestamp: number,
   toTimestamp: number,
   transactionId?: string,
   tags: string[] = [],
   from?: number,
   size?: number,
-  statuses: State.TransactionStates[] = [State.TransactionStates.Running]
+  statuses: State.TransactionStates[] = [State.TransactionStates.Running],
+  workflowName?: string,
+  workflowRev?: string
 ): Promise<ITransactionEventPaginate> => {
   const resp = await client({
     url: "/v1/store",
@@ -35,14 +37,16 @@ export const listTransaction = async (
       transactionId,
       from,
       size,
-      statuses: JSON.stringify(statuses)
-    }
+      statuses: JSON.stringify(statuses),
+      workflowName,
+      workflowRev,
+    },
   });
 
   return R.pathOr(
     {
       total: 0,
-      events: []
+      events: [],
     },
     ["data", "data"],
     resp
@@ -54,7 +58,7 @@ export const getTransactionData = async (
 ): Promise<Event.AllEvent[]> => {
   const resp = await client({
     url: `/v1/store/${transactionId}`,
-    method: "GET"
+    method: "GET",
   });
 
   return R.path(["data", "data"], resp) as Event.AllEvent[];
@@ -71,8 +75,8 @@ export const getTransactionDateHistogram = async (
     params: {
       statuses: JSON.stringify(statuses),
       fromTimestamp,
-      toTimestamp
-    }
+      toTimestamp,
+    },
   });
 
   return R.path(["data", "data"], resp) as IHistogramCount[];
@@ -87,8 +91,8 @@ export const getTaskExecuteime = async (
     method: "GET",
     params: {
       fromTimestamp,
-      toTimestamp
-    }
+      toTimestamp,
+    },
   });
 
   return R.path(["data", "data"], resp) as Event.AllEvent[];
@@ -103,8 +107,8 @@ export const getFalseEvents = async (
     method: "GET",
     params: {
       fromTimestamp,
-      toTimestamp
-    }
+      toTimestamp,
+    },
   });
 
   return R.pathOr([], ["data", "data"], resp);
