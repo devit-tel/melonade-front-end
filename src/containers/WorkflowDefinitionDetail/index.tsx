@@ -1,7 +1,7 @@
 import {
   State,
   TaskDefinition,
-  WorkflowDefinition
+  WorkflowDefinition,
 } from "@melonade/melonade-declaration";
 import {
   Button,
@@ -11,12 +11,13 @@ import {
   Modal,
   Select,
   Switch,
-  Tabs
+  Tabs,
 } from "antd";
 import * as R from "ramda";
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import styled from "styled-components";
+import uuid from "uuid/v4";
 import JsonEditor from "../../components/JsonEditor";
 import WorkflowChart from "../../components/WorkflowChart";
 import {
@@ -25,7 +26,7 @@ import {
   getWorkflowDefinitionData,
   listTaskDefinitions,
   startTranasaction,
-  updateWorkflowDefinition
+  updateWorkflowDefinition,
 } from "../../services/procressManager/http";
 
 const { TabPane } = Tabs;
@@ -84,7 +85,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       editing: true,
       saveCount: 0,
       workflowInput: {},
-      currentTab: "1"
+      currentTab: "1",
     };
   }
 
@@ -97,13 +98,13 @@ class TransactionTable extends React.Component<IProps, IState> {
       this.setState({
         workflowDefinition,
         taskDefinitions,
-        isLoading: false
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
         isLoading: false,
         workflowDefinition: undefined,
-        taskDefinitions: undefined
+        taskDefinitions: undefined,
       });
     }
   };
@@ -130,15 +131,15 @@ class TransactionTable extends React.Component<IProps, IState> {
         );
       }
       Modal.success({
-        title: "Saved successfully"
+        title: "Saved successfully",
       });
       this.setState({
-        saveCount: this.state.saveCount + 1
+        saveCount: this.state.saveCount + 1,
       });
     } catch (error) {
       Modal.error({
         title: "Save failed",
-        content: error.toString()
+        content: error.toString(),
       });
     }
   };
@@ -160,10 +161,10 @@ class TransactionTable extends React.Component<IProps, IState> {
         } catch (error) {
           Modal.error({
             title: "Failed to delete workflow definition",
-            content: error.toString()
+            content: error.toString(),
           });
         }
-      }
+      },
     });
   };
 
@@ -173,7 +174,7 @@ class TransactionTable extends React.Component<IProps, IState> {
         R.lensPath(path),
         value,
         this.state.workflowDefinition
-      )
+      ),
     });
   };
 
@@ -182,24 +183,23 @@ class TransactionTable extends React.Component<IProps, IState> {
   };
 
   startTransaction = async () => {
-    const transactionId = `web-${this.state.workflowDefinition?.name}-${
-      this.state.workflowDefinition?.rev
-    }-${new Date().toTimeString()}`;
+    const transactionId = `web-${uuid()}`;
 
     try {
       await startTranasaction(
         {
           name: this.state.workflowDefinition?.name || "",
-          rev: this.state.workflowDefinition?.rev || ""
+          rev: this.state.workflowDefinition?.rev || "",
         },
         this.state.workflowInput,
-        transactionId
+        transactionId,
+        ["web"]
       );
       window.open(`/transaction/${transactionId}`, transactionId);
     } catch (error) {
       Modal.error({
         title: "Cannot start transaction",
-        content: error.toString()
+        content: error.toString(),
       });
     }
   };
@@ -210,7 +210,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       taskDefinitions,
       editing,
       workflowInput,
-      currentTab
+      currentTab,
     } = this.state;
     return (
       <WorkflowDefinitionDetailContainer>
@@ -303,7 +303,7 @@ class TransactionTable extends React.Component<IProps, IState> {
               </Form.Item>
               {[
                 State.WorkflowFailureStrategies.Retry,
-                State.WorkflowFailureStrategies.CompensateThenRetry
+                State.WorkflowFailureStrategies.CompensateThenRetry,
               ].includes(
                 R.path(
                   ["failureStrategy"],
@@ -329,9 +329,9 @@ class TransactionTable extends React.Component<IProps, IState> {
               checkedChildren="Edit"
               unCheckedChildren=""
               checked={editing}
-              onChange={checked =>
+              onChange={(checked) =>
                 this.setState({
-                  editing: checked
+                  editing: checked,
                 })
               }
             />
@@ -339,9 +339,9 @@ class TransactionTable extends React.Component<IProps, IState> {
               workflowDefinition={workflowDefinition}
               taskDefinitions={taskDefinitions}
               editing={editing}
-              workflowDefinitionChanged={workflowDefinition => {
+              workflowDefinitionChanged={(workflowDefinition) => {
                 this.setState({
-                  workflowDefinition
+                  workflowDefinition,
                 });
               }}
             />
@@ -352,7 +352,7 @@ class TransactionTable extends React.Component<IProps, IState> {
               data={workflowDefinition || {}}
               onChange={(data: any) => {
                 this.setState({
-                  workflowDefinition: data
+                  workflowDefinition: data,
                 });
               }}
             />
@@ -370,7 +370,7 @@ class TransactionTable extends React.Component<IProps, IState> {
               data={workflowInput || {}}
               onChange={(data: any) => {
                 this.setState({
-                  workflowInput: data
+                  workflowInput: data,
                 });
               }}
             />

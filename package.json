@@ -82,6 +82,7 @@
     "ts-pnp": "1.1.4",
     "typescript": "3.7.2",
     "url-loader": "2.1.0",
+    "uuid": "^7.0.3",
     "vis-timeline": "^6.3.2",
     "webpack": "4.41.0",
     "webpack-dev-server": "3.2.1",
@@ -160,5 +161,8 @@
     "presets": [
       "react-app"
     ]
+  },
+  "devDependencies": {
+    "@types/uuid": "^7.0.2"
   }
 }
