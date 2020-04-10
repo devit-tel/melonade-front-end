@@ -1,14 +1,12 @@
 FROM node:10.16.3 as builder
 
 WORKDIR /usr/src/app
-RUN npm i -g yarn
 COPY package*.json ./
-COPY yarn* ./
-RUN yarn
+RUN npm install
 COPY . .
-RUN yarn build
+RUN npm run build
 
-from nginx:1.17.6-alpine
+FROM nginx:1.17.6-alpine
 
 COPY --from=builder ./usr/src/app/build/ /var/www/html/
 COPY ./nginx/default.conf.template /etc/nginx/conf.d/
