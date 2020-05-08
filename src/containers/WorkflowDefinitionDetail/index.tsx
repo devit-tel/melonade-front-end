@@ -218,7 +218,16 @@ class TransactionTable extends React.Component<IProps, IState> {
           <Button type="primary" onClick={this.saveWorkflowDefinition}>
             Save Workflow Definition
           </Button>
-          <Button type="danger" onClick={this.deleteWorkflowDefinition}>
+          <Button 
+            type="danger" 
+            onClick={this.deleteWorkflowDefinition}
+            disabled = {
+              (
+                this.props.location.pathname === "/definition/workflow/create" &&
+                this.state.saveCount === 0
+              )
+            }
+          >
             Delete Workflow Definition
           </Button>
         </ButtonContainer>
