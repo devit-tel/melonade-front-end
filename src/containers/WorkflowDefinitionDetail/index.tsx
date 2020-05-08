@@ -218,7 +218,16 @@ class TransactionTable extends React.Component<IProps, IState> {
           <Button type="primary" onClick={this.saveWorkflowDefinition}>
             Save Workflow Definition
           </Button>
-          <Button type="danger" onClick={this.deleteWorkflowDefinition}>
+          <Button 
+            type="danger" 
+            onClick={this.deleteWorkflowDefinition}
+            disabled = {
+              (
+                this.props.location.pathname === "/definition/workflow/create" &&
+                this.state.saveCount === 0
+              )
+            }
+          >
             Delete Workflow Definition
           </Button>
         </ButtonContainer>
@@ -231,8 +240,10 @@ class TransactionTable extends React.Component<IProps, IState> {
               <Form.Item label="Name">
                 <Input
                   disabled={
-                    this.props.location.pathname !==
-                    "/definition/workflow/create"
+                    (
+                      this.props.location.pathname !== "/definition/workflow/create" ||
+                      this.state.saveCount !== 0
+                    )
                   }
                   placeholder="The name of workflow"
                   value={R.path(["name"], workflowDefinition) as any}
@@ -244,8 +255,10 @@ class TransactionTable extends React.Component<IProps, IState> {
               <Form.Item label="Rev">
                 <Input
                   disabled={
-                    this.props.location.pathname !==
-                    "/definition/workflow/create"
+                    (
+                      this.props.location.pathname !== "/definition/workflow/create" ||
+                      this.state.saveCount !== 0
+                    )
                   }
                   placeholder="The revision of workflow"
                   value={R.path(["rev"], workflowDefinition) as any}
