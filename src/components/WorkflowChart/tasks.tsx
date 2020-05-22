@@ -559,6 +559,22 @@ const SubTransactionModel = (props: ISubTransactionProps) => (
   </SubTransactionModelContainer>
 );
 
+interface IDynamicTaskProps extends IActionButtonProps, ITaskDataProps {
+  task: WorkflowDefinition.IDynamicTask;
+}
+
+const DynamicTaskModel = (props: IDynamicTaskProps) => (
+  <SystemTaskModelContainer
+    backgroundColor={getBackgroundTasksData(
+      props.task.taskReferenceName,
+      props.tasksData
+    )}
+  >
+    <Text>{props.task.taskReferenceName}</Text>
+    <Text code>DYNAMIC</Text>
+  </SystemTaskModelContainer>
+);
+
 interface IAllTaskProps extends IActionButtonProps, ITaskDataProps {
   task: WorkflowDefinition.AllTaskType;
 }
@@ -610,6 +626,16 @@ const AllTaskModel = (props: IAllTaskProps) => {
     case Task.TaskTypes.SubTransaction:
       return (
         <SubTransactionModel
+          task={task}
+          path={props.path}
+          editing={props.editing}
+          onTaskUpdate={props.onTaskUpdate}
+          tasksData={props.tasksData}
+        />
+      );
+    case Task.TaskTypes.DynamicTask:
+      return (
+        <DynamicTaskModel
           task={task}
           path={props.path}
           editing={props.editing}
@@ -694,6 +720,13 @@ const pickTaskProperties = (
         inputParameters: task.inputParameters || {},
         type: task.type,
       } as WorkflowDefinition.IParallelTask;
+    case Task.TaskTypes.DynamicTask:
+      return {
+        taskReferenceName: task.taskReferenceName,
+        dynamicTasks: [],
+        inputParameters: task.inputParameters || {},
+        type: task.type,
+      } as WorkflowDefinition.IDynamicTask;
     default:
       return task;
   }
