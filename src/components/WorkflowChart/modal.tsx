@@ -85,6 +85,7 @@ export class CreateTaskModal extends React.Component<
               <Option value={Task.TaskTypes.SubTransaction}>
                 Sub-transaction
               </Option>
+              <Option value={Task.TaskTypes.DynamicTask}>Dynamic Task</Option>
             </Select>
           </Form.Item>
           <Form.Item label="Task ReferenceName">
@@ -307,6 +308,30 @@ export class CreateTaskModal extends React.Component<
                 }}
               />
             </React.Fragment>
+          )}
+          {R.pathEq(
+            ["task", "type"],
+            Task.TaskTypes.DynamicTask,
+            this.state
+          ) && (
+            <Form.Item label="Task list">
+              <Input
+                // eslint-disable-next-line no-template-curly-in-string
+                placeholder="list of task to create  (Array of Task e.g. ${workflow.input.tasks})"
+                value={
+                  R.path(
+                    ["inputParameters", "tasks"],
+                    this.state.task
+                  ) as string
+                }
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  this.onInputChanged(
+                    ["inputParameters", "tasks"],
+                    event.target.value
+                  );
+                }}
+              />
+            </Form.Item>
           )}
         </Form>
       </StyledModal>
