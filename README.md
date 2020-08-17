@@ -1,5 +1,23 @@
 # melonade-front-end
 
+## To start
+
+```bash
+  nvm install v10.16.3
+  nvm use
+
+  npm install
+  npm start
+```
+
+# Docker .env
+
+```bash
+PORT=8083
+REACT_APP_EVENT_LOGGER_HTTP_BASEURL=http://localhost:8082/
+REACT_APP_PROCESS_MANAGER_HTTP_BASEURL=http://localhost:8081/
+```
+
 ## TODO
 
 - [x] Reverse proxy
