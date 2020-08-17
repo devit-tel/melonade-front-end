@@ -1,6 +1,8 @@
 import { Store, Transaction } from "@melonade/melonade-declaration";
 import { Pagination, Table, Tag, Typography } from "antd";
+import { ColumnProps } from "antd/lib/table";
 import moment from "moment";
+import * as R from "ramda";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listRunningTransaction } from "../../services/procressManager/http";
@@ -9,12 +11,17 @@ const TRANSACTION_PER_PAGE = 50;
 
 interface IProps {}
 
-const columns = [
+const sortByPath = (path: (string | number)[]) => (a: any, b: any): number => {
+  if ((R.path(path, a) as any) > (R.path(path, b) as any)) return 1;
+  return -1;
+};
+
+const columns: ColumnProps<Transaction.ITransaction>[] = [
   {
     title: "TransactionId",
     dataIndex: "transactionId",
     key: "transactionId",
-    render: (text: string) => <Link to={`transaction/${text}`}>{text}</Link>
+    render: (text: string) => <Link to={`transaction/${text}`}>{text}</Link>,
   },
   {
     title: "Workflow",
@@ -24,7 +31,7 @@ const columns = [
       <Typography.Text code>
         {`${transaction.workflowDefinition.name} / ${transaction.workflowDefinition.rev}`}
       </Typography.Text>
-    )
+    ),
   },
   {
     title: "Created at",
@@ -34,7 +41,10 @@ const columns = [
       <Typography.Text>
         {moment(createdAt).format("YYYY/MM/DD HH:mm:ss.SSS")}
       </Typography.Text>
-    )
+    ),
+    sortDirections: ["ascend", "descend"],
+    sorter: sortByPath(["createTime"]),
+    defaultSortOrder: "descend",
   },
   {
     title: "Tags",
@@ -46,8 +56,8 @@ const columns = [
           <Tag key={tag}>{tag}</Tag>
         ))}
       </React.Fragment>
-    )
-  }
+    ),
+  },
 ];
 
 export default (props: IProps) => {
@@ -55,7 +65,7 @@ export default (props: IProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transactions, setTransactions] = useState<Store.ITransactionPaginate>({
     transactions: [],
-    total: 0
+    total: 0,
   });
   useEffect(() => {
     (async () => {
@@ -70,7 +80,7 @@ export default (props: IProps) => {
       } catch (error) {
         setTransactions({
           transactions: [],
-          total: 0
+          total: 0,
         });
       } finally {
         setIsLoading(false);
