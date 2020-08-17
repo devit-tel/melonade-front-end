@@ -3,7 +3,7 @@ import {
   TaskDefinition,
   WorkflowDefinition,
 } from "@melonade/melonade-declaration";
-import { Form, Input, InputNumber, Modal, Select } from "antd";
+import { Form, Input, Modal, Select } from "antd";
 import * as R from "ramda";
 import React from "react";
 import styled from "styled-components";
@@ -11,7 +11,7 @@ import JsonEditor from "../../components/JsonEditor";
 
 const { Option } = Select;
 
-const StyledNumberInput = styled(InputNumber)`
+const StyledInput = styled(Input)`
   width: 100%;
 `;
 
@@ -122,42 +122,38 @@ export class CreateTaskModal extends React.Component<
                 </Select>
               </Form.Item>
               <Form.Item label="Retry Limit">
-                <StyledNumberInput
-                  min={0}
+                <StyledInput
                   placeholder="Retry Limit"
                   value={R.path(["retry", "limit"], this.state.task) as any}
-                  onChange={(value?: number) => {
-                    this.onInputChanged(["retry", "limit"], value);
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(["retry", "limit"], e.target.value);
                   }}
                 />
               </Form.Item>
               <Form.Item label="Retry Delay">
-                <StyledNumberInput
-                  min={0}
+                <StyledInput
                   placeholder="Retry Delay"
                   value={R.path(["retry", "delay"], this.state.task) as any}
-                  onChange={(value?: number) => {
-                    this.onInputChanged(["retry", "delay"], value);
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(["retry", "delay"], e.target.value);
                   }}
                 />
               </Form.Item>
               <Form.Item label="Ack Timeout">
-                <StyledNumberInput
-                  min={0}
+                <StyledInput
                   placeholder="Ack Timeout"
                   value={R.path(["ackTimeout"], this.state.task) as any}
-                  onChange={(value?: number) => {
-                    this.onInputChanged(["ackTimeout"], value);
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(["ackTimeout"], e.target.value);
                   }}
                 />
               </Form.Item>
               <Form.Item label="Timeout">
-                <StyledNumberInput
-                  min={0}
+                <StyledInput
                   placeholder="Timeout"
                   value={R.path(["timeout"], this.state.task) as any}
-                  onChange={(value?: number) => {
-                    this.onInputChanged(["timeout"], value);
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    this.onInputChanged(["timeout"], e.target.value);
                   }}
                 />
               </Form.Item>
