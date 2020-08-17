@@ -4,6 +4,7 @@ import {
   WorkflowDefinition,
 } from "@melonade/melonade-declaration";
 import { Icon, Input, Pagination, Select, Table, Tag, Typography } from "antd";
+import { OptionProps } from "antd/lib/select";
 import debounce from "lodash.debounce";
 import moment from "moment";
 import React, { useContext, useEffect, useRef, useState } from "react";
@@ -46,7 +47,7 @@ const TransactionInput = styled(Input)`
 `;
 
 const StyledSelect = (styled(Select)`
-  min-width: 180px;
+  min-width: 200px;
 ` as unknown) as typeof Select;
 
 interface IProps {
@@ -167,7 +168,16 @@ export default (props: IProps) => {
     <div>
       <ToolBarContainer>
         <StyledSelect
+          showSearch
           placeholder="Find by workflow definition"
+          filterOption={(
+            input: string,
+            option: React.ReactElement<OptionProps>
+          ) => {
+            return `${option.props.children}`
+              .toLocaleLowerCase()
+              .includes(input.toLowerCase());
+          }}
           onChange={(i: number) => {
             setWorkflowName(workflowDefs[i]?.name);
             setWorkflowRev(workflowDefs[i]?.rev);
