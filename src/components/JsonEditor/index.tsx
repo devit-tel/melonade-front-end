@@ -9,6 +9,7 @@ const JsonEditorContainer = styled.div`
   .react-json-view {
     display: flex;
     flex: 1 1 50%;
+    width: 50%;
   }
 `;
 
