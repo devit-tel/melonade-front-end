@@ -34,7 +34,8 @@ const columns: ColumnProps<WorkflowDefinition.IWorkflowDefinition>[] = [
       <Link to={`/definition/workflow/${name}/${rev}`}>{name}</Link>
     ),
     sortDirections: ["ascend", "descend"],
-    sorter: sortByPath(["name"])
+    sorter: sortByPath(["name"]),
+    defaultSortOrder: "ascend",
   },
   {
     title: "Revision",
@@ -44,7 +45,8 @@ const columns: ColumnProps<WorkflowDefinition.IWorkflowDefinition>[] = [
       <Link to={`/definition/workflow/${name}/${rev}`}>{rev}</Link>
     ),
     sortDirections: ["ascend", "descend"],
-    sorter: sortByPath(["rev"])
+    sorter: sortByPath(["rev"]),
+    defaultSortOrder: "ascend",
   },
   {
     title: "Description",
@@ -52,7 +54,7 @@ const columns: ColumnProps<WorkflowDefinition.IWorkflowDefinition>[] = [
     key: "description",
     render: (description: string) => (
       <Typography.Text>{description}</Typography.Text>
-    )
+    ),
   },
   {
     title: "Failure Strategy",
@@ -62,7 +64,7 @@ const columns: ColumnProps<WorkflowDefinition.IWorkflowDefinition>[] = [
       <Typography.Text code>{failureStrategy}</Typography.Text>
     ),
     sortDirections: ["ascend", "descend"],
-    sorter: sortByPath(["failureStrategy"])
+    sorter: sortByPath(["failureStrategy"]),
   },
   {
     title: "Retry Limit",
@@ -70,8 +72,8 @@ const columns: ColumnProps<WorkflowDefinition.IWorkflowDefinition>[] = [
     key: "retry.limit",
     render: (limit: number) => <Typography.Text>{limit}</Typography.Text>,
     sortDirections: ["ascend", "descend"],
-    sorter: sortByPath(["retry", "limit"])
-  }
+    sorter: sortByPath(["retry", "limit"]),
+  },
 ];
 
 class TransactionTable extends React.Component<IProps, IState> {
@@ -80,7 +82,7 @@ class TransactionTable extends React.Component<IProps, IState> {
 
     this.state = {
       workflowDefinitions: [],
-      isLoading: false
+      isLoading: false,
     };
   }
 
@@ -90,12 +92,12 @@ class TransactionTable extends React.Component<IProps, IState> {
       const workflowDefinitions = await listWorkflowDefinitions();
       this.setState({
         workflowDefinitions,
-        isLoading: false
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
         isLoading: false,
-        workflowDefinitions: []
+        workflowDefinitions: [],
       });
     }
   };

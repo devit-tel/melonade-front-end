@@ -5,7 +5,11 @@ import * as R from "ramda";
 import React from "react";
 import styled from "styled-components";
 import TaskDefinitionModal from "../../components/TaskDefinitionModal";
-import { createTaskDefinitions, listTaskDefinitions, updateTaskDefinitions } from "../../services/procressManager/http";
+import {
+  createTaskDefinitions,
+  listTaskDefinitions,
+  updateTaskDefinitions,
+} from "../../services/procressManager/http";
 
 const Container = styled.div`
   & > button {
@@ -13,7 +17,7 @@ const Container = styled.div`
   }
 `;
 
-interface IProps { }
+interface IProps {}
 
 interface IState {
   taskDefinitions: TaskDefinition.ITaskDefinition[];
@@ -35,7 +39,7 @@ class TransactionTable extends React.Component<IProps, IState> {
     this.state = {
       taskDefinitions: [],
       isLoading: false,
-      showModal: false
+      showModal: false,
     };
   }
 
@@ -50,7 +54,7 @@ class TransactionTable extends React.Component<IProps, IState> {
           onClick={() => {
             this.setState({
               showModal: true,
-              editingTask: data
+              editingTask: data,
             });
           }}
         >
@@ -58,7 +62,8 @@ class TransactionTable extends React.Component<IProps, IState> {
         </Button>
       ),
       sortDirections: ["ascend", "descend"],
-      sorter: sortByPath(["name"])
+      sorter: sortByPath(["name"]),
+      defaultSortOrder: "ascend",
     },
     {
       title: "Description",
@@ -68,7 +73,7 @@ class TransactionTable extends React.Component<IProps, IState> {
         <Typography.Text>{description}</Typography.Text>
       ),
       sortDirections: ["ascend", "descend"],
-      sorter: sortByPath(["description"])
+      sorter: sortByPath(["description"]),
     },
     {
       title: "Ack Timeout (ms)",
@@ -78,7 +83,7 @@ class TransactionTable extends React.Component<IProps, IState> {
         <Typography.Text>{ackTimeout}</Typography.Text>
       ),
       sortDirections: ["ascend", "descend"],
-      sorter: sortByPath(["ackTimeout"])
+      sorter: sortByPath(["ackTimeout"]),
     },
     {
       title: "Timeout (ms)",
@@ -86,7 +91,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       key: "timeout",
       render: (Timeout: number) => <Typography.Text>{Timeout}</Typography.Text>,
       sortDirections: ["ascend", "descend"],
-      sorter: sortByPath(["timeout"])
+      sorter: sortByPath(["timeout"]),
     },
     {
       title: "Retry Limit",
@@ -94,7 +99,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       key: "retry.limit",
       render: (limit: number) => <Typography.Text>{limit}</Typography.Text>,
       sortDirections: ["ascend", "descend"],
-      sorter: sortByPath(["retry", "limit"])
+      sorter: sortByPath(["retry", "limit"]),
     },
     {
       title: "Retry Delay (ms)",
@@ -102,8 +107,8 @@ class TransactionTable extends React.Component<IProps, IState> {
       key: "retry.delay",
       render: (delay: number) => <Typography.Text>{delay}</Typography.Text>,
       sortDirections: ["ascend", "descend"],
-      sorter: sortByPath(["retry", "delay"])
-    }
+      sorter: sortByPath(["retry", "delay"]),
+    },
   ];
 
   listTaskDefinitions = async () => {
@@ -112,12 +117,12 @@ class TransactionTable extends React.Component<IProps, IState> {
       const taskDefinitions = await listTaskDefinitions();
       this.setState({
         taskDefinitions: taskDefinitions,
-        isLoading: false
+        isLoading: false,
       });
     } catch (error) {
       this.setState({
         isLoading: false,
-        taskDefinitions: []
+        taskDefinitions: [],
       });
     }
   };
@@ -135,14 +140,13 @@ class TransactionTable extends React.Component<IProps, IState> {
       }
       this.setState({
         showModal: false,
-        editingTask: undefined
+        editingTask: undefined,
       });
-
     } catch (error) {
       const errorResp = R.path(["response", "data", "error", "message"], error);
 
       this.setState({
-        errorMessage: errorResp ? JSON.stringify(errorResp) : error.toString()
+        errorMessage: errorResp ? JSON.stringify(errorResp) : error.toString(),
       });
     } finally {
       await this.listTaskDefinitions();
@@ -158,7 +162,7 @@ class TransactionTable extends React.Component<IProps, IState> {
       taskDefinitions,
       isLoading,
       editingTask,
-      errorMessage
+      errorMessage,
     } = this.state;
     return (
       <Container>
