@@ -109,6 +109,16 @@ class TransactionTable extends React.Component<IProps, IState> {
       sortDirections: ["ascend", "descend"],
       sorter: sortByPath(["retry", "delay"]),
     },
+    {
+      title: "Sync Worker",
+      dataIndex: "syncWorker",
+      key: "syncWorker",
+      render: (syncWorker: boolean) => (
+        <Typography.Text>{syncWorker ? "Yes" : "No"}</Typography.Text>
+      ),
+      sortDirections: ["ascend", "descend"],
+      sorter: sortByPath(["syncWorker"]),
+    },
   ];
 
   listTaskDefinitions = async () => {

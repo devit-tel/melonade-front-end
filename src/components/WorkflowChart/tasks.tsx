@@ -704,6 +704,7 @@ const pickTaskProperties = (
         retry: task.retry,
         timeout: task.timeout,
         type: task.type,
+        syncWorker: task.syncWorker,
       } as WorkflowDefinition.ITaskTask;
     case Task.TaskTypes.Decision:
       return {

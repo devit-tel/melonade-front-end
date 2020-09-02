@@ -3,7 +3,7 @@ import {
   TaskDefinition,
   WorkflowDefinition,
 } from "@melonade/melonade-declaration";
-import { Form, Input, Modal, Select } from "antd";
+import { Form, Input, Modal, Radio, Select } from "antd";
 import * as R from "ramda";
 import React from "react";
 import styled from "styled-components";
@@ -156,6 +156,18 @@ export class CreateTaskModal extends React.Component<
                     this.onInputChanged(["timeout"], e.target.value);
                   }}
                 />
+              </Form.Item>
+              <Form.Item label="Sync Worker">
+                <Radio.Group
+                  onChange={(e) => {
+                    this.onInputChanged(["syncWorker"], e.target.value);
+                  }}
+                  value={this.state.task?.syncWorker}
+                >
+                  <Radio value={undefined}>Unset</Radio>
+                  <Radio value={true}>Yes</Radio>
+                  <Radio value={false}>No</Radio>
+                </Radio.Group>
               </Form.Item>
 
               <JsonEditor

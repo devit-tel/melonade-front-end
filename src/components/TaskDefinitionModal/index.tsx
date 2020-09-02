@@ -1,5 +1,5 @@
 import { TaskDefinition } from "@melonade/melonade-declaration";
-import { Form, Input, InputNumber, Modal, Typography } from "antd";
+import { Form, Input, InputNumber, Modal, Switch, Typography } from "antd";
 import * as R from "ramda";
 import React from "react";
 import styled from "styled-components";
@@ -29,21 +29,21 @@ export default class TaskDefinitionModal extends React.Component<
     super(props);
 
     this.state = {
-      taskDefinition: undefined
+      taskDefinition: undefined,
     };
   }
 
   componentWillReceiveProps(nextProps: IProps) {
     if (!this.props.visible && nextProps.visible) {
       this.setState({
-        taskDefinition: nextProps.taskDefinition
+        taskDefinition: nextProps.taskDefinition,
       });
     }
   }
 
   onInputChanged = (path: (string | number)[], value: any) => {
     this.setState({
-      taskDefinition: R.set(R.lensPath(path), value, this.state.taskDefinition)
+      taskDefinition: R.set(R.lensPath(path), value, this.state.taskDefinition),
     });
   };
 
@@ -112,6 +112,14 @@ export default class TaskDefinitionModal extends React.Component<
               value={R.path(["retry", "limit"], taskDefinition) as any}
               onChange={(value?: number) => {
                 this.onInputChanged(["retry", "limit"], value || 0);
+              }}
+            />
+          </Form.Item>
+          <Form.Item label="Sync Worker">
+            <Switch
+              checked={taskDefinition?.syncWorker || false}
+              onChange={(check?: boolean) => {
+                this.onInputChanged(["syncWorker"], check);
               }}
             />
           </Form.Item>
