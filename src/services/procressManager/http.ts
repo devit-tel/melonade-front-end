@@ -9,6 +9,10 @@ import { processManager } from "../../config";
 
 const client = axios.create(processManager.http);
 
+const sortByNameCaseInsensitive = R.sortBy(
+  R.compose(R.toLower, R.prop("name"))
+);
+
 export const listWorkflowDefinitions = async (): Promise<
   WorkflowDefinition.IWorkflowDefinition[]
 > => {
@@ -16,8 +20,7 @@ export const listWorkflowDefinitions = async (): Promise<
     url: "/v1/definition/workflow",
     method: "GET",
   });
-
-  return R.pathOr([], ["data", "data"], resp);
+  return sortByNameCaseInsensitive(resp?.data?.data ?? []);
 };
 
 export const getWorkflowDefinitionData = async (
@@ -43,7 +46,7 @@ export const listTaskDefinitions = async (): Promise<
     method: "GET",
   });
 
-  return R.pathOr([], ["data", "data"], resp);
+  return sortByNameCaseInsensitive(resp?.data?.data ?? []);
 };
 
 export const updateTaskDefinitions = async (
