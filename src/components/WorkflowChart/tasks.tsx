@@ -57,6 +57,7 @@ const ChartContainer = styled.div`
   flex-flow: column nowrap;
   padding: 24px;
   align-items: center;
+  overflow-y: auto;
 `;
 
 const StartModel = styled.div`
@@ -704,6 +705,7 @@ const pickTaskProperties = (
         retry: task.retry,
         timeout: task.timeout,
         type: task.type,
+        syncWorker: task.syncWorker,
       } as WorkflowDefinition.ITaskTask;
     case Task.TaskTypes.Decision:
       return {
