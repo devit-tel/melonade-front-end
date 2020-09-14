@@ -1,7 +1,7 @@
 import {
   Task,
   TaskDefinition,
-  WorkflowDefinition
+  WorkflowDefinition,
 } from "@melonade/melonade-declaration";
 import * as R from "ramda";
 import React from "react";
@@ -23,11 +23,10 @@ interface IProps {
 const WorkflowChartDefinitionContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
-  justify-content: center;
 
-  background: linear-gradient(90deg, #fff 20px, transparent 1%) center,
-    linear-gradient(#fff 20px, transparent 1%) center, #ddd;
-  background-size: 22px 22px;
+  // background: linear-gradient(90deg, #fff 20px, transparent 1%) center,
+  //   linear-gradient(#fff 20px, transparent 1%) center, #ddd;
+  // background-size: 22px 22px;
 `;
 
 export default (props: IProps) => (
@@ -36,11 +35,11 @@ export default (props: IProps) => (
       taskDefinitions={props.taskDefinitions || []}
       tasks={R.pathOr([], ["workflowDefinition", "tasks"], props)}
       editing={props.editing}
-      onTaskUpdated={tasks => {
+      onTaskUpdated={(tasks) => {
         props.workflowDefinitionChanged &&
           props.workflowDefinitionChanged({
             ...props.workflowDefinition,
-            tasks
+            tasks,
           } as any);
       }}
       tasksData={props.tasksData}

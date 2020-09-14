@@ -21,6 +21,10 @@ const Container = styled.div`
   overflow: hidden;
 `;
 
+const WorkflowsContainer = styled.div`
+  overflow: auto;
+`;
+
 const StyledTabs = styled(Tabs)``;
 
 const getTaskStatePriority = (task?: Task.ITask): number => {
@@ -195,25 +199,27 @@ class TransactionTable extends React.Component<IProps, IState> {
             <EventTable events={events || []} isLoading={isLoading} />
           </TabPane>
           <TabPane tab="Workflows view" key="2">
-            {Object.keys(groupedWorkflow)
-              .sort((workflowIdA: string, workflowIdB: string) => {
-                const workflowDataA = groupedWorkflow[workflowIdA];
-                const workflowDataB = groupedWorkflow[workflowIdB];
-                return (
-                  R.pathOr(0, ["timestamp"], workflowDataA) -
-                  R.pathOr(0, ["timestamp"], workflowDataB)
-                );
-              })
-              .map((workflowId: string) => {
-                const workflowData = groupedWorkflow[workflowId];
-                return (
-                  <WorkflowChart
-                    key={workflowId}
-                    workflowDefinition={workflowData.workflowDefinition}
-                    tasksData={workflowData.tasksData}
-                  />
-                );
-              })}
+            <WorkflowsContainer>
+              {Object.keys(groupedWorkflow)
+                .sort((workflowIdA: string, workflowIdB: string) => {
+                  const workflowDataA = groupedWorkflow[workflowIdA];
+                  const workflowDataB = groupedWorkflow[workflowIdB];
+                  return (
+                    R.pathOr(0, ["timestamp"], workflowDataA) -
+                    R.pathOr(0, ["timestamp"], workflowDataB)
+                  );
+                })
+                .map((workflowId: string) => {
+                  const workflowData = groupedWorkflow[workflowId];
+                  return (
+                    <WorkflowChart
+                      key={workflowId}
+                      workflowDefinition={workflowData.workflowDefinition}
+                      tasksData={workflowData.tasksData}
+                    />
+                  );
+                })}
+            </WorkflowsContainer>
           </TabPane>
         </StyledTabs>
       </Container>

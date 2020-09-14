@@ -57,7 +57,8 @@ const ChartContainer = styled.div`
   flex-flow: column nowrap;
   padding: 24px;
   align-items: center;
-  overflow-y: auto;
+  flex: 1 1 100%;
+  // overflow-y: auto;
 `;
 
 const StartModel = styled.div`
