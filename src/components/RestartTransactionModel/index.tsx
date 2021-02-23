@@ -14,11 +14,12 @@ interface IProps {
 const RestartTransactionModel = (props: IProps) => {
   return (
     <Modal
-      width="700"
-      centered
+      width="90vw"
       title="Start transaction"
       visible={props.visible}
-      onOk={props.onClose}
+      okButtonProps={{
+        hidden: true,
+      }}
       onCancel={props.onClose}
     >
       <WorkflowDefinitionDetail
