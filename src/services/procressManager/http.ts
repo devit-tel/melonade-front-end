@@ -122,7 +122,7 @@ export const cancelTranasaction = async (
   });
 };
 
-export const startTranasaction = async (
+export const startTransaction = async (
   workflowRef: WorkflowDefinition.IWorkflowRef,
   input: any,
   transactionId?: string,

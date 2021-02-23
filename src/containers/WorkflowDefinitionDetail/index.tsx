@@ -25,7 +25,7 @@ import {
   deleteWorkflowDefinition,
   getWorkflowDefinitionData,
   listTaskDefinitions,
-  startTranasaction,
+  startTransaction,
   updateWorkflowDefinition,
 } from "../../services/procressManager/http";
 
@@ -186,7 +186,7 @@ class TransactionTable extends React.Component<IProps, IState> {
     const transactionId = `web-${uuid()}`;
 
     try {
-      await startTranasaction(
+      await startTransaction(
         {
           name: this.state.workflowDefinition?.name || "",
           rev: this.state.workflowDefinition?.rev || "",
@@ -218,14 +218,12 @@ class TransactionTable extends React.Component<IProps, IState> {
           <Button type="primary" onClick={this.saveWorkflowDefinition}>
             Save Workflow Definition
           </Button>
-          <Button 
-            type="danger" 
+          <Button
+            type="danger"
             onClick={this.deleteWorkflowDefinition}
-            disabled = {
-              (
-                this.props.location.pathname === "/definition/workflow/create" &&
-                this.state.saveCount === 0
-              )
+            disabled={
+              this.props.location.pathname === "/definition/workflow/create" &&
+              this.state.saveCount === 0
             }
           >
             Delete Workflow Definition
@@ -240,10 +238,9 @@ class TransactionTable extends React.Component<IProps, IState> {
               <Form.Item label="Name">
                 <Input
                   disabled={
-                    (
-                      this.props.location.pathname !== "/definition/workflow/create" ||
-                      this.state.saveCount !== 0
-                    )
+                    this.props.location.pathname !==
+                      "/definition/workflow/create" ||
+                    this.state.saveCount !== 0
                   }
                   placeholder="The name of workflow"
                   value={R.path(["name"], workflowDefinition) as any}
@@ -255,10 +252,9 @@ class TransactionTable extends React.Component<IProps, IState> {
               <Form.Item label="Rev">
                 <Input
                   disabled={
-                    (
-                      this.props.location.pathname !== "/definition/workflow/create" ||
-                      this.state.saveCount !== 0
-                    )
+                    this.props.location.pathname !==
+                      "/definition/workflow/create" ||
+                    this.state.saveCount !== 0
                   }
                   placeholder="The revision of workflow"
                   value={R.path(["rev"], workflowDefinition) as any}
