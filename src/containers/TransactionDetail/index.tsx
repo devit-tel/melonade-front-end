@@ -13,7 +13,7 @@ import EventTable from "../../components/EventTable";
 import TimelineChart from "../../components/TimelineChart";
 import WorkflowChart from "../../components/WorkflowChart";
 import { getTransactionData } from "../../services/eventLogger/http";
-import { cancelTranasaction } from "../../services/procressManager/http";
+import { cancelTransaction } from "../../services/processManager/http";
 
 const { TabPane } = Tabs;
 
@@ -119,12 +119,12 @@ const groupWorkflowById = (
   );
 };
 
-const getLastestTransactionData = R.find<Event.AllEvent>(
+const getLatestTransactionData = R.find<Event.AllEvent>(
   (event: Event.AllEvent) =>
     event.type === "TRANSACTION" && event.isError === false
 );
 
-class TransactionTable extends React.Component<IProps, IState> {
+class TransactionDetail extends React.Component<IProps, IState> {
   private timer?: number;
   constructor(props: IProps) {
     super(props);
@@ -153,7 +153,7 @@ class TransactionTable extends React.Component<IProps, IState> {
     Modal.confirm({
       title: "Do you Want to cancel this transaction?",
       onOk() {
-        cancelTranasaction(transactionId);
+        cancelTransaction(transactionId);
       },
     });
   };
@@ -175,15 +175,15 @@ class TransactionTable extends React.Component<IProps, IState> {
     const { events, isLoading } = this.state;
     const { transactionId } = this.props.match.params;
     const groupedWorkflow = groupWorkflowById(events);
-    const lastestTransactionEvent = getLastestTransactionData(events);
+    const latestTransactionEvent = getLatestTransactionData(events);
     return (
       <Container>
         <Button type="primary" icon="reload" onClick={this.getTransactionData}>
           Refresh
         </Button>
-        {lastestTransactionEvent?.details?.status ===
+        {latestTransactionEvent?.details?.status ===
           State.TransactionStates.Running &&
-          !lastestTransactionEvent?.details?.parent && (
+          !latestTransactionEvent?.details?.parent && (
             <Button
               type="danger"
               icon="rollback"
@@ -227,4 +227,4 @@ class TransactionTable extends React.Component<IProps, IState> {
   }
 }
 
-export default TransactionTable;
+export default TransactionDetail;

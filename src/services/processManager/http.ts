@@ -113,7 +113,7 @@ export const deleteWorkflowDefinition = async (
   });
 };
 
-export const cancelTranasaction = async (
+export const cancelTransaction = async (
   transactionId: string
 ): Promise<void> => {
   await client({
@@ -123,16 +123,16 @@ export const cancelTranasaction = async (
 };
 
 export const startTransaction = async (
-  workflowRef: WorkflowDefinition.IWorkflowRef,
+  workflowDefinition: WorkflowDefinition.IWorkflowDefinition,
   input: any,
   transactionId?: string,
   tags?: string[]
 ): Promise<void> => {
   await client({
-    url: `/v1/transaction/${workflowRef.name}/${workflowRef.rev}`,
+    url: `/v1/transaction/start`,
     method: "POST",
     params: { transactionId, tags: JSON.stringify(tags) },
-    data: input,
+    data: { input, workflowDefinition },
   });
 };
 

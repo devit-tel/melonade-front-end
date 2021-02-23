@@ -1,8 +1,6 @@
-import {
-  State,
-  TaskDefinition,
-  WorkflowDefinition,
-} from "@melonade/melonade-declaration";
+import { State, WorkflowDefinition } from "@melonade/melonade-declaration";
+import { ITaskDefinition } from "@melonade/melonade-declaration/build/taskDefinition";
+import { IWorkflowDefinition } from "@melonade/melonade-declaration/build/workflowDefinition";
 import {
   Button,
   Form,
@@ -14,8 +12,8 @@ import {
   Tabs,
 } from "antd";
 import * as R from "ramda";
-import React from "react";
-import { RouteComponentProps } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 import uuid from "uuid/v4";
 import JsonEditor from "../../components/JsonEditor";
@@ -27,7 +25,7 @@ import {
   listTaskDefinitions,
   startTransaction,
   updateWorkflowDefinition,
-} from "../../services/procressManager/http";
+} from "../../services/processManager/http";
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -58,336 +56,292 @@ const StartTransactionButton = styled(Button)`
   margin: 20px 0;
 `;
 
-interface IWorkflowDefinitionParams {
-  name: string;
-  rev: string;
-}
-
-interface IProps extends RouteComponentProps<IWorkflowDefinitionParams> {}
-
-interface IState {
+interface IProps {
+  name?: string;
+  rev?: string;
   workflowDefinition?: WorkflowDefinition.IWorkflowDefinition;
-  taskDefinitions?: TaskDefinition.ITaskDefinition[];
-  isLoading: boolean;
-  editing: boolean;
-  saveCount: number;
-  workflowInput: any;
-  currentTab: string;
+  workflowInput?: any;
+  transactionId?: string;
 }
 
-class TransactionTable extends React.Component<IProps, IState> {
-  constructor(props: IProps) {
-    super(props);
+const WorkflowDefinitionDetail = (props: IProps) => {
+  const [saveCount, setSaveCount] = useState(0);
+  const [workflowDefinition, setWorkflowDefinition] = useState(
+    props.workflowDefinition
+  );
+  const [taskDefinitions, setTaskDefinitions] = useState<ITaskDefinition[]>([]);
+  const [currentTab, setCurrentTab] = useState("1");
+  const [editing, setEditing] = useState(true);
+  const [workflowInput, setWorkflowInput] = useState<any>({});
+  const [transactionId, setTransactionId] = useState(
+    props.transactionId ?? `web-${uuid()}`
+  );
+  const history = useHistory();
 
-    this.state = {
-      workflowDefinition: undefined,
-      isLoading: false,
-      editing: true,
-      saveCount: 0,
-      workflowInput: {},
-      currentTab: "1",
-    };
-  }
-
-  getWorkflowAndTasksDefinitionData = async () => {
-    this.setState({ isLoading: true });
-    try {
-      const { name, rev } = this.props.match.params;
-      const workflowDefinition = await getWorkflowDefinitionData(name, rev);
+  useEffect(() => {
+    (async () => {
       const taskDefinitions = await listTaskDefinitions();
-      this.setState({
-        workflowDefinition,
-        taskDefinitions,
-        isLoading: false,
-      });
-    } catch (error) {
-      this.setState({
-        isLoading: false,
-        workflowDefinition: undefined,
-        taskDefinitions: undefined,
-      });
-    }
-  };
-
-  saveWorkflowDefinition = async () => {
-    try {
-      // Validate workflow
-      new WorkflowDefinition.WorkflowDefinition(
-        this.state.workflowDefinition as WorkflowDefinition.IWorkflowDefinition
-      );
-
-      if (
-        this.props.location.pathname === "/definition/workflow/create" &&
-        this.state.saveCount === 0
-      ) {
-        await createWorkflowDefinition(
-          this.state
-            .workflowDefinition as WorkflowDefinition.IWorkflowDefinition
+      setTaskDefinitions(taskDefinitions);
+      if (props.name && props.rev) {
+        const workflowDefinition = await getWorkflowDefinitionData(
+          props.name,
+          props.rev
         );
-      } else {
-        await updateWorkflowDefinition(
-          this.state
-            .workflowDefinition as WorkflowDefinition.IWorkflowDefinition
-        );
+        setWorkflowDefinition(workflowDefinition);
+      } else if (props.workflowDefinition && props.workflowInput) {
+        setWorkflowDefinition(props.workflowDefinition);
+        setWorkflowInput(props.workflowInput);
+        setSaveCount(-1);
       }
-      Modal.success({
-        title: "Saved successfully",
-      });
-      this.setState({
-        saveCount: this.state.saveCount + 1,
-      });
-    } catch (error) {
-      Modal.error({
-        title: "Save failed",
-        content: error.toString(),
-      });
-    }
-  };
+    })();
+  }, [props.name, props.rev, props.workflowDefinition, props.workflowInput]);
 
-  deleteWorkflowDefinition = () => {
-    Modal.confirm({
-      title: "Are you sure delete this workflow definition?",
-      content: `You will not able to start transaction with this workflow anymore.`,
-      okText: "Delete",
-      okType: "danger",
-      cancelText: "No",
-      onOk: async () => {
-        try {
-          await deleteWorkflowDefinition(
-            R.pathOr("", ["workflowDefinition", "name"], this.state),
-            R.pathOr("", ["workflowDefinition", "rev"], this.state)
-          );
-          this.props.history.push("/definition/workflow");
-        } catch (error) {
-          Modal.error({
-            title: "Failed to delete workflow definition",
-            content: error.toString(),
-          });
-        }
-      },
-    });
-  };
-
-  onInputChanged = (path: (string | number)[], value: any) => {
-    this.setState({
-      workflowDefinition: R.set(
-        R.lensPath(path),
-        value,
-        this.state.workflowDefinition
-      ),
-    });
-  };
-
-  componentDidMount = async () => {
-    this.getWorkflowAndTasksDefinitionData();
-  };
-
-  startTransaction = async () => {
-    const transactionId = `web-${uuid()}`;
-
-    try {
-      await startTransaction(
-        {
-          name: this.state.workflowDefinition?.name || "",
-          rev: this.state.workflowDefinition?.rev || "",
-        },
-        this.state.workflowInput,
-        transactionId,
-        ["web"]
-      );
-      window.open(`/transaction/${transactionId}`, transactionId);
-    } catch (error) {
-      Modal.error({
-        title: "Cannot start transaction",
-        content: error.toString(),
-      });
-    }
-  };
-
-  render() {
-    const {
-      workflowDefinition,
-      taskDefinitions,
-      editing,
-      workflowInput,
-      currentTab,
-    } = this.state;
-    return (
-      <WorkflowDefinitionDetailContainer>
+  return (
+    <WorkflowDefinitionDetailContainer>
+      {saveCount >= 0 && (
         <ButtonContainer>
-          <Button type="primary" onClick={this.saveWorkflowDefinition}>
+          <Button
+            type="primary"
+            onClick={async () => {
+              try {
+                if (workflowDefinition) {
+                  // Validate workflow
+                  new WorkflowDefinition.WorkflowDefinition(workflowDefinition);
+
+                  if (
+                    history.location.pathname ===
+                      "/definition/workflow/create" &&
+                    saveCount === 0
+                  ) {
+                    await createWorkflowDefinition(workflowDefinition);
+                  } else {
+                    await updateWorkflowDefinition(workflowDefinition);
+                  }
+                  Modal.success({
+                    title: "Saved successfully",
+                  });
+
+                  setSaveCount(saveCount + 1);
+                }
+              } catch (error) {
+                Modal.error({
+                  title: "Save failed",
+                  content: error.toString(),
+                });
+              }
+            }}
+          >
             Save Workflow Definition
           </Button>
           <Button
             type="danger"
-            onClick={this.deleteWorkflowDefinition}
+            onClick={() =>
+              Modal.confirm({
+                title: "Are you sure delete this workflow definition?",
+                content: `You will not able to start transaction with this workflow anymore.`,
+                okText: "Delete",
+                okType: "danger",
+                cancelText: "No",
+                onOk: async () => {
+                  try {
+                    if (workflowDefinition) {
+                      await deleteWorkflowDefinition(
+                        workflowDefinition?.name,
+                        workflowDefinition?.rev
+                      );
+                      history.push("/definition/workflow");
+                    } else {
+                      throw new Error(`workflow definition are not defined`);
+                    }
+                  } catch (error) {
+                    Modal.error({
+                      title: "Failed to delete workflow definition",
+                      content: error.toString(),
+                    });
+                  }
+                },
+              })
+            }
             disabled={
-              this.props.location.pathname === "/definition/workflow/create" &&
-              this.state.saveCount === 0
+              history.location.pathname === "/definition/workflow/create" &&
+              saveCount === 0
             }
           >
             Delete Workflow Definition
           </Button>
         </ButtonContainer>
+      )}
 
-        <StyledTabs
-          onChange={(currentTab: string) => this.setState({ currentTab })}
-        >
-          <TabPane tab="Form View" key="1">
-            <Form>
-              <Form.Item label="Name">
-                <Input
-                  disabled={
-                    this.props.location.pathname !==
-                      "/definition/workflow/create" ||
-                    this.state.saveCount !== 0
+      <StyledTabs onChange={setCurrentTab}>
+        <TabPane tab="Form View" key="1">
+          <Form>
+            <Form.Item label="Name">
+              <Input
+                disabled={
+                  history.location.pathname !== "/definition/workflow/create" ||
+                  saveCount !== 0
+                }
+                placeholder="The name of workflow"
+                value={workflowDefinition?.name}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setWorkflowDefinition({
+                    ...(workflowDefinition as IWorkflowDefinition),
+                    name: event.target.value,
+                  });
+                }}
+              />
+            </Form.Item>
+            <Form.Item label="Rev">
+              <Input
+                disabled={
+                  history.location.pathname !== "/definition/workflow/create" ||
+                  saveCount !== 0
+                }
+                placeholder="The revision of workflow"
+                value={R.path(["rev"], workflowDefinition) as any}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setWorkflowDefinition({
+                    ...(workflowDefinition as IWorkflowDefinition),
+                    rev: event.target.value,
+                  });
+                }}
+              />
+            </Form.Item>
+            <Form.Item label="Description">
+              <Input
+                placeholder="The description of workflow"
+                value={R.path(["description"], workflowDefinition) as any}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setWorkflowDefinition({
+                    ...(workflowDefinition as IWorkflowDefinition),
+                    description: event.target.value,
+                  });
+                }}
+              />
+            </Form.Item>
+            <Form.Item label="Failure Strategies">
+              <Select
+                value={workflowDefinition?.failureStrategy}
+                onSelect={(
+                  value: State.WorkflowFailureStrategies | undefined
+                ) => {
+                  if (value) {
+                    setWorkflowDefinition({
+                      ...(workflowDefinition as IWorkflowDefinition),
+                      failureStrategy: value,
+                    });
                   }
-                  placeholder="The name of workflow"
-                  value={R.path(["name"], workflowDefinition) as any}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    this.onInputChanged(["name"], event.target.value);
-                  }}
-                />
-              </Form.Item>
-              <Form.Item label="Rev">
-                <Input
-                  disabled={
-                    this.props.location.pathname !==
-                      "/definition/workflow/create" ||
-                    this.state.saveCount !== 0
-                  }
-                  placeholder="The revision of workflow"
-                  value={R.path(["rev"], workflowDefinition) as any}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    this.onInputChanged(["rev"], event.target.value);
-                  }}
-                />
-              </Form.Item>
-              <Form.Item label="Description">
-                <Input
-                  placeholder="The description of workflow"
-                  value={R.path(["description"], workflowDefinition) as any}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    this.onInputChanged(["description"], event.target.value);
-                  }}
-                />
-              </Form.Item>
-              <Form.Item label="Failure Strategies">
-                <Select
-                  value={
-                    R.path(
-                      ["failureStrategy"],
-                      workflowDefinition
-                    ) as State.WorkflowFailureStrategies
-                  }
-                  onSelect={(value: State.WorkflowFailureStrategies) =>
-                    this.onInputChanged(["failureStrategy"], value)
-                  }
+                }}
+              >
+                <Option
+                  key={State.WorkflowFailureStrategies.Failed}
+                  value={State.WorkflowFailureStrategies.Failed}
                 >
-                  <Option
-                    key={State.WorkflowFailureStrategies.Failed}
-                    value={State.WorkflowFailureStrategies.Failed}
-                  >
-                    {State.WorkflowFailureStrategies.Failed}
-                  </Option>
-                  <Option
-                    key={State.WorkflowFailureStrategies.Retry}
-                    value={State.WorkflowFailureStrategies.Retry}
-                  >
-                    {State.WorkflowFailureStrategies.Retry}
-                  </Option>
-                  <Option
-                    key={State.WorkflowFailureStrategies.Compensate}
-                    value={State.WorkflowFailureStrategies.Compensate}
-                  >
-                    {State.WorkflowFailureStrategies.Compensate}
-                  </Option>
-                  <Option
-                    key={State.WorkflowFailureStrategies.CompensateThenRetry}
-                    value={State.WorkflowFailureStrategies.CompensateThenRetry}
-                  >
-                    {State.WorkflowFailureStrategies.CompensateThenRetry}
-                  </Option>
-                </Select>
+                  {State.WorkflowFailureStrategies.Failed}
+                </Option>
+                <Option
+                  key={State.WorkflowFailureStrategies.Retry}
+                  value={State.WorkflowFailureStrategies.Retry}
+                >
+                  {State.WorkflowFailureStrategies.Retry}
+                </Option>
+                <Option
+                  key={State.WorkflowFailureStrategies.Compensate}
+                  value={State.WorkflowFailureStrategies.Compensate}
+                >
+                  {State.WorkflowFailureStrategies.Compensate}
+                </Option>
+                <Option
+                  key={State.WorkflowFailureStrategies.CompensateThenRetry}
+                  value={State.WorkflowFailureStrategies.CompensateThenRetry}
+                >
+                  {State.WorkflowFailureStrategies.CompensateThenRetry}
+                </Option>
+              </Select>
+            </Form.Item>
+            {[
+              State.WorkflowFailureStrategies.Retry,
+              State.WorkflowFailureStrategies.CompensateThenRetry,
+            ].includes(
+              R.path(
+                ["failureStrategy"],
+                workflowDefinition
+              ) as State.WorkflowFailureStrategies
+            ) ? (
+              <Form.Item label="Retry Limit">
+                <StyledNumberInput
+                  placeholder="Number that workflow can retry if failed"
+                  value={R.path(["retry", "limit"], workflowDefinition) as any}
+                  onChange={(value?: number) => {
+                    setWorkflowDefinition({
+                      ...(workflowDefinition as IWorkflowDefinition),
+                      retry: {
+                        limit: value || 0,
+                      },
+                    });
+                  }}
+                />
               </Form.Item>
-              {[
-                State.WorkflowFailureStrategies.Retry,
-                State.WorkflowFailureStrategies.CompensateThenRetry,
-              ].includes(
-                R.path(
-                  ["failureStrategy"],
-                  workflowDefinition
-                ) as State.WorkflowFailureStrategies
-              ) ? (
-                <Form.Item label="Retry Limit">
-                  <StyledNumberInput
-                    placeholder="Number that workflow can retry if failed"
-                    value={
-                      R.path(["retry", "limit"], workflowDefinition) as any
-                    }
-                    onChange={(value?: number) => {
-                      this.onInputChanged(["retry", "limit"], value);
-                    }}
-                  />
-                </Form.Item>
-              ) : null}
-            </Form>
-          </TabPane>
-          <TabPane tab="Workflow View" key="2">
-            <Switch
-              checkedChildren="Edit"
-              unCheckedChildren=""
-              checked={editing}
-              onChange={(checked) =>
-                this.setState({
-                  editing: checked,
-                })
+            ) : null}
+          </Form>
+        </TabPane>
+        <TabPane tab="Workflow View" key="2">
+          <Switch
+            checkedChildren="Edit"
+            unCheckedChildren=""
+            checked={editing}
+            onChange={setEditing}
+          />
+          <WorkflowChart
+            workflowDefinition={workflowDefinition}
+            taskDefinitions={taskDefinitions}
+            editing={editing}
+            workflowDefinitionChanged={setWorkflowDefinition}
+          />
+        </TabPane>
+        <TabPane tab="JSON View" key="3">
+          <JsonEditor
+            key={currentTab} // Make sure it unmount when tab change
+            data={workflowDefinition || {}}
+            onChange={setWorkflowDefinition}
+          />
+        </TabPane>
+        <TabPane tab="Start" key="4">
+          <StartTransactionButton
+            type="ghost"
+            onClick={async () => {
+              try {
+                if (workflowDefinition) {
+                  await startTransaction(
+                    workflowDefinition,
+                    workflowInput,
+                    transactionId,
+                    ["web"]
+                  );
+                  window.open(`/transaction/${transactionId}`, transactionId);
+                } else {
+                  throw new Error("workflow definition are not defined");
+                }
+              } catch (error) {
+                Modal.error({
+                  title: "Cannot start transaction",
+                  content: error.toString(),
+                });
               }
-            />
-            <WorkflowChart
-              workflowDefinition={workflowDefinition}
-              taskDefinitions={taskDefinitions}
-              editing={editing}
-              workflowDefinitionChanged={(workflowDefinition) => {
-                this.setState({
-                  workflowDefinition,
-                });
-              }}
-            />
-          </TabPane>
-          <TabPane tab="JSON View" key="3">
-            <JsonEditor
-              key={currentTab} // Make sure it unmount when tab change
-              data={workflowDefinition || {}}
-              onChange={(data: any) => {
-                this.setState({
-                  workflowDefinition: data,
-                });
-              }}
-            />
-          </TabPane>
-          <TabPane tab="Start" key="4">
-            <StartTransactionButton
-              type="ghost"
-              onClick={this.startTransaction}
-              icon="play-circle"
-            >
-              Start Workflow
-            </StartTransactionButton>
-            <JsonEditor
-              key={currentTab}
-              data={workflowInput || {}}
-              onChange={(data: any) => {
-                this.setState({
-                  workflowInput: data,
-                });
-              }}
-            />
-          </TabPane>
-        </StyledTabs>
-      </WorkflowDefinitionDetailContainer>
-    );
-  }
-}
+            }}
+            icon="play-circle"
+          >
+            Start Workflow
+          </StartTransactionButton>
+          <JsonEditor
+            key={currentTab}
+            data={workflowInput || {}}
+            onChange={setWorkflowInput}
+          />
+        </TabPane>
+      </StyledTabs>
+    </WorkflowDefinitionDetailContainer>
+  );
+};
 
-export default TransactionTable;
+export default WorkflowDefinitionDetail;

@@ -5,7 +5,7 @@ import * as R from "ramda";
 import React from "react";
 import { Link, RouteComponentProps } from "react-router-dom";
 import styled from "styled-components";
-import { listWorkflowDefinitions } from "../../services/procressManager/http";
+import { listWorkflowDefinitions } from "../../services/processManager/http";
 
 const Container = styled.div`
   & > button {
@@ -76,7 +76,7 @@ const columns: ColumnProps<WorkflowDefinition.IWorkflowDefinition>[] = [
   },
 ];
 
-class TransactionTable extends React.Component<IProps, IState> {
+class WorkflowDefinitionList extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
@@ -127,4 +127,4 @@ class TransactionTable extends React.Component<IProps, IState> {
   }
 }
 
-export default TransactionTable;
+export default WorkflowDefinitionList;
