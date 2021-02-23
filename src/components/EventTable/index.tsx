@@ -14,6 +14,7 @@ import {
 } from "react-virtualized";
 import "react-virtualized/styles.css";
 import JsonViewModal from "../JsonViewModal";
+import RestartTransactionModel from "../RestartTransactionModel";
 import Status from "../StatusText";
 
 const DEFAULT_COLUMNS = [
@@ -144,6 +145,7 @@ interface IState {
   showIdField?: boolean;
   viewingEvent?: any;
   searchText?: string;
+  restartEvent?: Event.ITransactionEvent;
 }
 
 export default class EventsTable extends React.Component<IProps, IState> {
@@ -173,13 +175,18 @@ export default class EventsTable extends React.Component<IProps, IState> {
           onClick={() => this.setState({ viewingEvent: event })}
         />
         {event.type === "TRANSACTION" &&
+          event.isError === false &&
           event.details.status !== State.TransactionStates.Running && (
             <Button
               type={"ghost"}
               shape="circle"
               icon="redo"
               size="small"
-              onClick={() => this.setState({ viewingEvent: event })}
+              onClick={() =>
+                this.setState({
+                  restartEvent: event,
+                })
+              }
             />
           )}
       </div>
@@ -245,6 +252,15 @@ export default class EventsTable extends React.Component<IProps, IState> {
     const filteredEvents = this.getFilteredEvents();
     return (
       <React.Fragment>
+        <RestartTransactionModel
+          onClose={() => this.setState({ restartEvent: undefined })}
+          visible={!!this.state.restartEvent}
+          transactionId={this.state.restartEvent?.details.transactionId}
+          workflowDefinition={
+            this.state.restartEvent?.details.workflowDefinition
+          }
+          workflowInput={this.state.restartEvent?.details.input}
+        />
         <JsonViewModal
           data={viewingEvent}
           visible={viewingEvent}

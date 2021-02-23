@@ -1,25 +1,33 @@
+import { WorkflowDefinition } from "@melonade/melonade-declaration";
 import { Modal } from "antd";
 import React from "react";
 import WorkflowDefinitionDetail from "../../containers/WorkflowDefinitionDetail";
 
 interface IProps {
   onClose?: () => void;
-  title?: "default" | "large" | "small";
   visible?: boolean;
-  data: Object;
+  transactionId?: string;
+  workflowDefinition?: WorkflowDefinition.IWorkflowDefinition;
+  workflowInput: any;
 }
 
-export default (props: IProps) => {
+const RestartTransactionModel = (props: IProps) => {
   return (
     <Modal
       width="700"
       centered
-      title={props.title}
+      title="Start transaction"
       visible={props.visible}
       onOk={props.onClose}
       onCancel={props.onClose}
     >
-      <WorkflowDefinitionDetail />
+      <WorkflowDefinitionDetail
+        transactionId={props.transactionId}
+        workflowDefinition={props.workflowDefinition}
+        workflowInput={props.workflowInput}
+      />
     </Modal>
   );
 };
+
+export default RestartTransactionModel;
