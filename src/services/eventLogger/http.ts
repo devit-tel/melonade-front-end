@@ -82,7 +82,7 @@ export const getTransactionDateHistogram = async (
   return R.path(["data", "data"], resp) as IHistogramCount[];
 };
 
-export const getTaskExecuteime = async (
+export const getTaskExecuteTime = async (
   fromTimestamp: number,
   toTimestamp: number
 ): Promise<any> => {

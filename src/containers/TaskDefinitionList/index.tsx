@@ -9,7 +9,7 @@ import {
   createTaskDefinitions,
   listTaskDefinitions,
   updateTaskDefinitions,
-} from "../../services/procressManager/http";
+} from "../../services/processManager/http";
 
 const Container = styled.div`
   & > button {
@@ -32,7 +32,7 @@ const sortByPath = (path: (string | number)[]) => (a: any, b: any): number => {
   return -1;
 };
 
-class TransactionTable extends React.Component<IProps, IState> {
+class TaskDefinitionList extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
@@ -207,4 +207,4 @@ class TransactionTable extends React.Component<IProps, IState> {
   }
 }
 
-export default TransactionTable;
+export default TaskDefinitionList;

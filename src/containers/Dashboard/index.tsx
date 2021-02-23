@@ -13,9 +13,9 @@ import EventTable from "../../components/EventTable";
 import { DateRangeContext } from "../../contexts/DateRangeContext";
 import {
   getFalseEvents,
-  getTaskExecuteime,
+  getTaskExecuteTime,
   getTransactionDateHistogram,
-  IHistogramCount
+  IHistogramCount,
 } from "../../services/eventLogger/http";
 
 interface IBoxChartRow {
@@ -73,17 +73,19 @@ export interface ITaskExecutionTime {
 
 interface IProps {}
 
-export default (props: IProps) => {
+const Dashboard = (props: IProps) => {
   const [dateRange] = useContext(DateRangeContext);
   const [transactionHistogram, setTransactionHistogram] = useState<
     IHistogramCount[]
   >([]);
-  const [tasksExecutionStatistics, setTasksExecutionStatistics] = useState<
-    DataSet.DataView
-  >(new DataSet.DataView());
-  const [tasksExecutionTimes, setTasksExecutionTimes] = useState<
-    DataSet.DataView
-  >(new DataSet.DataView());
+  const [
+    tasksExecutionStatistics,
+    setTasksExecutionStatistics,
+  ] = useState<DataSet.DataView>(new DataSet.DataView());
+  const [
+    tasksExecutionTimes,
+    setTasksExecutionTimes,
+  ] = useState<DataSet.DataView>(new DataSet.DataView());
   const [falseEvents, setFalseEvents] = useState<Event.AllEvent[]>([]);
 
   useEffect(() => {
@@ -92,40 +94,40 @@ export default (props: IProps) => {
         startedHistogram,
         completedHistogram,
         compensatedHistogram,
-        failedHistogram
+        failedHistogram,
       ] = await Promise.all([
         getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
-          State.TransactionStates.Running
+          State.TransactionStates.Running,
         ]),
         getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
-          State.TransactionStates.Completed
+          State.TransactionStates.Completed,
         ]),
         getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
           State.TransactionStates.Compensated,
-          State.TransactionStates.Cancelled
+          State.TransactionStates.Cancelled,
         ]),
         getTransactionDateHistogram(+dateRange[0], +dateRange[1], [
-          State.TransactionStates.Failed
-        ])
+          State.TransactionStates.Failed,
+        ]),
       ]);
 
       setTransactionHistogram([
         ...startedHistogram.map((histogram: IHistogramCount) => ({
           ...histogram,
-          type: "Started"
+          type: "Started",
         })),
         ...completedHistogram.map((histogram: IHistogramCount) => ({
           ...histogram,
-          type: "Completed"
+          type: "Completed",
         })),
         ...compensatedHistogram.map((histogram: IHistogramCount) => ({
           ...histogram,
-          type: "Compensated"
+          type: "Compensated",
         })),
         ...failedHistogram.map((histogram: IHistogramCount) => ({
           ...histogram,
-          type: "Failed"
-        }))
+          type: "Failed",
+        })),
       ]);
     })();
 
@@ -134,7 +136,7 @@ export default (props: IProps) => {
     })();
 
     (async () => {
-      const tasksExecutionTime = await getTaskExecuteime(
+      const tasksExecutionTime = await getTaskExecuteTime(
         +dateRange[0],
         +dateRange[1]
       );
@@ -143,7 +145,7 @@ export default (props: IProps) => {
         new DataSet.DataView().source(
           tasksExecutionTime.map((taskExecutionTime: ITaskExecutionTime) => ({
             ...taskExecutionTime,
-            executedAt: +new Date(taskExecutionTime.executedAt)
+            executedAt: +new Date(taskExecutionTime.executedAt),
           }))
         )
       );
@@ -161,7 +163,7 @@ export default (props: IProps) => {
             low: min(executionTimes),
             median: median(executionTimes),
             q1: quantile(executionTimes, 0.2),
-            q3: quantile(executionTimes, 0.8)
+            q3: quantile(executionTimes, 0.8),
           };
         }
       );
@@ -171,7 +173,7 @@ export default (props: IProps) => {
           callback: (obj: IBoxChartRow & any) => {
             obj.range = [obj.low, obj.q1, obj.median, obj.q3, obj.high];
             return obj;
-          }
+          },
         })
       );
     })();
@@ -190,11 +192,11 @@ export default (props: IProps) => {
               alias: "Date",
               formatter: (date: number) =>
                 moment(date).format("YYYY/MM/DD HH:mm"),
-              ticks: getInterval(transactionHistogram, "date", 5)
+              ticks: getInterval(transactionHistogram, "date", 5),
             },
             count: {
-              alias: "Count"
-            }
+              alias: "Count",
+            },
           }}
           data={transactionHistogram}
         >
@@ -227,9 +229,9 @@ export default (props: IProps) => {
             <Axis
               name="executedAt"
               label={{
-                formatter: value => {
+                formatter: (value) => {
                   return moment(+value).format("YYYY/MM/DD HH:mm");
-                }
+                },
               }}
             />
             <Axis name="executionTime" />
@@ -247,8 +249,8 @@ export default (props: IProps) => {
                   lineWidth: 1,
                   strokeOpacity: 1,
                   fillOpacity: 0.3,
-                  opacity: 0.65
-                }
+                  opacity: 0.65,
+                },
               ]}
             />
           </Chart>
@@ -266,8 +268,8 @@ export default (props: IProps) => {
                 type: "rect",
                 style: {
                   fill: "#E4E8F1",
-                  fillOpacity: 0.43
-                }
+                  fillOpacity: 0.43,
+                },
               }}
               itemTpl='<li data-index={index} style="margin-bottom:4px;"><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}<br/><span style="padding-left: 16px">Max：{high}ms</span><br/><span style="padding-left: 16px">Quantile top 20%：{q3}ms</span><br/><span style="padding-left: 16px">Median：{median}ms</span><br/><span style="padding-left: 16px">Quantile bottom 20%：{q1}ms</span><br/><span style="padding-left: 16px">Min：{low}ms</span><br/></li>'
             />
@@ -285,16 +287,16 @@ export default (props: IProps) => {
                     q1,
                     median,
                     q3,
-                    high
+                    high,
                   };
-                }
+                },
               ]}
               shape="box"
               style={
                 {
                   stroke: "#545454",
                   fill: "#1890FF",
-                  fillOpacity: 0.3
+                  fillOpacity: 0.3,
                 } as object
               }
             />
@@ -312,10 +314,12 @@ export default (props: IProps) => {
             "ERROR",
             "DETAILS_ID",
             "DETAILS_STATUS",
-            "TIME"
+            "TIME",
           ]}
         />
       </Section>
     </Container>
   );
 };
+
+export default Dashboard;

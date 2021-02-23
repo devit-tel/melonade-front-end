@@ -23,6 +23,8 @@ interface IProps {
 const WorkflowChartDefinitionContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
+  overflow: auto;
+  width: auto;
 
   // background: linear-gradient(90deg, #fff 20px, transparent 1%) center,
   //   linear-gradient(#fff 20px, transparent 1%) center, #ddd;

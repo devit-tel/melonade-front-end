@@ -10,10 +10,11 @@ import {
   Column,
   Index,
   Table,
-  TableCellDataGetterParams
+  TableCellDataGetterParams,
 } from "react-virtualized";
 import "react-virtualized/styles.css";
 import JsonViewModal from "../JsonViewModal";
+import RestartTransactionModel from "../RestartTransactionModel";
 import Status from "../StatusText";
 
 const DEFAULT_COLUMNS = [
@@ -23,7 +24,7 @@ const DEFAULT_COLUMNS = [
   "DETAILS_TYPE",
   "DETAILS_ID",
   "DETAILS_STATUS",
-  "TIME"
+  "TIME",
 ];
 
 export type EventColumn =
@@ -37,7 +38,7 @@ export type EventColumn =
   | "DETAILS_NAME"
   | "DETAILS_TYPE";
 
-const nameRenderrer = (cell: TableCellDataGetterParams) => {
+const nameRenderer = (cell: TableCellDataGetterParams) => {
   const event: Event.AllEvent = cell.rowData;
   if (event.isError === false && event.type === "WORKFLOW") {
     return (
@@ -60,7 +61,7 @@ const nameRenderrer = (cell: TableCellDataGetterParams) => {
   return undefined;
 };
 
-const idRenderrer = (cell: TableCellDataGetterParams) => {
+const idRenderer = (cell: TableCellDataGetterParams) => {
   const event: Event.AllEvent = cell.rowData;
   switch (event.type) {
     case "TRANSACTION":
@@ -86,7 +87,7 @@ const idRenderrer = (cell: TableCellDataGetterParams) => {
   return null;
 };
 
-const fieldRenderrer = (path: string[], defaultValue?: string) => (
+const fieldRenderer = (path: string[], defaultValue?: string) => (
   cell: TableCellDataGetterParams
 ) => {
   const event: Event.AllEvent = cell.rowData;
@@ -100,7 +101,7 @@ const fieldRenderrer = (path: string[], defaultValue?: string) => (
   );
 };
 
-const statusRenderrer = (cell: TableCellDataGetterParams) => {
+const statusRenderer = (cell: TableCellDataGetterParams) => {
   const event: Event.AllEvent = cell.rowData;
 
   return (
@@ -115,7 +116,7 @@ const statusRenderrer = (cell: TableCellDataGetterParams) => {
   );
 };
 
-const transactionIDRenderrer = (cell: TableCellDataGetterParams) => {
+const transactionIDRenderer = (cell: TableCellDataGetterParams) => {
   const event: Event.AllEvent = cell.rowData;
 
   return (
@@ -123,7 +124,7 @@ const transactionIDRenderrer = (cell: TableCellDataGetterParams) => {
   );
 };
 
-const timeRenderrer = (cell: TableCellDataGetterParams) => {
+const timeRenderer = (cell: TableCellDataGetterParams) => {
   const event: Event.AllEvent = cell.rowData;
 
   return (
@@ -144,6 +145,7 @@ interface IState {
   showIdField?: boolean;
   viewingEvent?: any;
   searchText?: string;
+  restartEvent?: Event.ITransactionEvent;
 }
 
 export default class EventsTable extends React.Component<IProps, IState> {
@@ -153,7 +155,7 @@ export default class EventsTable extends React.Component<IProps, IState> {
     this.state = {
       viewingEvent: undefined,
       showSystemError: false,
-      showIdField: false
+      showIdField: false,
     };
   }
 
@@ -164,25 +166,42 @@ export default class EventsTable extends React.Component<IProps, IState> {
     const event: Event.AllEvent = cell.rowData;
 
     return (
-      <Button
-        type={event.isError ? "danger" : "primary"}
-        shape="circle"
-        icon="file-search"
-        size="small"
-        onClick={() => this.setState({ viewingEvent: event })}
-      />
+      <div>
+        <Button
+          type={event.isError ? "danger" : "primary"}
+          shape="circle"
+          icon="file-search"
+          size="small"
+          onClick={() => this.setState({ viewingEvent: event })}
+        />
+        {event.type === "TRANSACTION" &&
+          event.isError === false &&
+          event.details.status !== State.TransactionStates.Running && (
+            <Button
+              type={"ghost"}
+              shape="circle"
+              icon="redo"
+              size="small"
+              onClick={() =>
+                this.setState({
+                  restartEvent: event,
+                })
+              }
+            />
+          )}
+      </div>
     );
   };
 
   onCheckBoxChanged = (stateField: string) => (e: CheckboxChangeEvent) => {
     this.setState({
-      [stateField]: e.target.checked
+      [stateField]: e.target.checked,
     });
   };
 
   onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
-      searchText: e.target.value
+      searchText: e.target.value,
     });
   };
 
@@ -233,6 +252,15 @@ export default class EventsTable extends React.Component<IProps, IState> {
     const filteredEvents = this.getFilteredEvents();
     return (
       <React.Fragment>
+        <RestartTransactionModel
+          onClose={() => this.setState({ restartEvent: undefined })}
+          visible={!!this.state.restartEvent}
+          transactionId={this.state.restartEvent?.details.transactionId}
+          workflowDefinition={
+            this.state.restartEvent?.details.workflowDefinition
+          }
+          workflowInput={this.state.restartEvent?.details.input}
+        />
         <JsonViewModal
           data={viewingEvent}
           visible={viewingEvent}
@@ -272,13 +300,13 @@ export default class EventsTable extends React.Component<IProps, IState> {
                 <Column
                   cellRenderer={this.detailsRenderer}
                   dataKey="details"
-                  width={30}
+                  width={50}
                 />
               )}
               {columns.includes("TRANSACTION_ID") && (
                 <Column
                   label="TransactionId"
-                  cellRenderer={transactionIDRenderrer}
+                  cellRenderer={transactionIDRenderer}
                   dataKey="transactionId"
                   width={250}
                 />
@@ -289,7 +317,7 @@ export default class EventsTable extends React.Component<IProps, IState> {
               {columns.includes("DETAILS_ID") && showIdField && (
                 <Column
                   label="ID"
-                  cellRenderer={idRenderrer}
+                  cellRenderer={idRenderer}
                   dataKey="details.id"
                   width={350}
                 />
@@ -297,7 +325,7 @@ export default class EventsTable extends React.Component<IProps, IState> {
               {columns.includes("DETAILS_NAME") && (
                 <Column
                   label="Name"
-                  cellRenderer={nameRenderrer}
+                  cellRenderer={nameRenderer}
                   dataKey="details.name"
                   width={200}
                 />
@@ -305,7 +333,7 @@ export default class EventsTable extends React.Component<IProps, IState> {
               {columns.includes("DETAILS_TYPE") && (
                 <Column
                   label="Type"
-                  cellRenderer={fieldRenderrer(["details", "type"])}
+                  cellRenderer={fieldRenderer(["details", "type"])}
                   dataKey="details.type"
                   width={150}
                 />
@@ -313,7 +341,7 @@ export default class EventsTable extends React.Component<IProps, IState> {
               {columns.includes("ERROR") && (
                 <Column
                   label="Error"
-                  cellRenderer={fieldRenderrer(["error"])}
+                  cellRenderer={fieldRenderer(["error"])}
                   dataKey="error"
                   width={400}
                 />
@@ -321,15 +349,15 @@ export default class EventsTable extends React.Component<IProps, IState> {
               {columns.includes("DETAILS_STATUS") && (
                 <Column
                   label="Status"
-                  cellRenderer={statusRenderrer}
+                  cellRenderer={statusRenderer}
                   dataKey="details.status"
                   width={100}
                 />
               )}
               {columns.includes("TIME") && (
                 <Column
-                  label="Occured At"
-                  cellRenderer={timeRenderrer}
+                  label="Occurred At"
+                  cellRenderer={timeRenderer}
                   dataKey="timestamp"
                   width={220}
                 />

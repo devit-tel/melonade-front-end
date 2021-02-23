@@ -5,7 +5,7 @@ import moment from "moment";
 import * as R from "ramda";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { listRunningTransaction } from "../../services/procressManager/http";
+import { listRunningTransaction } from "../../services/processManager/http";
 
 const TRANSACTION_PER_PAGE = 50;
 
@@ -62,7 +62,7 @@ const columns: ColumnProps<Transaction.ITransaction>[] = [
   },
 ];
 
-export default (props: IProps) => {
+const RunningTransactionList = (props: IProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [transactions, setTransactions] = useState<Store.ITransactionPaginate>({
@@ -109,3 +109,5 @@ export default (props: IProps) => {
     </div>
   );
 };
+
+export default RunningTransactionList;

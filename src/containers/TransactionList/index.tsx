@@ -16,7 +16,7 @@ import {
   ITransactionEventPaginate,
   listTransactions,
 } from "../../services/eventLogger/http";
-import { listWorkflowDefinitions } from "../../services/procressManager/http";
+import { listWorkflowDefinitions } from "../../services/processManager/http";
 
 const { Option } = Select;
 
@@ -97,13 +97,14 @@ const columns = [
   },
 ];
 
-export default (props: IProps) => {
+const TransactionList = (props: IProps) => {
   const [dateRange] = useContext(DateRangeContext);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [transactionEvents, setTransactionEvents] = useState<
-    ITransactionEventPaginate
-  >({ events: [], total: 0 });
+  const [
+    transactionEvents,
+    setTransactionEvents,
+  ] = useState<ITransactionEventPaginate>({ events: [], total: 0 });
   const [transactionId, setTransactionId] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
 
@@ -226,3 +227,5 @@ export default (props: IProps) => {
     </div>
   );
 };
+
+export default TransactionList;

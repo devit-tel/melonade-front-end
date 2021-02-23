@@ -84,12 +84,21 @@ const LayoutRouter = (props: ILayoutRouterProps) => (
     <Route path="/definition/task" component={TaskDefinitionList} exact />
     <Route
       path="/definition/workflow/:name/:rev"
-      component={WorkflowDefinitionDetail}
+      render={(props: RouteComponentProps<any, StaticContext, any>) => {
+        return (
+          <WorkflowDefinitionDetail
+            name={props.match.params.name}
+            rev={props.match.params.rev}
+          />
+        );
+      }}
       exact
     />
     <Route
       path="/definition/workflow/create"
-      component={WorkflowDefinitionDetail}
+      render={(props: RouteComponentProps<any, StaticContext, any>) => (
+        <WorkflowDefinitionDetail />
+      )}
       exact
     />
   </Layout>
