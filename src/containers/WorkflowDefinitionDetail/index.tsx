@@ -45,15 +45,12 @@ const WorkflowDefinitionDetailContainer = styled.div`
   align-items: flex-end;
 `;
 
-const ButtonContainer = styled.div`
+const RowContainer = styled.div`
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
   align-self: stretch;
-`;
-
-const StartTransactionButton = styled(Button)`
-  margin: 20px 0;
+  padding-bottom: 5px;
 `;
 
 interface IProps {
@@ -99,7 +96,7 @@ const WorkflowDefinitionDetail = (props: IProps) => {
   return (
     <WorkflowDefinitionDetailContainer>
       {saveCount >= 0 && (
-        <ButtonContainer>
+        <RowContainer>
           <Button
             type="primary"
             onClick={async () => {
@@ -169,7 +166,7 @@ const WorkflowDefinitionDetail = (props: IProps) => {
           >
             Delete Workflow Definition
           </Button>
-        </ButtonContainer>
+        </RowContainer>
       )}
 
       <StyledTabs onChange={setCurrentTab}>
@@ -307,32 +304,41 @@ const WorkflowDefinitionDetail = (props: IProps) => {
           />
         </TabPane>
         <TabPane tab="Start" key="4">
-          <StartTransactionButton
-            type="ghost"
-            onClick={async () => {
-              try {
-                if (workflowDefinition) {
-                  await startTransaction(
-                    workflowDefinition,
-                    workflowInput,
-                    transactionId,
-                    ["web"]
-                  );
-                  window.open(`/transaction/${transactionId}`, transactionId);
-                } else {
-                  throw new Error("workflow definition are not defined");
+          <RowContainer>
+            <Input
+              placeholder="Transaction ID"
+              value={transactionId}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setTransactionId(event.target.value);
+              }}
+            />
+            <Button
+              type="ghost"
+              onClick={async () => {
+                try {
+                  if (workflowDefinition) {
+                    await startTransaction(
+                      workflowDefinition,
+                      workflowInput,
+                      transactionId,
+                      ["web"]
+                    );
+                    window.open(`/transaction/${transactionId}`, transactionId);
+                  } else {
+                    throw new Error("workflow definition are not defined");
+                  }
+                } catch (error) {
+                  Modal.error({
+                    title: "Cannot start transaction",
+                    content: error.toString(),
+                  });
                 }
-              } catch (error) {
-                Modal.error({
-                  title: "Cannot start transaction",
-                  content: error.toString(),
-                });
-              }
-            }}
-            icon="play-circle"
-          >
-            Start Workflow
-          </StartTransactionButton>
+              }}
+              icon="play-circle"
+            >
+              Start Workflow
+            </Button>
+          </RowContainer>
           <JsonEditor
             key={currentTab}
             data={workflowInput || {}}
