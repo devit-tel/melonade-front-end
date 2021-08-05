@@ -4,19 +4,29 @@ import {
   WorkflowDefinition,
 } from "@melonade/melonade-declaration";
 import { Form, Input, Modal, Radio, Select } from "antd";
+import { highlight, languages } from "prismjs";
+import "prismjs/components/prism-javascript";
+import "prismjs/themes/prism-twilight.css"; //Example style, you can use another
 import * as R from "ramda";
 import React from "react";
+import Editor from "react-simple-code-editor";
 import styled from "styled-components";
 import JsonEditor from "../../components/JsonEditor";
 
 const { Option } = Select;
 
-const StyledInput = styled(Input)`
-  width: 100%;
-`;
-
 const StyledModal = styled(Modal)`
   min-width: 70vw;
+`;
+
+const StyledTag = styled.span`
+  background-color: #4caf50; /* Green */
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  margin: 2px;
+  padding: 2px;
 `;
 
 interface ICreateTaskModalProps {
@@ -30,6 +40,91 @@ interface ICreateTaskModalProps {
 interface ICreateTaskModalState {
   task?: WorkflowDefinition.ITaskTask;
 }
+
+interface IPropsInput {
+  placeholder?: string;
+  value: string;
+  onChange: (data: string) => void;
+}
+
+const InputCode = (props: IPropsInput) => {
+  return (
+    <div>
+      <Editor
+        value={props.value || ""}
+        onValueChange={props.onChange}
+        highlight={(code) =>
+          highlight(code, languages.javascript, "javascript")
+        }
+        padding={10}
+        style={{
+          fontFamily: '"Fira code", "Fira Mono", monospace',
+          fontSize: 12,
+          backgroundColor: "#322931",
+        }}
+      />
+      <StyledTag>type: {getType(props.value)}</StyledTag>
+    </div>
+  );
+};
+
+const getType = (value: any) => {
+  if (value === undefined) {
+    return "undefined";
+  }
+
+  if (!Number.isNaN(+value)) {
+    return "number";
+  }
+
+  if (typeof value === "string") {
+    if (/^(```javascript\n)([\S\s]+)(```)$/gm.test(value)) {
+      return "javascript";
+    }
+
+    return "string";
+  }
+
+  return "json";
+};
+
+interface IPropsInputJsonOrCode {
+  value: any;
+  onChange: (data: any) => void;
+}
+
+const InputJsonOrCode = (props: IPropsInputJsonOrCode) => {
+  var data: string = "";
+
+  if (typeof props.value != "string") {
+    data = JSON.stringify(props.value, null, 4);
+  } else {
+    data = props.value;
+  }
+
+  return (
+    <div>
+      <Editor
+        value={data}
+        onValueChange={(v) => {
+          try {
+            props.onChange(JSON.parse(v));
+          } catch (error) {
+            props.onChange(v);
+          }
+        }}
+        highlight={(code) => highlight(code, languages.js, "javascript")}
+        padding={10}
+        style={{
+          fontFamily: '"Fira code", "Fira Mono", monospace',
+          fontSize: 12,
+          backgroundColor: "#322931",
+        }}
+      />
+      <StyledTag>type: {getType(props.value)}</StyledTag>
+    </div>
+  );
+};
 
 export class CreateTaskModal extends React.Component<
   ICreateTaskModalProps,
@@ -122,38 +217,38 @@ export class CreateTaskModal extends React.Component<
                 </Select>
               </Form.Item>
               <Form.Item label="Retry Limit">
-                <StyledInput
+                <InputCode
                   placeholder="Retry Limit"
                   value={R.path(["retry", "limit"], this.state.task) as any}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    this.onInputChanged(["retry", "limit"], e.target.value);
+                  onChange={(e) => {
+                    this.onInputChanged(["retry", "limit"], e);
                   }}
                 />
               </Form.Item>
               <Form.Item label="Retry Delay">
-                <StyledInput
+                <InputCode
                   placeholder="Retry Delay"
                   value={R.path(["retry", "delay"], this.state.task) as any}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    this.onInputChanged(["retry", "delay"], e.target.value);
+                  onChange={(e) => {
+                    this.onInputChanged(["retry", "delay"], e);
                   }}
                 />
               </Form.Item>
               <Form.Item label="Ack Timeout">
-                <StyledInput
+                <InputCode
                   placeholder="Ack Timeout"
                   value={R.path(["ackTimeout"], this.state.task) as any}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    this.onInputChanged(["ackTimeout"], e.target.value);
+                  onChange={(e) => {
+                    this.onInputChanged(["ackTimeout"], e);
                   }}
                 />
               </Form.Item>
               <Form.Item label="Timeout">
-                <StyledInput
+                <InputCode
                   placeholder="Timeout"
                   value={R.path(["timeout"], this.state.task) as any}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    this.onInputChanged(["timeout"], e.target.value);
+                  onChange={(e) => {
+                    this.onInputChanged(["timeout"], e);
                   }}
                 />
               </Form.Item>
@@ -170,9 +265,8 @@ export class CreateTaskModal extends React.Component<
                 </Radio.Group>
               </Form.Item>
 
-              <JsonEditor
-                key={`${this.props.visible}`} // Remount every time
-                data={R.path(["inputParameters"], this.state.task) || {}}
+              <InputJsonOrCode
+                value={R.path(["inputParameters"], this.state.task) || {}}
                 onChange={(data: any) => {
                   this.onInputChanged(["inputParameters"], data);
                 }}
