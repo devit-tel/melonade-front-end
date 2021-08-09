@@ -288,17 +288,12 @@ export class CreateTaskModal extends React.Component<
 
           {R.pathEq(["task", "type"], Task.TaskTypes.Decision, this.state) && (
             <Form.Item label="Case path">
-              <Input
+              <InputCode
                 // eslint-disable-next-line no-template-curly-in-string
                 placeholder="path it get case value (e.g. ${workflow.input.paymentType})"
-                value={
-                  R.path(["inputParameters", "case"], this.state.task) as string
-                }
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  this.onInputChanged(
-                    ["inputParameters", "case"],
-                    event.target.value
-                  );
+                value={this.state.task?.inputParameters?.case ?? ""}
+                onChange={(v) => {
+                  this.onInputChanged(["inputParameters", "case"], v);
                 }}
               />
             </Form.Item>
@@ -311,54 +306,37 @@ export class CreateTaskModal extends React.Component<
                 {"{workflow.input.whenToStart}"}
               </p>
               <Form.Item label="Completed After">
-                <Input
+                <InputCode
                   placeholder="Delay milliseconds before task completed"
-                  value={R.path(
-                    ["inputParameters", "completedAfter"],
-                    this.state.task
-                  )}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    const value = isNaN(event.target.value as any)
-                      ? event.target.value
-                      : +event.target.value;
-
+                  value={this.state.task?.inputParameters?.completedAfter ?? ""}
+                  onChange={(v) => {
                     this.onInputChanged(
                       ["inputParameters", "completedAfter"],
-                      value
+                      v
                     );
                   }}
                 />
               </Form.Item>
               <Form.Item label="Completed At">
-                <Input
+                <InputCode
                   placeholder="ISO 8601 date"
-                  value={
-                    R.path(
-                      ["inputParameters", "completedAt"],
-                      this.state.task
-                    ) as string
-                  }
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    this.onInputChanged(
-                      ["inputParameters", "completedAt"],
-                      event.target.value
-                    );
+                  value={this.state.task?.inputParameters?.completedAt ?? ""}
+                  onChange={(v) => {
+                    this.onInputChanged(["inputParameters", "completedAt"], v);
                   }}
                 />{" "}
               </Form.Item>
               <Form.Item label="Completed When">
-                <Input
+                <InputCode
                   placeholder='crontab e.g. "*/5 * * * 0"'
                   value={
-                    R.path(
-                      ["inputParameters", "completedWhen"],
-                      this.state.task
-                    ) as string
+                    this.state.task?.inputParameters?.completedWhen ??
+                    ("" as string)
                   }
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  onChange={(v) => {
                     this.onInputChanged(
                       ["inputParameters", "completedWhen"],
-                      event.target.value
+                      v
                     );
                   }}
                 />
@@ -377,38 +355,20 @@ export class CreateTaskModal extends React.Component<
                 {"{workflow.input.workflowToStart}"}
               </p>
               <Form.Item label="Workflow name">
-                <Input
+                <InputCode
                   placeholder="Name of the workflow"
-                  value={R.path(
-                    ["inputParameters", "workflowName"],
-                    this.state.task
-                  )}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    const value = isNaN(event.target.value as any)
-                      ? event.target.value
-                      : +event.target.value;
-
-                    this.onInputChanged(
-                      ["inputParameters", "workflowName"],
-                      value
-                    );
+                  value={this.state.task?.inputParameters?.workflowName}
+                  onChange={(v) => {
+                    this.onInputChanged(["inputParameters", "workflowName"], v);
                   }}
                 />
               </Form.Item>
               <Form.Item label="Workflow rev">
-                <Input
+                <InputCode
                   placeholder="Revision of the workflow"
-                  value={
-                    R.path(
-                      ["inputParameters", "workflowRev"],
-                      this.state.task
-                    ) as string
-                  }
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    this.onInputChanged(
-                      ["inputParameters", "workflowRev"],
-                      event.target.value
-                    );
+                  value={this.state.task?.inputParameters?.workflowRev}
+                  onChange={(v) => {
+                    this.onInputChanged(["inputParameters", "workflowRev"], v);
                   }}
                 />{" "}
               </Form.Item>
@@ -426,20 +386,12 @@ export class CreateTaskModal extends React.Component<
             this.state
           ) && (
             <Form.Item label="Task list">
-              <Input
+              <InputCode
                 // eslint-disable-next-line no-template-curly-in-string
                 placeholder="list of task to create  (Array of Task e.g. ${workflow.input.tasks})"
-                value={
-                  R.path(
-                    ["inputParameters", "tasks"],
-                    this.state.task
-                  ) as string
-                }
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  this.onInputChanged(
-                    ["inputParameters", "tasks"],
-                    event.target.value
-                  );
+                value={this.state.task?.inputParameters?.tasks ?? ""}
+                onChange={(v) => {
+                  this.onInputChanged(["inputParameters", "tasks"], v);
                 }}
               />
             </Form.Item>
