@@ -195,6 +195,31 @@ export class CreateTaskModal extends React.Component<
               }}
             />
           </Form.Item>
+          {[Task.TaskTypes.Task, Task.TaskTypes.SubTransaction].includes(
+            this.state.task?.type as Task.TaskTypes
+          ) && (
+            <>
+              <Form.Item label="Retry Limit">
+                <InputCode
+                  placeholder="Retry Limit"
+                  value={R.path(["retry", "limit"], this.state.task) as any}
+                  onChange={(e) => {
+                    this.onInputChanged(["retry", "limit"], e);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item label="Retry Delay">
+                <InputCode
+                  placeholder="Retry Delay"
+                  value={R.path(["retry", "delay"], this.state.task) as any}
+                  onChange={(e) => {
+                    this.onInputChanged(["retry", "delay"], e);
+                  }}
+                />
+              </Form.Item>
+            </>
+          )}
+
           {R.pathEq(["task", "type"], Task.TaskTypes.Task, this.state) && (
             <React.Fragment>
               <Form.Item label="Task Name">
@@ -218,24 +243,6 @@ export class CreateTaskModal extends React.Component<
                     }
                   )}
                 </Select>
-              </Form.Item>
-              <Form.Item label="Retry Limit">
-                <InputCode
-                  placeholder="Retry Limit"
-                  value={R.path(["retry", "limit"], this.state.task) as any}
-                  onChange={(e) => {
-                    this.onInputChanged(["retry", "limit"], e);
-                  }}
-                />
-              </Form.Item>
-              <Form.Item label="Retry Delay">
-                <InputCode
-                  placeholder="Retry Delay"
-                  value={R.path(["retry", "delay"], this.state.task) as any}
-                  onChange={(e) => {
-                    this.onInputChanged(["retry", "delay"], e);
-                  }}
-                />
               </Form.Item>
               <Form.Item label="Ack Timeout">
                 <InputCode
