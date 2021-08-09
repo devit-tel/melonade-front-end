@@ -11,7 +11,6 @@ import * as R from "ramda";
 import React from "react";
 import Editor from "react-simple-code-editor";
 import styled from "styled-components";
-import JsonEditor from "../../components/JsonEditor";
 
 const { Option } = Select;
 
@@ -107,6 +106,10 @@ const InputJsonOrCode = (props: IPropsInputJsonOrCode) => {
       <Editor
         value={data}
         onValueChange={(v) => {
+          if (!v) {
+            props.onChange(v);
+            return;
+          }
           try {
             props.onChange(JSON.parse(v));
           } catch (error) {
@@ -400,11 +403,8 @@ export class CreateTaskModal extends React.Component<
                   }}
                 />{" "}
               </Form.Item>
-              <JsonEditor
-                key={`${this.props.visible}`} // Remount every time
-                data={
-                  R.path(["inputParameters", "input"], this.state.task) || {}
-                }
+              <InputJsonOrCode
+                value={this.state.task?.inputParameters?.input || ""}
                 onChange={(data: any) => {
                   this.onInputChanged(["inputParameters", "input"], data);
                 }}
