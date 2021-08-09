@@ -60,6 +60,7 @@ const InputCode = (props: IPropsInput) => {
           fontFamily: '"Fira code", "Fira Mono", monospace',
           fontSize: 12,
           backgroundColor: "#322931",
+          color: "#eee",
         }}
       />
       <StyledTag>type: {getType(props.value)}</StyledTag>
@@ -122,6 +123,7 @@ const InputJsonOrCode = (props: IPropsInputJsonOrCode) => {
           fontFamily: '"Fira code", "Fira Mono", monospace',
           fontSize: 12,
           backgroundColor: "#322931",
+          color: "#eee",
         }}
       />
       <StyledTag>type: {getType(props.value)}</StyledTag>
