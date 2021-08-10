@@ -6,7 +6,8 @@ import {
 import { Form, Input, Modal, Radio, Select } from "antd";
 import { highlight, languages } from "prismjs";
 import "prismjs/components/prism-javascript";
-import "prismjs/themes/prism-twilight.css"; //Example style, you can use another
+import "prismjs/components/prism-json";
+import "prismjs/themes/prism.css"; //Example style, you can use another
 import * as R from "ramda";
 import React from "react";
 import Editor from "react-simple-code-editor";
@@ -50,17 +51,38 @@ const InputCode = (props: IPropsInput) => {
   return (
     <div>
       <Editor
-        value={props.value || ""}
-        onValueChange={props.onChange}
-        highlight={(code) =>
-          highlight(code, languages.javascript, "javascript")
-        }
+        value={props.value}
+        onValueChange={(v) => {
+          if (!v) {
+            props.onChange(v);
+            return;
+          }
+          try {
+            props.onChange(JSON.parse(v));
+          } catch (error) {
+            props.onChange(v);
+          }
+        }}
+        highlight={(code) => {
+          switch (getType(props.value)) {
+            case "javascript":
+              const m = /^(```javascript\n)([\S\s]+)(```)$/gm.exec(code);
+              if (!m) return code;
+              return [
+                m[1],
+                highlight(m[2], languages.js, "javascript"),
+                m[3],
+              ].join("");
+
+            case "json":
+              return highlight(code, languages.json, "json");
+            default:
+              return code;
+          }
+        }}
         padding={10}
         style={{
-          fontFamily: '"Fira code", "Fira Mono", monospace',
-          fontSize: 12,
-          backgroundColor: "#322931",
-          color: "#eee",
+          border: "1px solid #999",
         }}
       />
       <StyledTag>type: {getType(props.value)}</StyledTag>
@@ -96,7 +118,7 @@ interface IPropsInputJsonOrCode {
 const InputJsonOrCode = (props: IPropsInputJsonOrCode) => {
   var data: string = "";
 
-  if (typeof props.value != "string") {
+  if (typeof props.value === "object") {
     data = JSON.stringify(props.value, null, 4);
   } else {
     data = props.value;
@@ -117,13 +139,27 @@ const InputJsonOrCode = (props: IPropsInputJsonOrCode) => {
             props.onChange(v);
           }
         }}
-        highlight={(code) => highlight(code, languages.js, "javascript")}
+        highlight={(code) => {
+          switch (getType(props.value)) {
+            case "javascript":
+              const m = /^(```javascript\n)([\S\s]+)(```)$/gm.exec(code);
+              if (!m) return code;
+              console.log(m);
+              return [
+                m[1],
+                highlight(m[2], languages.js, "javascript"),
+                m[3],
+              ].join("");
+
+            case "json":
+              return highlight(code, languages.json, "json");
+            default:
+              return code;
+          }
+        }}
         padding={10}
         style={{
-          fontFamily: '"Fira code", "Fira Mono", monospace',
-          fontSize: 12,
-          backgroundColor: "#322931",
-          color: "#eee",
+          border: "1px solid #999",
         }}
       />
       <StyledTag>type: {getType(props.value)}</StyledTag>
@@ -278,7 +314,7 @@ export class CreateTaskModal extends React.Component<
               </Form.Item>
 
               <InputJsonOrCode
-                value={R.path(["inputParameters"], this.state.task) || {}}
+                value={R.path(["inputParameters"], this.state.task)}
                 onChange={(data: any) => {
                   this.onInputChanged(["inputParameters"], data);
                 }}
