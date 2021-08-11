@@ -1,4 +1,5 @@
 import { Event, State } from "@melonade/melonade-declaration";
+import { TaskTypes } from "@melonade/melonade-declaration/build/task";
 import { Button, Checkbox, Form, Input, Typography } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import moment from "moment";
@@ -192,6 +193,7 @@ export default class EventsTable extends React.Component<IProps, IState> {
           )}
         {event.type === "TASK" &&
           event.isError === false &&
+          [TaskTypes.Task, TaskTypes.Compensate].includes(event.details.type) &&
           [State.TaskStates.Scheduled, State.TaskStates.Inprogress].includes(
             event.details.status
           ) && (
