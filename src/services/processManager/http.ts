@@ -3,6 +3,7 @@ import {
   WorkflowDefinition,
   Store,
 } from "@melonade/melonade-declaration";
+import { ITaskUpdate } from "@melonade/melonade-declaration/build/event";
 import axios from "axios";
 import * as R from "ramda";
 import { processManager } from "../../config";
@@ -157,4 +158,12 @@ export const listRunningTransaction = async (
     ["data", "data"],
     resp
   );
+};
+
+export const updateTask = async (taskData: ITaskUpdate): Promise<void> => {
+  await client({
+    url: `/v1/transaction/update`,
+    method: "POST",
+    data: taskData,
+  });
 };

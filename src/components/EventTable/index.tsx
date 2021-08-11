@@ -13,6 +13,7 @@ import {
   TableCellDataGetterParams,
 } from "react-virtualized";
 import "react-virtualized/styles.css";
+import { updateTask } from "../../services/processManager/http";
 import JsonViewModal from "../JsonViewModal";
 import RestartTransactionModel from "../RestartTransactionModel";
 import Status from "../StatusText";
@@ -87,19 +88,19 @@ const idRenderer = (cell: TableCellDataGetterParams) => {
   return null;
 };
 
-const fieldRenderer = (path: string[], defaultValue?: string) => (
-  cell: TableCellDataGetterParams
-) => {
-  const event: Event.AllEvent = cell.rowData;
-  const text = R.pathOr(defaultValue, path, event);
+const fieldRenderer =
+  (path: string[], defaultValue?: string) =>
+  (cell: TableCellDataGetterParams) => {
+    const event: Event.AllEvent = cell.rowData;
+    const text = R.pathOr(defaultValue, path, event);
 
-  if (!text && !defaultValue) return null;
-  return (
-    <Typography.Text code>
-      {R.pathOr(defaultValue, path, event)}
-    </Typography.Text>
-  );
-};
+    if (!text && !defaultValue) return null;
+    return (
+      <Typography.Text code>
+        {R.pathOr(defaultValue, path, event)}
+      </Typography.Text>
+    );
+  };
 
 const statusRenderer = (cell: TableCellDataGetterParams) => {
   const event: Event.AllEvent = cell.rowData;
@@ -185,6 +186,28 @@ export default class EventsTable extends React.Component<IProps, IState> {
               onClick={() =>
                 this.setState({
                   restartEvent: event,
+                })
+              }
+            />
+          )}
+        {event.type === "TASK" &&
+          event.isError === false &&
+          [State.TaskStates.Scheduled, State.TaskStates.Inprogress].includes(
+            event.details.status
+          ) && (
+            <Button
+              type="danger"
+              shape="circle"
+              icon="cross"
+              size="small"
+              onClick={() =>
+                updateTask({
+                  status: State.TaskStates.Failed,
+                  taskId: event.details.taskId,
+                  transactionId: event.details.transactionId,
+                  doNotRetry: true,
+                  isSystem: true,
+                  logs: ["web force fail"],
                 })
               }
             />
